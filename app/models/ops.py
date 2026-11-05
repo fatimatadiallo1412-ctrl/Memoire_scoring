@@ -135,3 +135,31 @@ class DemandeCredit(Base):
     cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     maj_le: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    
+class Decision(Base):
+    """Décision humaine. Table en AJOUT SEUL : une décision n'est jamais modifiée."""
+    __tablename__ = "decision"
+    __table_args__ = (
+        CheckConstraint(
+            "decision NOT IN ('accorder', 'accorder_modifie') OR "
+            "(montant_accorde IS NOT NULL AND duree_accordee IS NOT NULL)",
+            name="montant_si_accord"),
+        CheckConstraint(
+            "concordance IS DISTINCT FROM FALSE OR "
+            "(commentaire IS NOT NULL AND length(trim(commentaire)) > 0)",
+            name="motif_si_divergence"),
+        {"schema": SCHEMA},
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    demande_id: Mapped[int] = mapped_column(ForeignKey(f"{SCHEMA}.demande_credit.id"), index=True)
+    score_id: Mapped[int | None] = mapped_column(ForeignKey("ml.score.id"))
+    decideur_id: Mapped[int] = mapped_column(ForeignKey(f"{SCHEMA}.utilisateur.id"))
+    decision: Mapped[E.TypeDecision] = enum_col(E.TypeDecision, "type_decision")
+    montant_accorde: Mapped[int | None] = mapped_column(BigInteger)
+    duree_accordee: Mapped[int | None] = mapped_column(Integer)
+    commentaire: Mapped[str | None] = mapped_column(Text)
+    # Recommandation du modèle au moment de la décision, conservée À PART de la décision
+    recommandation_modele: Mapped[str | None] = mapped_column(String(30))
+    concordance: Mapped[bool | None] = mapped_column(Boolean)
+    decide_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
