@@ -3,6 +3,7 @@ from app.models.enums import Role
 from datetime import date, datetime
 from typing import Literal
 from pydantic import Field, field_validator
+from app.models.enums import StatutDossier
 
 class UtilisateurOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -51,5 +52,31 @@ class ClientOut(ClientIn):
 
     id: int
     code_client: str
+    cree_le: datetime
+    maj_le: datetime
+
+class DemandeIn(BaseModel):
+    client_id: int
+    produit_id: int
+    montant_demande: int = Field(gt=0)
+    duree_mois: int = Field(gt=0, le=120)
+    objet: str | None = Field(default=None, max_length=200)
+    date_demande: date | None = None
+
+
+class DemandeOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    numero: str
+    client_id: int
+    produit_id: int
+    instructeur_id: int
+    montant_demande: int
+    duree_mois: int
+    objet: str | None
+    statut: StatutDossier
+    date_demande: date
+    avis_instruction: str | None
     cree_le: datetime
     maj_le: datetime
