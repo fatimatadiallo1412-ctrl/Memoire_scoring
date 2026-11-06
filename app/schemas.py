@@ -200,3 +200,10 @@ class SituationOut(BaseModel):
     jours_retard_max: int
     solde: bool
     echeances: list[LigneEcheanceOut]
+class ProchaineEcheanceOut(BaseModel):
+    credit_id: int
+    numero: int
+    date_echeance: date
+    reste_du: int
+    en_retard: bool
+    jours: int          # jours de retard si en_retard, sinon jours restants
