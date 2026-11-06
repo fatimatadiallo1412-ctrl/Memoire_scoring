@@ -128,4 +128,13 @@ class DecisionOut(BaseModel):
     commentaire: str | None
     recommandation_modele: str | None
     concordance: bool | None
-    decide_le: datetime    
+    decide_le: datetime  
+class ParametreIn(BaseModel):
+    valeur: float
+
+
+class ParametreOut(BaseModel):
+    cle: str
+    valeur: float
+    description: str
+    modifie_le: datetime | None = None  

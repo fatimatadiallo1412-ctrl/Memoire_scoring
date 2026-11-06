@@ -163,3 +163,14 @@ class Decision(Base):
     recommandation_modele: Mapped[str | None] = mapped_column(String(30))
     concordance: Mapped[bool | None] = mapped_column(Boolean)
     decide_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+class Parametre(Base):
+    """Paramètres de politique de crédit, modifiables par le directeur."""
+    __tablename__ = "parametre"
+    __table_args__ = ({"schema": SCHEMA},)
+
+    cle: Mapped[str] = mapped_column(String(40), primary_key=True)
+    valeur: Mapped[float] = mapped_column(Numeric(12, 4))
+    description: Mapped[str] = mapped_column(String(200))
+    modifie_par: Mapped[int | None] = mapped_column(ForeignKey(f"{SCHEMA}.utilisateur.id"))
+    modifie_le: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now())    

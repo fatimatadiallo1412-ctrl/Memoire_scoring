@@ -6,10 +6,10 @@ import joblib
 from app import referentiels as R
 from src.features import PLAFOND_ENFANTS, PLAFOND_FAMILLE
 from src.modeling import COLONNES, RACINE
-from src.suggestion import SEUIL_DEFAUT, construire_ligne, suggerer_montant
+from src.suggestion import  construire_ligne, suggerer_montant
 
 VERSION_MODELE = "xgb_home_credit_v3"
-PAS_MONTANT = 10_000
+
 
 
 @lru_cache(maxsize=1)
@@ -39,7 +39,7 @@ def profil_client(client, jour) -> dict:
     }
 
 
-def evaluer_dossier(client, demande, produit, seuil=SEUIL_DEFAUT, ratio_min=0.5):
+def evaluer_dossier(client, demande, produit, parametres):
     """Renvoie la recommandation (accord / accord_reduit / refus) et les variables d'entrée."""
     modele = charger_modele()
     profil = profil_client(client, demande.date_demande)
@@ -47,8 +47,10 @@ def evaluer_dossier(client, demande, produit, seuil=SEUIL_DEFAUT, ratio_min=0.5)
 
     recommandation = suggerer_montant(
         modele, profil, demande.montant_demande, demande.duree_mois,
-        client.revenu_mensuel, COLONNES, seuil=seuil, pas=PAS_MONTANT,
-        montant_min=produit.montant_min, ratio_min=ratio_min, taux_annuel=taux)
+        client.revenu_mensuel, COLONNES,
+        seuil=parametres["seuil_defaut"], pas=int(parametres["pas_montant"]),
+        montant_min=produit.montant_min, ratio_min=parametres["ratio_min"],
+        taux_annuel=taux, endettement_max=parametres["endettement_max"])
 
     ligne = construire_ligne(profil, demande.montant_demande, demande.duree_mois,
                              client.revenu_mensuel, COLONNES, taux)

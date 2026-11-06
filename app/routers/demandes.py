@@ -11,7 +11,8 @@ from app.models.enums import Role, StatutDossier
 from app.schemas import DemandeIn, DemandeOut, InstructionIn, ScoreOut
 from app.scoring import VERSION_MODELE, evaluer_dossier
 from app.workflow import changer_statut
-from src.suggestion import SEUIL_DEFAUT
+from app.parametres import lire_parametres
+
 
 router = APIRouter(prefix="/demandes", tags=["demandes"])
 
@@ -148,7 +149,8 @@ def scorer_demande(demande_id: int, session: Session = Depends(get_session),
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
                             "Le revenu mensuel du client est nécessaire au scoring")
 
-    reco, variables = evaluer_dossier(client, demande, produit)
+    parametres = lire_parametres(session)
+    reco, variables = evaluer_dossier(client, demande, produit, parametres)
 
     if reco["decision"] == "accord":
         montant_suggere, p_suggere = demande.montant_demande, reco["p_defaut"]
@@ -159,13 +161,14 @@ def scorer_demande(demande_id: int, session: Session = Depends(get_session),
         demande_id=demande.id,
         version_modele=VERSION_MODELE,
         p_defaut=reco["p_demande"],
-        seuil_applique=SEUIL_DEFAUT,
+        seuil_applique=parametres["seuil_defaut"],
         recommandation=reco["decision"],
         montant_suggere=montant_suggere,
         p_montant_suggere=p_suggere,
         variables_entree=variables,
         facteurs={"motifs": reco["motifs"],
-                  "endettement_demande": round(reco["endettement_demande"], 3)},
+                  "endettement_demande": round(reco["endettement_demande"], 3),
+                  "parametres": parametres},
     )
     session.add(score)
     if demande.statut == StatutDossier.COMPLET:
