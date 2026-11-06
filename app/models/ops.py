@@ -213,3 +213,21 @@ class Echeance(Base):
     montant_du: Mapped[int] = mapped_column(BigInteger)
     capital: Mapped[int] = mapped_column(BigInteger)
     interet: Mapped[int] = mapped_column(BigInteger)    
+class Paiement(Base):
+    """Paiement reçu sur un crédit. Table en AJOUT SEUL."""
+    __tablename__ = "paiement"
+    __table_args__ = (
+        CheckConstraint("montant > 0", name="ck_paiement_montant"),
+        CheckConstraint("mode IN ('especes', 'mobile_money', 'virement')",
+                        name="ck_paiement_mode"),
+        {"schema": "ops"},
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    credit_id: Mapped[int] = mapped_column(ForeignKey("ops.credit.id"), index=True)
+    montant: Mapped[int] = mapped_column(BigInteger)
+    date_paiement: Mapped[date] = mapped_column(Date)
+    mode: Mapped[str] = mapped_column(String(20), default="especes")
+    enregistre_par: Mapped[int] = mapped_column(ForeignKey("ops.utilisateur.id"))
+    cree_le: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now())

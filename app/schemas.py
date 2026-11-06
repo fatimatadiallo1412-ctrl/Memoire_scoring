@@ -164,3 +164,39 @@ class EcheanceOut(BaseModel):
     montant_du: int
     capital: int
     interet: int    
+class PaiementIn(BaseModel):
+    montant: int = Field(gt=0)
+    date_paiement: date | None = None      # par défaut : aujourd'hui
+    mode: Literal["especes", "mobile_money", "virement"] = "especes"
+
+
+class PaiementOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    credit_id: int
+    montant: int
+    date_paiement: date
+    mode: str
+    enregistre_par: int
+
+
+class LigneEcheanceOut(BaseModel):
+    numero: int
+    date_echeance: date
+    montant_du: int
+    montant_paye: int
+    reste_du: int
+    statut: str
+    jours_retard: int
+
+
+class SituationOut(BaseModel):
+    total_du: int
+    total_paye: int
+    reste_a_payer: int
+    capital_restant: int
+    nb_echeances_en_retard: int
+    montant_en_retard: int
+    jours_retard_max: int
+    solde: bool
+    echeances: list[LigneEcheanceOut]
