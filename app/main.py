@@ -4,7 +4,7 @@ from app.routers import auth
 from app.routers import auth, clients
 from app.routers import auth, clients, demandes
 from app.routers import auth, clients, decisions, demandes
-from app.routers import auth, clients, demandes, decisions, parametres
+from app.routers import auth, clients, demandes, decisions, parametres,credits
 app = FastAPI(
     title="Plateforme de scoring de crédit - microfinance",
     swagger_ui_parameters={"persistAuthorization": True},
@@ -31,3 +31,4 @@ app.include_router(demandes.router)
 app.include_router(decisions.router)
 ...
 app.include_router(parametres.router)
+app.include_router(credits.router)

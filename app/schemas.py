@@ -138,3 +138,29 @@ class ParametreOut(BaseModel):
     valeur: float
     description: str
     modifie_le: datetime | None = None  
+
+class DecaissementIn(BaseModel):
+    # Facultative : par défaut, la date du jour
+    date_decaissement: date | None = None
+
+
+class CreditOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    demande_id: int
+    client_id: int
+    montant_accorde: int
+    duree_mois: int
+    taux_annuel: float
+    mensualite: int
+    date_decaissement: date
+    decaisse_par: int
+
+
+class EcheanceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    numero: int
+    date_echeance: date
+    montant_du: int
+    capital: int
+    interet: int    

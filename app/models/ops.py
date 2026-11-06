@@ -2,11 +2,12 @@ from datetime import date, datetime
 
 from sqlalchemy import (BigInteger, Boolean, CheckConstraint, Date, DateTime,
                         Enum as SAEnum, ForeignKey, Index, Integer, Numeric,
-                        String, Text, func)
+                        String, Text,UniqueConstraint, func)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models import enums as E
 from app.models.base import Base
+
 
 SCHEMA = "ops"
 
@@ -173,4 +174,42 @@ class Parametre(Base):
     description: Mapped[str] = mapped_column(String(200))
     modifie_par: Mapped[int | None] = mapped_column(ForeignKey(f"{SCHEMA}.utilisateur.id"))
     modifie_le: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now())    
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+class Credit(Base):
+    __tablename__ = "credit"
+    __table_args__ = (
+        CheckConstraint("montant_accorde > 0", name="ck_credit_montant"),
+        CheckConstraint("duree_mois > 0", name="ck_credit_duree"),
+        {"schema": "ops"},
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    demande_id: Mapped[int] = mapped_column(
+        ForeignKey("ops.demande_credit.id"), unique=True
+    )
+    client_id: Mapped[int] = mapped_column(ForeignKey("ops.client.id"))
+    montant_accorde: Mapped[int] = mapped_column(BigInteger)
+    duree_mois: Mapped[int]
+    taux_annuel: Mapped[float] = mapped_column(Numeric(6, 4))
+    mensualite: Mapped[int] = mapped_column(BigInteger)
+    date_decaissement: Mapped[date] = mapped_column(Date)
+    decaisse_par: Mapped[int] = mapped_column(ForeignKey("ops.utilisateur.id"))
+    cree_le: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+
+class Echeance(Base):
+    __tablename__ = "echeance"
+    __table_args__ = (
+        UniqueConstraint("credit_id", "numero", name="uq_echeance_credit_numero"),
+        {"schema": "ops"},
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    credit_id: Mapped[int] = mapped_column(ForeignKey("ops.credit.id"))
+    numero: Mapped[int]
+    date_echeance: Mapped[date] = mapped_column(Date)
+    montant_du: Mapped[int] = mapped_column(BigInteger)
+    capital: Mapped[int] = mapped_column(BigInteger)
+    interet: Mapped[int] = mapped_column(BigInteger)    
