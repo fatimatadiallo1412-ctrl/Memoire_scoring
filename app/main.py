@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.routers import auth
 from app.routers import auth, clients
 from app.routers import auth, clients, demandes
+from app.routers import auth, clients, decisions, demandes
 app = FastAPI(
     title="Plateforme de scoring de crédit - microfinance",
     swagger_ui_parameters={"persistAuthorization": True},
@@ -26,3 +27,4 @@ def sante():
 app.include_router(clients.router)
 ...
 app.include_router(demandes.router)
+app.include_router(decisions.router)

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select, text
@@ -6,13 +6,11 @@ from sqlalchemy.orm import Session
 
 from app.db import get_session
 from app.deps import exiger_roles
-from app.models import Client, DemandeCredit, Journal, ProduitCredit, Utilisateur
+from app.models import Client, DemandeCredit, Journal, ProduitCredit, Score, Utilisateur
 from app.models.enums import Role, StatutDossier
-from app.schemas import DemandeIn, DemandeOut
-from app.workflow import changer_statut
-from app.models import Score
-from app.schemas import ScoreOut
+from app.schemas import DemandeIn, DemandeOut, InstructionIn, ScoreOut
 from app.scoring import VERSION_MODELE, evaluer_dossier
+from app.workflow import changer_statut
 from src.suggestion import SEUIL_DEFAUT
 
 router = APIRouter(prefix="/demandes", tags=["demandes"])
@@ -192,3 +190,41 @@ def dernier_score(demande_id: int, session: Session = Depends(get_session),
     resultat = ScoreOut.model_validate(score)
     resultat.valide = demande.donnees_modifiees_le <= score.calcule_le   # sinon : score périmé
     return resultat
+def exiger_score_valide(session: Session, demande: DemandeCredit) -> Score:
+    score = session.scalar(select(Score).where(Score.demande_id == demande.id)
+                           .order_by(Score.calcule_le.desc()).limit(1))
+    if score is None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Le dossier n'a pas encore été scoré")
+    if demande.donnees_modifiees_le > score.calcule_le:
+        raise HTTPException(status.HTTP_409_CONFLICT,
+                            "Le score est périmé : les données ont changé, il faut le recalculer")
+    return score
+
+
+@router.post("/{demande_id}/instruire", response_model=DemandeOut)
+def instruire_demande(demande_id: int, donnees: InstructionIn,
+                      session: Session = Depends(get_session),
+                      utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
+    demande = charger_demande(session, demande_id)
+    exiger_score_valide(session, demande)
+    changer_statut(demande, StatutDossier.INSTRUIT)
+    demande.avis_instruction = donnees.avis
+    demande.avis_instruction_le = datetime.now(timezone.utc)
+    session.add(Journal(utilisateur_id=utilisateur.id, action="dossier_instruit",
+                        entite="demande_credit", entite_id=demande_id))
+    session.commit()
+    session.refresh(demande)
+    return demande
+
+
+@router.post("/{demande_id}/soumettre", response_model=DemandeOut)
+def soumettre_demande(demande_id: int, session: Session = Depends(get_session),
+                      utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
+    demande = charger_demande(session, demande_id)
+    exiger_score_valide(session, demande)
+    changer_statut(demande, StatutDossier.SOUMIS)
+    session.add(Journal(utilisateur_id=utilisateur.id, action="dossier_soumis",
+                        entite="demande_credit", entite_id=demande_id))
+    session.commit()
+    session.refresh(demande)
+    return demande

@@ -5,6 +5,7 @@ from typing import Literal
 from pydantic import Field, field_validator
 from app.models.enums import StatutDossier
 from app.referentiels import PROFESSION
+from app.models.enums import TypeDecision
 
 class UtilisateurOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -102,3 +103,29 @@ class ScoreOut(BaseModel):
     calcule_le: datetime
     facteurs: dict | None = None
     valide: bool = True
+
+class InstructionIn(BaseModel):
+    avis: str = Field(min_length=10, max_length=2000)
+
+
+class DecisionIn(BaseModel):
+    decision: TypeDecision
+    montant_accorde: int | None = Field(default=None, gt=0)
+    duree_accordee: int | None = Field(default=None, gt=0, le=120)
+    commentaire: str | None = Field(default=None, max_length=2000)
+
+
+class DecisionOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    demande_id: int
+    score_id: int | None
+    decideur_id: int
+    decision: TypeDecision
+    montant_accorde: int | None
+    duree_accordee: int | None
+    commentaire: str | None
+    recommandation_modele: str | None
+    concordance: bool | None
+    decide_le: datetime    
