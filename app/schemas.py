@@ -4,6 +4,7 @@ from datetime import date, datetime
 from typing import Literal
 from pydantic import Field, field_validator
 from app.models.enums import StatutDossier
+from app.referentiels import PROFESSION
 
 class UtilisateurOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -45,6 +46,12 @@ class ClientIn(BaseModel):
         if age < 18:
             raise ValueError("Le client doit être majeur")
         return valeur
+    @field_validator("profession")
+    @classmethod
+    def profession_connue(cls, valeur):
+        if valeur is not None and valeur not in PROFESSION:
+            raise ValueError(f"Profession inconnue. Choix possibles : {', '.join(PROFESSION)}")
+        return valeur
 
 
 class ClientOut(ClientIn):
@@ -80,3 +87,17 @@ class DemandeOut(BaseModel):
     avis_instruction: str | None
     cree_le: datetime
     maj_le: datetime
+
+class ScoreOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    demande_id: int
+    version_modele: str
+    p_defaut: float
+    seuil_applique: float
+    recommandation: str
+    montant_suggere: int | None
+    p_montant_suggere: float | None
+    calcule_le: datetime
+    valide: bool = True

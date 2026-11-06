@@ -10,6 +10,10 @@ from app.models import Client, DemandeCredit, Journal, ProduitCredit, Utilisateu
 from app.models.enums import Role, StatutDossier
 from app.schemas import DemandeIn, DemandeOut
 from app.workflow import changer_statut
+from app.models import Score
+from app.schemas import ScoreOut
+from app.scoring import VERSION_MODELE, evaluer_dossier
+from src.suggestion import SEUIL_DEFAUT
 
 router = APIRouter(prefix="/demandes", tags=["demandes"])
 
@@ -133,3 +137,56 @@ def completer_demande(demande_id: int, session: Session = Depends(get_session),
     session.commit()
     session.refresh(demande)
     return demande
+@router.post("/{demande_id}/scorer", response_model=ScoreOut)
+def scorer_demande(demande_id: int, session: Session = Depends(get_session),
+                   utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
+    demande = charger_demande(session, demande_id)
+    if demande.statut not in (StatutDossier.COMPLET, StatutDossier.SCORE):
+        raise HTTPException(status.HTTP_409_CONFLICT,
+                            f"Un dossier au statut {demande.statut.value} ne peut pas être scoré")
+    client = session.get(Client, demande.client_id)
+    produit = session.get(ProduitCredit, demande.produit_id)
+    if client.revenu_mensuel <= 0:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            "Le revenu mensuel du client est nécessaire au scoring")
+
+    reco, variables = evaluer_dossier(client, demande, produit)
+
+    if reco["decision"] == "accord":
+        montant_suggere, p_suggere = demande.montant_demande, reco["p_defaut"]
+    else:
+        montant_suggere, p_suggere = reco["montant"], reco["p_defaut"]
+
+    score = Score(
+        demande_id=demande.id,
+        version_modele=VERSION_MODELE,
+        p_defaut=reco["p_demande"],
+        seuil_applique=SEUIL_DEFAUT,
+        recommandation=reco["decision"],
+        montant_suggere=montant_suggere,
+        p_montant_suggere=p_suggere,
+        variables_entree=variables,
+    )
+    session.add(score)
+    if demande.statut == StatutDossier.COMPLET:
+        changer_statut(demande, StatutDossier.SCORE)
+    session.add(Journal(utilisateur_id=utilisateur.id, action="dossier_score",
+                        entite="demande_credit", entite_id=demande_id,
+                        details={"recommandation": reco["decision"],
+                                 "p_defaut": round(reco["p_demande"], 4)}))
+    session.commit()
+    session.refresh(score)
+    return score
+
+
+@router.get("/{demande_id}/score", response_model=ScoreOut)
+def dernier_score(demande_id: int, session: Session = Depends(get_session),
+                  utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
+    demande = charger_demande(session, demande_id)
+    score = session.scalar(select(Score).where(Score.demande_id == demande_id)
+                           .order_by(Score.calcule_le.desc()).limit(1))
+    if score is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Aucun score pour ce dossier")
+    resultat = ScoreOut.model_validate(score)
+    resultat.valide = demande.donnees_modifiees_le <= score.calcule_le   # sinon : score périmé
+    return resultat

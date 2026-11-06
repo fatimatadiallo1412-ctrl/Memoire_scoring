@@ -22,7 +22,7 @@ load_dotenv()
 
 CLE_SECRETE = os.environ["SECRET_KEY"]
 ALGORITHME = "HS256"
-DUREE_JETON_MINUTES = 60
+DUREE_JETON_MINUTES = 480
 
 
 def creer_jeton(utilisateur_id: int, role: str) -> str:
