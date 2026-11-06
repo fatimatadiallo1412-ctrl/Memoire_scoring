@@ -100,4 +100,5 @@ class ScoreOut(BaseModel):
     montant_suggere: int | None
     p_montant_suggere: float | None
     calcule_le: datetime
+    facteurs: dict | None = None
     valide: bool = True

@@ -166,6 +166,8 @@ def scorer_demande(demande_id: int, session: Session = Depends(get_session),
         montant_suggere=montant_suggere,
         p_montant_suggere=p_suggere,
         variables_entree=variables,
+        facteurs={"motifs": reco["motifs"],
+                  "endettement_demande": round(reco["endettement_demande"], 3)},
     )
     session.add(score)
     if demande.statut == StatutDossier.COMPLET:
