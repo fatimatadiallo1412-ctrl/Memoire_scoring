@@ -9,6 +9,7 @@ PARAMETRES_DEFAUT = {
     "endettement_max": (0.40, "Mensualité maximale, en part du revenu mensuel", 0.10, 0.80),
     "ratio_min": (0.50, "Part minimale du montant demandé proposable en réduction", 0.10, 1.00),
     "pas_montant": (10_000, "Pas de réduction du montant (FCFA)", 1_000, 1_000_000),
+    "facteur_prudence_antecedent": (0.80, "Facteur appliqué au seuil de défaut si le client a un incident passé regularisé(1 = règle désactivée)", 0.10, 1.00),
 }
 
 

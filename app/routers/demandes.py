@@ -12,6 +12,7 @@ from app.schemas import DemandeIn, DemandeOut, InstructionIn, ScoreOut
 from app.scoring import VERSION_MODELE, evaluer_dossier
 from app.workflow import changer_statut
 from app.parametres import lire_parametres
+from app.historique import niveau_antecedent
 
 
 router = APIRouter(prefix="/demandes", tags=["demandes"])
@@ -150,7 +151,9 @@ def scorer_demande(demande_id: int, session: Session = Depends(get_session),
                             "Le revenu mensuel du client est nécessaire au scoring")
 
     parametres = lire_parametres(session)
-    reco, variables = evaluer_dossier(client, demande, produit, parametres)
+    reco, variables = evaluer_dossier(
+        client, demande, produit, parametres,
+        antecedent=niveau_antecedent(session, client.id, demande.date_demande))
 
     if reco["decision"] == "accord":
         montant_suggere, p_suggere = demande.montant_demande, reco["p_defaut"]
@@ -161,7 +164,7 @@ def scorer_demande(demande_id: int, session: Session = Depends(get_session),
         demande_id=demande.id,
         version_modele=VERSION_MODELE,
         p_defaut=reco["p_demande"],
-        seuil_applique=parametres["seuil_defaut"],
+        seuil_applique=reco["seuil_applique"],
         recommandation=reco["decision"],
         montant_suggere=montant_suggere,
         p_montant_suggere=p_suggere,

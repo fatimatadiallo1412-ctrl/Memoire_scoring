@@ -6,10 +6,13 @@ import joblib
 from app import referentiels as R
 from src.features import PLAFOND_ENFANTS, PLAFOND_FAMILLE
 from src.modeling import COLONNES, RACINE
-from src.suggestion import  construire_ligne, suggerer_montant
+from src.suggestion import construire_ligne, suggerer_montant
 
 VERSION_MODELE = "xgb_home_credit_v3"
 
+# Facteur appliqué au seuil de défaut pour un client dont l'incident passé est régularisé
+# (1.0 = règle désactivée). La valeur réelle vient de ops.parametre.
+FACTEUR_PRUDENCE_DEFAUT = 0.8
 
 
 @lru_cache(maxsize=1)
@@ -39,20 +42,44 @@ def profil_client(client, jour) -> dict:
     }
 
 
-def evaluer_dossier(client, demande, produit, parametres):
-    """Renvoie la recommandation (accord / accord_reduit / refus) et les variables d'entrée."""
+def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun"):
+    """Renvoie la recommandation (accord / accord_reduit / refus) et les variables d'entrée.
+
+    antecedent (voir app/historique.py) :
+      "aucun"      : aucun incident, évaluation normale
+      "regularise" : défaut passé régularisé, seuil d'acceptation resserré
+      "en_cours"   : crédit en retard de plus de 90 jours, recommandation de refus
+    La probabilité du modèle n'est jamais modifiée.
+    """
     modele = charger_modele()
     profil = profil_client(client, demande.date_demande)
     taux = float(produit.taux_annuel) / 100
 
+    seuil_base = float(parametres["seuil_defaut"])
+    facteur = float(parametres.get("facteur_prudence_antecedent", FACTEUR_PRUDENCE_DEFAUT))
+    seuil = seuil_base * facteur if antecedent == "regularise" else seuil_base
+
     recommandation = suggerer_montant(
         modele, profil, demande.montant_demande, demande.duree_mois,
         client.revenu_mensuel, COLONNES,
-        seuil=parametres["seuil_defaut"], pas=int(parametres["pas_montant"]),
+        seuil=seuil, pas=int(parametres["pas_montant"]),
         montant_min=produit.montant_min, ratio_min=parametres["ratio_min"],
         taux_annuel=taux, endettement_max=parametres["endettement_max"])
+
+    if antecedent == "en_cours":
+        recommandation["decision"] = "refus"
+        recommandation["montant"] = None
+        recommandation["p_defaut"] = None
+        recommandation["motifs"].append(
+            "Crédit en retard de plus de 90 jours : à régulariser avant tout nouveau crédit")
+    elif antecedent == "regularise":
+        recommandation["motifs"].append(
+            f"Incident de paiement passé, régularisé : seuil de risque resserré "
+            f"({seuil:.3f} au lieu de {seuil_base:.3f})")
+    recommandation["seuil_applique"] = seuil
 
     ligne = construire_ligne(profil, demande.montant_demande, demande.duree_mois,
                              client.revenu_mensuel, COLONNES, taux)
     variables = json.loads(ligne.to_json(orient="records"))[0]
+    variables["antecedent_defaut"] = antecedent
     return recommandation, variables
