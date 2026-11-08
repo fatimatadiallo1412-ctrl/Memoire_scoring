@@ -1,0 +1,17 @@
+intention;langue;phrase
+solde;fr;Bonjour combien me reste-t-il à payer ?
+solde;fr;bonjour et solde
+solde;fr;solde et merci
+retard;fr;Salam suis-je en retard svp
+prochaine_echeance;fr;Bonsoir quand dois-je payer ? merci
+historique;fr;Bonjour mes derniers paiements merci beaucoup
+nouveau_credit;fr;Bonjour je veux refaire un prêt
+retard;fr;merci de me dire si je suis en retard
+aide;fr;Salam j'ai une question
+hors_sujet;fr;Bonjour quel temps fait-il demain ?
+prochaine_echeance+solde;fr;solde et date de remboursement
+prochaine_echeance+solde;fr;Bonjour quel est mon solde et ma prochaine échéance merci
+prochaine_echeance+solde;fr;combien il me reste et quand je dois payer
+retard+solde;fr;suis-je en retard et combien je dois encore
+historique+solde;fr;mes derniers paiements puis mon solde
+prochaine_echeance+solde;fr;le montant à payer et la date

@@ -1,0 +1,193 @@
+intention;langue;phrase
+prochaine_echeance;fr;Quand dois-je payer ?
+prochaine_echeance;fr;Quelle est ma prochaine échéance ?
+prochaine_echeance;fr;C'est quand ma prochaine mensualité ?
+prochaine_echeance;fr;Quel jour je dois rembourser ?
+prochaine_echeance;fr;Date de mon prochain paiement
+prochaine_echeance;fr;Quand est-ce que je paie la prochaine fois ?
+prochaine_echeance;fr;prochaine echeance
+prochaine_echeance;fr;Ma prochaine date de remboursement s'il vous plaît
+prochaine_echeance;fr;Quel est le montant de ma prochaine mensualité ?
+prochaine_echeance;fr;A quelle date je dois payer mon crédit ?
+prochaine_echeance;fr;Dites-moi quand je dois verser
+prochaine_echeance;fr;C'est pour quand le prochain versement ?
+prochaine_echeance;fr;Combien je dois payer ce mois-ci ?
+prochaine_echeance;fr;Quand tombe ma prochaine échéance ?
+prochaine_echeance;fr;Je voudrais savoir quand payer
+prochaine_echeance;fr;Mon prochain remboursement c'est quand
+prochaine_echeance;fr;quand je dois payer
+prochaine_echeance;fr;Quelle est la date limite de mon paiement ?
+prochaine_echeance;fr;Date de ma prochaine mensualité svp
+prochaine_echeance;fr;Echéance suivante ?
+prochaine_echeance;fr;Je paie quand la prochaine fois ?
+solde;fr;Combien me reste-t-il à payer ?
+solde;fr;Quel est mon solde ?
+solde;fr;Combien je dois encore à l'institution ?
+solde;fr;Le reste de mon crédit
+solde;fr;Montant restant à rembourser
+solde;fr;Où en suis-je dans mon remboursement ?
+solde;fr;Combien il me reste sur mon prêt ?
+solde;fr;solde de mon crédit
+solde;fr;Quel est le capital restant dû ?
+solde;fr;Combien j'ai déjà remboursé et combien il reste ?
+solde;fr;Je veux connaître ma dette totale
+solde;fr;Combien me reste-t-il avant de terminer mon crédit ?
+solde;fr;reste a payer
+solde;fr;Quel est le total qu'il me reste à verser ?
+solde;fr;Ma situation de remboursement
+solde;fr;Combien dois-je encore ?
+solde;fr;Quel montant me reste-t-il sur mon crédit ?
+solde;fr;Est-ce que j'ai fini de payer ?
+solde;fr;Le solde restant svp
+solde;fr;Combien je dois au total ?
+retard;fr;Suis-je en retard ?
+retard;fr;Est-ce que j'ai des impayés ?
+retard;fr;J'ai combien de jours de retard ?
+retard;fr;Est-ce que je suis à jour dans mes paiements ?
+retard;fr;Ai-je un retard de paiement ?
+retard;fr;Mes échéances en retard
+retard;fr;retard
+retard;fr;Combien je dois en retard ?
+retard;fr;Est-ce que j'ai manqué une échéance ?
+retard;fr;Y a-t-il des impayés sur mon compte ?
+retard;fr;Je suis à jour ou pas ?
+retard;fr;Quel est le montant de mes retards ?
+retard;fr;Depuis combien de jours suis-je en retard ?
+retard;fr;Est-ce que mon dossier est en retard ?
+retard;fr;Où en sont mes impayés ?
+retard;fr;Ai-je raté un paiement ?
+retard;fr;Situation de mes retards
+retard;fr;Suis-je à jour ?
+retard;fr;J'ai oublié de payer, est-ce que je suis en retard ?
+retard;fr;Est-ce que je dois de l'argent en retard ?
+historique;fr;Quels sont mes derniers paiements ?
+historique;fr;Historique de mes remboursements
+historique;fr;Montre-moi mes paiements
+historique;fr;Quand ai-je payé la dernière fois ?
+historique;fr;Liste de mes versements
+historique;fr;Mes derniers versements
+historique;fr;Est-ce que mon paiement a bien été enregistré ?
+historique;fr;Mon dernier paiement c'est quand ?
+historique;fr;historique des paiements
+historique;fr;Je voudrais voir ce que j'ai déjà payé
+historique;fr;Détail de mes remboursements passés
+historique;fr;J'ai payé hier, est-ce que c'est enregistré ?
+historique;fr;Quels paiements ai-je faits ?
+historique;fr;Récapitulatif de mes versements
+historique;fr;Mes paiements récents
+historique;fr;Combien j'ai versé la dernière fois ?
+historique;fr;Le dernier montant que j'ai payé
+historique;fr;Preuve de mes paiements
+historique;fr;Mes règlements précédents
+historique;fr;Combien j'ai payé le mois dernier ?
+aide;fr;Aide
+aide;fr;Que peux-tu faire ?
+aide;fr;Comment ça marche ?
+aide;fr;Quelles questions puis-je poser ?
+aide;fr;Qu'est-ce que tu sais faire ?
+aide;fr;Je ne sais pas quoi demander
+aide;fr;Peux-tu m'aider ?
+aide;fr;help
+aide;fr;Que puis-je te demander ?
+aide;fr;Comment utiliser cet assistant ?
+aide;fr;Explique-moi ce que tu fais
+aide;fr;Quelles sont les options ?
+aide;fr;J'ai besoin d'aide
+aide;fr;menu
+aide;fr;Je suis perdu, que faire ?
+aide;fr;Liste des choses que tu peux faire
+salutation;fr;Bonjour
+salutation;fr;Bonsoir
+salutation;fr;Salut
+salutation;fr;Salam
+salutation;fr;Salut ça va ?
+salutation;fr;Hello
+salutation;fr;Bonjour madame
+salutation;fr;Bonjour monsieur
+salutation;fr;Coucou
+salutation;fr;Salam aleykum
+salutation;fr;Assalamou alaykoum
+salutation;fr;Bonsoir ça va ?
+salutation;fr;Bonjour comment allez-vous ?
+remerciement;fr;Merci
+remerciement;fr;Merci beaucoup
+remerciement;fr;D'accord merci
+remerciement;fr;Au revoir
+remerciement;fr;A bientôt
+remerciement;fr;Ok merci
+remerciement;fr;Je vous remercie
+remerciement;fr;Bonne journée
+remerciement;fr;Merci pour votre aide
+remerciement;fr;Parfait merci
+remerciement;fr;C'est bon merci
+remerciement;fr;Bonne soirée
+hors_sujet;fr;Quel est le taux d'intérêt ?
+hors_sujet;fr;Quel temps fait-il demain ?
+hors_sujet;fr;Qui a gagné le match hier ?
+hors_sujet;fr;Raconte-moi une blague
+hors_sujet;fr;Je veux changer mon numéro de téléphone
+hors_sujet;fr;Où se trouve l'agence la plus proche ?
+hors_sujet;fr;À quelle heure ouvre l'agence ?
+hors_sujet;fr;Combien coûte un billet d'avion pour Paris ?
+hors_sujet;fr;Quelle est la capitale du Sénégal ?
+hors_sujet;fr;Je voudrais parler à un agent
+hors_sujet;fr;J'ai perdu ma carte d'identité
+hors_sujet;fr;Je veux ouvrir un compte d'épargne
+hors_sujet;fr;Quel est le prix du riz au marché ?
+hors_sujet;fr;Peux-tu me prêter de l'argent ?
+hors_sujet;fr;asdfgh
+hors_sujet;fr;Donne-moi une recette de thieboudienne
+hors_sujet;fr;Comment fonctionne le score de crédit ?
+hors_sujet;fr;Pourquoi mon dossier a été refusé ?
+hors_sujet;fr;Je veux contester une décision
+hors_sujet;fr;Quel est le numéro du directeur ?
+hors_sujet;fr;Comment faire une réclamation ?
+hors_sujet;fr;Quelle heure est-il ?
+nouveau_credit;fr;Je veux refaire un prêt
+nouveau_credit;fr;Quand pourrai-je demander un nouveau crédit ?
+nouveau_credit;fr;Comment obtenir un nouveau prêt ?
+nouveau_credit;fr;Je voudrais un autre crédit
+nouveau_credit;fr;Puis-je emprunter à nouveau ?
+nouveau_credit;fr;A partir de quand je peux refaire un crédit ?
+nouveau_credit;fr;Je veux augmenter mon crédit
+nouveau_credit;fr;Je cherche un nouveau financement
+nouveau_credit;fr;Est-ce que je peux avoir un deuxième crédit ?
+nouveau_credit;fr;nouveau crédit
+nouveau_credit;fr;Comment faire une nouvelle demande de prêt ?
+nouveau_credit;fr;Je veux demander un crédit de plus
+nouveau_credit;fr;Quelles sont les conditions pour un nouveau prêt ?
+nouveau_credit;fr;Après combien de temps puis-je refaire une demande ?
+nouveau_credit;fr;J'ai fini de payer, je peux reprendre un crédit ?
+nouveau_credit;fr;Je veux emprunter encore
+retard;fr;J'ai dépassé la date limite de mon paiement
+retard;fr;Je n'ai pas payé à temps, y a-t-il un problème ?
+retard;fr;J'ai raté la date de ma mensualité
+retard;fr;Je n'ai pas pu payer à la date prévue
+retard;fr;Est-ce que c'est grave si je paie en retard ?
+historique;fr;Liste de mes transactions
+historique;fr;Mes anciens paiements
+historique;fr;Voir tous mes remboursements effectués
+historique;fr;Relevé de mes paiements
+historique;fr;J'ai déjà payé mais ça n'apparaît pas
+historique;fr;Mon dernier versement n'est pas pris en compte
+aide;fr;J'ai une question
+aide;fr;Je viens pour un renseignement
+aide;fr;Je voudrais des informations
+aide;fr;Je veux des infos sur mon crédit
+aide;fr;Salam j'ai besoin d'un renseignement
+aide;fr;Bonjour je voudrais savoir quelque chose
+hors_sujet;fr;C'est combien le transport pour Thiès ?
+hors_sujet;fr;Combien coûte un téléphone ?
+hors_sujet;fr;Combien de temps dure le trajet Dakar Saint-Louis ?
+hors_sujet;fr;Comment configurer mon téléphone ?
+hors_sujet;fr;Mon application ne s'ouvre pas
+hors_sujet;fr;Comment télécharger WhatsApp ?
+hors_sujet;fr;Quel est le prix du mil ?
+aide;fr;Comment fonctionne l'application ?
+aide;fr;A quoi sert cette application ?
+aide;fr;Comment on utilise l'appli ?
+aide;fr;Explique-moi comment marche l'application
+salutation;fr;Bjr
+salutation;fr;Bsr
+salutation;fr;Bonjour comment tu vas ?
+salutation;fr;Bjr ça va ?
