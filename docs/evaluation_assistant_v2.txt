@@ -1,0 +1,60 @@
+Phrases d'entraînement : 184
+intention
+hors_sujet            29
+historique            26
+retard                25
+aide                  22
+prochaine_echeance    21
+solde                 20
+nouveau_credit        16
+salutation            13
+remerciement          12
+
+Validation croisée (5 plis) : exactitude 0.815 (optimiste : phrases d'un même auteur)
+
+Test indépendant : 56 phrases, exactitude 0.893
+                    precision    recall  f1-score   support
+
+              aide       0.62      0.71      0.67         7
+        historique       1.00      0.83      0.91         6
+        hors_sujet       0.62      0.83      0.71         6
+    nouveau_credit       1.00      1.00      1.00         6
+prochaine_echeance       1.00      1.00      1.00         7
+      remerciement       1.00      1.00      1.00         6
+            retard       1.00      1.00      1.00         7
+        salutation       1.00      0.60      0.75         5
+             solde       1.00      1.00      1.00         6
+
+          accuracy                           0.89        56
+         macro avg       0.92      0.89      0.89        56
+      weighted avg       0.91      0.89      0.90        56
+
+Matrice de confusion (lignes : vrai ; colonnes : prédit)
+                    aide  historique  hors_sujet  nouveau_credit  prochaine_echeance  remerciement  retard  salutation  solde
+aide                   5           0           2               0                   0             0       0           0      0
+historique             1           5           0               0                   0             0       0           0      0
+hors_sujet             1           0           5               0                   0             0       0           0      0
+nouveau_credit         0           0           0               6                   0             0       0           0      0
+prochaine_echeance     0           0           0               0                   7             0       0           0      0
+remerciement           0           0           0               0                   0             6       0           0      0
+retard                 0           0           0               0                   0             0       7           0      0
+salutation             1           0           1               0                   0             0       0           3      0
+solde                  0           0           0               0                   0             0       0           0      6
+
+Effet du seuil de confiance (seuil actuel du code : 0.5)
+       bonne réponse  mauvaise réponse  non compris  hors-sujet écarté
+seuil                                                                 
+0.3             0.90              0.02         0.08              0.833
+0.4             0.78              0.02         0.20              0.833
+0.5             0.62              0.02         0.36              1.000
+0.6             0.50              0.00         0.50              1.000
+0.7             0.34              0.00         0.66              1.000
+
+Phrases mal classées :
+ intention langue                                                                             phrase     predit
+historique     fr bonsoir j'ai deja payer mais mes informations ne sont pas à jour sur l'application       aide
+      aide     fr                                              Comment sa marche cette application ? hors_sujet
+      aide     fr                                           Comment je peux utiliser l'application ? hors_sujet
+salutation     fr                                                           Bjr comment allez vous ? hors_sujet
+salutation     fr                                                      Bonjour svp j'ai une question       aide
+hors_sujet     fr                                          Tu connais une bonne ecole informatique ?       aide

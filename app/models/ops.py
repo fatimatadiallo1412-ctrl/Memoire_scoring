@@ -73,6 +73,11 @@ class Client(Base):
     adresse: Mapped[str | None] = mapped_column(String(200))
     agence_id: Mapped[int] = mapped_column(ForeignKey(f"{SCHEMA}.agence.id"))
 
+    # Portefeuille : gestionnaire (agent de crédit) responsable de ce client
+    gestionnaire_id: Mapped[int | None] = mapped_column(
+        ForeignKey(f"{SCHEMA}.utilisateur.id", use_alter=True, name="fk_client_gestionnaire"),
+        index=True)
+
     # Variables utilisées par le modèle
     type_revenu: Mapped[str] = mapped_column(String(30))
     profession: Mapped[str | None] = mapped_column(String(60))

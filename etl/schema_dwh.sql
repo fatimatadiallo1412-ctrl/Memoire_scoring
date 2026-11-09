@@ -154,3 +154,6 @@ CREATE TABLE dwh.fait_portefeuille_mensuel (
 CREATE INDEX ix_fait_demande_date ON dwh.fait_demande (date_demande_key);
 CREATE INDEX ix_fait_echeance_date ON dwh.fait_echeance (date_echeance_key);
 CREATE INDEX ix_fait_paiement_date ON dwh.fait_paiement (date_paiement_key);
+-- Lecture seule pour l'outil de tableaux de bord (le rôle est créé une fois, hors ETL)
+GRANT USAGE ON SCHEMA dwh TO metabase_lecteur;
+GRANT SELECT ON ALL TABLES IN SCHEMA dwh TO metabase_lecteur;

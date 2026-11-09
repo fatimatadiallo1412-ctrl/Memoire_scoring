@@ -1,0 +1,69 @@
+Phrases d'entraînement : 192
+intention
+hors_sujet            29
+historique            26
+aide                  26
+retard                25
+prochaine_echeance    21
+solde                 20
+salutation            17
+nouveau_credit        16
+remerciement          12
+
+Validation croisée (5 plis) : exactitude 0.833 (optimiste : phrases d'un même auteur)
+
+Validation : 56 phrases, exactitude 0.893
+                    precision    recall  f1-score   support
+
+              aide       0.58      1.00      0.74         7
+        historique       1.00      0.67      0.80         6
+        hors_sujet       1.00      0.67      0.80         6
+    nouveau_credit       1.00      1.00      1.00         6
+prochaine_echeance       1.00      1.00      1.00         7
+      remerciement       1.00      1.00      1.00         6
+            retard       1.00      0.86      0.92         7
+        salutation       1.00      0.80      0.89         5
+             solde       0.86      1.00      0.92         6
+
+          accuracy                           0.89        56
+         macro avg       0.94      0.89      0.90        56
+      weighted avg       0.93      0.89      0.90        56
+
+Matrice de confusion (lignes : vrai ; colonnes : prédit)
+                    aide  historique  hors_sujet  nouveau_credit  prochaine_echeance  remerciement  retard  salutation  solde
+aide                   7           0           0               0                   0             0       0           0      0
+historique             1           4           0               0                   0             0       0           0      1
+hors_sujet             2           0           4               0                   0             0       0           0      0
+nouveau_credit         0           0           0               6                   0             0       0           0      0
+prochaine_echeance     0           0           0               0                   7             0       0           0      0
+remerciement           0           0           0               0                   0             6       0           0      0
+retard                 1           0           0               0                   0             0       6           0      0
+salutation             1           0           0               0                   0             0       0           4      0
+solde                  0           0           0               0                   0             0       0           0      6
+
+Effet du seuil de confiance (C = 10.0, seuil actuel du code : 0.5)
+       bonne réponse  réponse erronée  non compris  hors-sujet écarté  donnée erronée
+seuil                                                                                
+0.3             0.92             0.08         0.00              0.667               1
+0.4             0.82             0.04         0.14              0.833               0
+0.5             0.66             0.04         0.30              1.000               0
+0.6             0.56             0.02         0.42              1.000               0
+0.7             0.38             0.00         0.62              1.000               0
+
+Effet du paramètre C (seuil fixé à 0.4)
+     exactitude  confiance moyenne  bonne réponse  réponse erronée  non compris  hors-sujet écarté  donnée erronée
+C                                                                                                                 
+1         0.911              0.321           0.26             0.00         0.74              1.000               0
+3         0.911              0.487           0.56             0.02         0.42              1.000               0
+10        0.893              0.636           0.82             0.04         0.14              0.833               0
+30        0.911              0.731           0.90             0.06         0.04              0.833               1
+100       0.911              0.802           0.94             0.06         0.00              0.667               1
+
+Phrases mal classées :
+ intention langue                                                                             phrase predit
+    retard     fr                                                 Comment savoir si je suis a jour ?   aide
+historique     fr                                           Mon historique de remboursement est ou ?  solde
+historique     fr bonsoir j'ai deja payer mais mes informations ne sont pas à jour sur l'application   aide
+salutation     fr                                                      Bonjour svp j'ai une question   aide
+hors_sujet     fr                                          Tu connais une bonne ecole informatique ?   aide
+hors_sujet     fr                                              Comment installer python sur mon pc ?   aide

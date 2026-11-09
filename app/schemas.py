@@ -60,6 +60,7 @@ class ClientOut(ClientIn):
 
     id: int
     code_client: str
+    gestionnaire_id: int | None = None
     cree_le: datetime
     maj_le: datetime
 
@@ -207,3 +208,24 @@ class ProchaineEcheanceOut(BaseModel):
     reste_du: int
     en_retard: bool
     jours: int          # jours de retard si en_retard, sinon jours restants
+
+
+class ClientMaj(BaseModel):
+    """Modification partielle d'un client : seuls les champs envoyés sont modifiés."""
+    nom: str | None = Field(default=None, min_length=1, max_length=100)
+    prenom: str | None = Field(default=None, min_length=1, max_length=100)
+    date_naissance: date | None = None
+    sexe: Literal["F", "M"] | None = None
+    telephone: str | None = Field(default=None, max_length=20)
+    adresse: str | None = Field(default=None, max_length=200)
+    agence_id: int | None = None
+    type_revenu: Literal["salarie_prive", "fonctionnaire", "independant", "retraite"] | None = None
+    profession: str | None = Field(default=None, max_length=60)
+    situation_familiale: Literal["celibataire", "marie", "divorce", "veuf"] | None = None
+    type_logement: Literal["proprietaire", "locataire", "famille", "logement_fonction"] | None = None
+    anciennete_activite_mois: int | None = Field(default=None, ge=0)
+    nb_enfants: int | None = Field(default=None, ge=0, le=30)
+    taille_menage: int | None = Field(default=None, ge=1, le=40)
+    possede_bien_immobilier: bool | None = None
+    possede_vehicule: bool | None = None
+    revenu_mensuel: int | None = Field(default=None, ge=0)

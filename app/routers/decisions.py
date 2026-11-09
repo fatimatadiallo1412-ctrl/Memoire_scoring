@@ -31,7 +31,7 @@ STATUT_APRES = {
              status_code=status.HTTP_201_CREATED)
 def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get_session),
             utilisateur: Utilisateur = Depends(exiger_roles(Role.DECIDEUR))):
-    demande = charger_demande(session, demande_id)
+    demande = charger_demande(session, demande_id, utilisateur)
     if demande.statut != StatutDossier.SOUMIS:
         raise HTTPException(status.HTTP_409_CONFLICT,
                             "Seul un dossier soumis à décision peut faire l'objet d'une décision")
@@ -72,6 +72,6 @@ def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get
 @router.get("/{demande_id}/decisions", response_model=list[DecisionOut])
 def historique_decisions(demande_id: int, session: Session = Depends(get_session),
                          utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
-    charger_demande(session, demande_id)
+    charger_demande(session, demande_id, utilisateur)
     return session.scalars(select(Decision).where(Decision.demande_id == demande_id)
                            .order_by(Decision.decide_le)).all()

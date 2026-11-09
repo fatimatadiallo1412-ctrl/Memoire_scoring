@@ -1,0 +1,5 @@
+{
+  "python.analysis.exclude": ["**/.venv", "**/data", "**/models", "**/node_modules"],
+  "python.analysis.diagnosticMode": "openFilesOnly",
+  "liveServer.settings.multiRootWorkspaceName": "Memoire_scoring"
+}

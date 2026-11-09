@@ -11,6 +11,7 @@ from app.models.enums import Role, StatutDossier
 from app.schemas import DemandeIn, DemandeOut, InstructionIn, ScoreOut
 from app.scoring import VERSION_MODELE, evaluer_dossier
 from app.workflow import changer_statut
+from app.portefeuille import client_accessible, filtrer_demandes
 from app.parametres import lire_parametres
 from app.historique import niveau_antecedent
 
@@ -37,7 +38,7 @@ def verifier_produit(session: Session, produit_id: int, montant: int, duree: int
             f"Durée hors limites du produit ({produit.duree_min_mois} à {produit.duree_max_mois} mois)")
 
 
-def charger_demande(session: Session, demande_id: int) -> DemandeCredit:
+def _charger_demande_brut(session: Session, demande_id: int) -> DemandeCredit:
     demande = session.get(DemandeCredit, demande_id)
     if demande is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Dossier introuvable")
@@ -47,7 +48,7 @@ def charger_demande(session: Session, demande_id: int) -> DemandeCredit:
 @router.post("", response_model=DemandeOut, status_code=status.HTTP_201_CREATED)
 def creer_demande(donnees: DemandeIn, session: Session = Depends(get_session),
                   utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
-    if session.get(Client, donnees.client_id) is None:
+    if not client_accessible(session, donnees.client_id, utilisateur):
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Client inconnu")
     verifier_produit(session, donnees.produit_id, donnees.montant_demande, donnees.duree_mois)
 
@@ -81,6 +82,7 @@ def lister_demandes(
     utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE)),
 ):
     requete = select(DemandeCredit).order_by(DemandeCredit.id.desc()).limit(limite)
+    requete = filtrer_demandes(requete, utilisateur)
     if statut:
         requete = requete.where(DemandeCredit.statut == statut)
     if client_id:
@@ -91,13 +93,13 @@ def lister_demandes(
 @router.get("/{demande_id}", response_model=DemandeOut)
 def lire_demande(demande_id: int, session: Session = Depends(get_session),
                  utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
-    return charger_demande(session, demande_id)
+    return charger_demande(session, demande_id, utilisateur)
 
 
 @router.put("/{demande_id}", response_model=DemandeOut)
 def modifier_demande(demande_id: int, donnees: DemandeIn, session: Session = Depends(get_session),
                      utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
-    demande = charger_demande(session, demande_id)
+    demande = charger_demande(session, demande_id, utilisateur)
     if demande.statut not in MODIFIABLES:
         raise HTTPException(status.HTTP_409_CONFLICT,
                             f"Un dossier au statut {demande.statut.value} ne peut plus être modifié")
@@ -121,7 +123,7 @@ def modifier_demande(demande_id: int, donnees: DemandeIn, session: Session = Dep
 @router.post("/{demande_id}/completer", response_model=DemandeOut)
 def completer_demande(demande_id: int, session: Session = Depends(get_session),
                       utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
-    demande = charger_demande(session, demande_id)
+    demande = charger_demande(session, demande_id, utilisateur)
     client = session.get(Client, demande.client_id)
 
     manquants = []
@@ -140,7 +142,7 @@ def completer_demande(demande_id: int, session: Session = Depends(get_session),
 @router.post("/{demande_id}/scorer", response_model=ScoreOut)
 def scorer_demande(demande_id: int, session: Session = Depends(get_session),
                    utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
-    demande = charger_demande(session, demande_id)
+    demande = charger_demande(session, demande_id, utilisateur)
     if demande.statut not in (StatutDossier.COMPLET, StatutDossier.SCORE):
         raise HTTPException(status.HTTP_409_CONFLICT,
                             f"Un dossier au statut {demande.statut.value} ne peut pas être scoré")
@@ -188,7 +190,7 @@ def scorer_demande(demande_id: int, session: Session = Depends(get_session),
 @router.get("/{demande_id}/score", response_model=ScoreOut)
 def dernier_score(demande_id: int, session: Session = Depends(get_session),
                   utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
-    demande = charger_demande(session, demande_id)
+    demande = charger_demande(session, demande_id, utilisateur)
     score = session.scalar(select(Score).where(Score.demande_id == demande_id)
                            .order_by(Score.calcule_le.desc()).limit(1))
     if score is None:
@@ -211,7 +213,7 @@ def exiger_score_valide(session: Session, demande: DemandeCredit) -> Score:
 def instruire_demande(demande_id: int, donnees: InstructionIn,
                       session: Session = Depends(get_session),
                       utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
-    demande = charger_demande(session, demande_id)
+    demande = charger_demande(session, demande_id, utilisateur)
     exiger_score_valide(session, demande)
     changer_statut(demande, StatutDossier.INSTRUIT)
     demande.avis_instruction = donnees.avis
@@ -226,11 +228,20 @@ def instruire_demande(demande_id: int, donnees: InstructionIn,
 @router.post("/{demande_id}/soumettre", response_model=DemandeOut)
 def soumettre_demande(demande_id: int, session: Session = Depends(get_session),
                       utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
-    demande = charger_demande(session, demande_id)
+    demande = charger_demande(session, demande_id, utilisateur)
     exiger_score_valide(session, demande)
     changer_statut(demande, StatutDossier.SOUMIS)
     session.add(Journal(utilisateur_id=utilisateur.id, action="dossier_soumis",
                         entite="demande_credit", entite_id=demande_id))
     session.commit()
     session.refresh(demande)
+    return demande
+
+
+def charger_demande(session: Session, demande_id: int, utilisateur: Utilisateur) -> DemandeCredit:
+    """Charge un dossier si son client est dans le portefeuille de l'utilisateur.
+    Sinon 404 (et non 403) : on ne révèle pas l'existence du dossier."""
+    demande = _charger_demande_brut(session, demande_id)
+    if not client_accessible(session, demande.client_id, utilisateur):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Dossier introuvable")
     return demande

@@ -8,6 +8,7 @@ from app.deps import exiger_roles
 from app.models import Credit, Decision, Echeance, Journal, ProduitCredit, Utilisateur
 from app.models.enums import Role, StatutDossier
 from app.routers.demandes import LECTURE, charger_demande
+from app.portefeuille import credit_accessible
 from app.schemas import CreditOut, DecaissementIn, EcheanceOut
 from app.workflow import changer_statut
 from sqlalchemy import func, select
@@ -24,7 +25,7 @@ def decaisser(demande_id: int, donnees: DecaissementIn | None = None,
               session: Session = Depends(get_session),
               utilisateur: Utilisateur = Depends(
                   exiger_roles(Role.AGENT_CREDIT, Role.ADMINISTRATEUR))):
-    demande = charger_demande(session, demande_id)
+    demande = charger_demande(session, demande_id, utilisateur)
     if demande.statut not in (StatutDossier.ACCORDE, StatutDossier.ACCORDE_MODIFIE):
         raise HTTPException(status.HTTP_409_CONFLICT,
                             "Seul un dossier accordé peut être décaissé")
@@ -68,7 +69,7 @@ def decaisser(demande_id: int, donnees: DecaissementIn | None = None,
 @router.get("/demandes/{demande_id}/credit", response_model=CreditOut)
 def credit_du_dossier(demande_id: int, session: Session = Depends(get_session),
                       utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
-    charger_demande(session, demande_id)
+    charger_demande(session, demande_id, utilisateur)
     credit = session.scalars(select(Credit).where(Credit.demande_id == demande_id)).first()
     if credit is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Ce dossier n'a pas de crédit décaissé")
@@ -78,11 +79,11 @@ def credit_du_dossier(demande_id: int, session: Session = Depends(get_session),
 @router.get("/credits/{credit_id}/echeances", response_model=list[EcheanceOut])
 def echeances_du_credit(credit_id: int, session: Session = Depends(get_session),
                         utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
-    if session.get(Credit, credit_id) is None:
+    if not credit_accessible(session, credit_id, utilisateur):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Crédit introuvable")
     return session.scalars(select(Echeance).where(Echeance.credit_id == credit_id)
                            .order_by(Echeance.numero)).all()
-def _credit_ou_404(session: Session, credit_id: int) -> Credit:
+def _credit_brut(session: Session, credit_id: int) -> Credit:
     credit = session.get(Credit, credit_id)
     if credit is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Crédit introuvable")
@@ -103,7 +104,7 @@ def enregistrer_paiement(credit_id: int, donnees: PaiementIn,
                          session: Session = Depends(get_session),
                          utilisateur: Utilisateur = Depends(
                              exiger_roles(Role.AGENT_CREDIT, Role.ADMINISTRATEUR))):
-    credit = _credit_ou_404(session, credit_id)
+    credit = _credit_ou_404(session, credit_id, utilisateur)
     demande = session.get(DemandeCredit, credit.demande_id)
     if demande.statut not in (StatutDossier.EN_REMBOURSEMENT, StatutDossier.CONTENTIEUX):
         raise HTTPException(status.HTTP_409_CONFLICT,
@@ -144,7 +145,7 @@ def enregistrer_paiement(credit_id: int, donnees: PaiementIn,
 @router.get("/credits/{credit_id}/paiements", response_model=list[PaiementOut])
 def historique_paiements(credit_id: int, session: Session = Depends(get_session),
                          utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
-    _credit_ou_404(session, credit_id)
+    _credit_ou_404(session, credit_id, utilisateur)
     return session.scalars(select(Paiement).where(Paiement.credit_id == credit_id)
                            .order_by(Paiement.date_paiement, Paiement.id)).all()
 
@@ -152,4 +153,11 @@ def historique_paiements(credit_id: int, session: Session = Depends(get_session)
 @router.get("/credits/{credit_id}/situation", response_model=SituationOut)
 def situation_du_credit(credit_id: int, session: Session = Depends(get_session),
                         utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
-    return _situation(session, _credit_ou_404(session, credit_id))
+    return _situation(session, _credit_ou_404(session, credit_id, utilisateur))
+
+
+def _credit_ou_404(session: Session, credit_id: int, utilisateur: Utilisateur) -> Credit:
+    """Le crédit n'est renvoyé que si son client est dans le portefeuille de l'utilisateur."""
+    if not credit_accessible(session, credit_id, utilisateur):
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Crédit introuvable")
+    return _credit_brut(session, credit_id)
