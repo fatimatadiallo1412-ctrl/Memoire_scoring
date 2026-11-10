@@ -7,7 +7,7 @@ import argparse
 import getpass
 import sys
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 from app.db import SessionLocal
 from app.models import Agence, Utilisateur
@@ -33,6 +33,10 @@ def main() -> None:
             sys.exit(f"Aucune agence avec l'id {args.agence_id}.")
         if session.scalars(select(Utilisateur).where(Utilisateur.email == args.email)).first():
             sys.exit("Cet email est déjà utilisé.")
+        if args.role == Role.ADMINISTRATEUR.value and session.execute(text(
+                "SELECT 1 FROM ops.utilisateur WHERE role = 'administrateur' AND actif LIMIT 1")).first():
+            sys.exit("Il existe déjà un administrateur actif : il ne peut y en avoir qu'un. "
+                     "Pour changer de titulaire : python -m app.remplacer_administrateur")
         session.add(Utilisateur(
             email=args.email, nom_complet=args.nom,
             mot_de_passe_hash=hasher_mot_de_passe(mot_de_passe),

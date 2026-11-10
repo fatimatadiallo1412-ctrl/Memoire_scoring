@@ -1,0 +1,118 @@
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.db import get_session
+from app.deps import exiger_roles
+from app.models import Journal, Parametre, Utilisateur
+from app.models.enums import Role
+from app.parametres import PARAMETRES_DEFAUT
+from app.schemas import ParametreIn, ParametreOut
+
+router = APIRouter(prefix="/parametres", tags=["paramètres"])
+
+
+@router.get("", response_model=list[ParametreOut])
+def lister_parametres(session: Session = Depends(get_session),
+                      utilisateur: Utilisateur = Depends(
+                          exiger_roles(Role.AGENT_CREDIT, Role.DECIDEUR, Role.ADMINISTRATEUR))):
+    en_base = {p.cle: p for p in session.scalars(select(Parametre))}
+    resultat = []
+    for cle, (defaut, description, _, _) in PARAMETRES_DEFAUT.items():
+        p = en_base.get(cle)
+        resultat.append(ParametreOut(
+            cle=cle, valeur=float(p.valeur) if p else defaut, description=description,
+            modifie_le=p.modifie_le if p else None))
+    return resultat
+
+
+@router.put("/{cle}", response_model=ParametreOut)
+def modifier_parametre(cle: str, donnees: ParametreIn, session: Session = Depends(get_session),
+                       utilisateur: Utilisateur = Depends(exiger_roles(Role.DECIDEUR))):
+    if cle not in PARAMETRES_DEFAUT:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Paramètre inconnu")
+    defaut, description, mini, maxi = PARAMETRES_DEFAUT[cle]
+    if not mini <= donnees.valeur <= maxi:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            f"Valeur hors limites ({mini} à {maxi})")
+
+    parametre = session.get(Parametre, cle)
+    ancienne = float(parametre.valeur) if parametre else defaut
+    if parametre is None:
+        parametre = Parametre(cle=cle, description=description, valeur=donnees.valeur)
+        session.add(parametre)
+    else:
+        parametre.valeur = donnees.valeur
+    parametre.modifie_par = utilisateur.id
+
+    session.add(Journal(utilisateur_id=utilisateur.id, action="parametre_modifie",
+                        entite="parametre",
+                        details={"cle": cle, "ancienne": ancienne, "nouvelle": donnees.valeur}))
+    session.commit()
+    session.refresh(parametre)
+    return ParametreOut(cle=cle, valeur=float(parametre.valeur), description=description,
+                        modifie_le=parametre.modifie_le)from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.models import Parametre
+
+# clé : (valeur par défaut, description, minimum, maximum)
+PARAMETRES_DEFAUT = {
+    "seuil_defaut": (0.15, "Probabilité maximale de défaut acceptée", 0.01, 0.60),
+    "endettement_max": (0.40, "Mensualité maximale, en part du revenu mensuel", 0.10, 0.80),
+    "ratio_min": (0.50, "Part minimale du montant demandé proposable en réduction", 0.10, 1.00),
+    "pas_montant": (10_000, "Pas de réduction du montant (FCFA)", 1_000, 1_000_000),
+    "facteur_prudence_antecedent": (0.80, "Facteur appliqué au seuil de défaut si le client a un incident passé regularisé(1 = règle désactivée)", 0.10, 1.00),
+}
+
+
+def lire_parametres(session: Session) -> dict:
+    """Valeurs en vigueur : celles de la base, à défaut les valeurs par défaut."""
+    valeurs = {cle: v[0] for cle, v in PARAMETRES_DEFAUT.items()}
+    for p in session.scalars(select(Parametre)):
+        if p.cle in valeurs:
+            valeurs[p.cle] = float(p.valeur)
+    return valeursfrom datetime import date
+from typing import Literal
+
+from fastapi import APIRouter, Depends, Query, Response
+from sqlalchemy.orm import Session
+
+from app.deps import exiger_roles, get_session
+from app.models import Journal, Utilisateur
+from app.models.enums import Role
+from app.rapports.donnees import construire_rapport
+from app.rapports.excel import generer_excel
+from app.rapports.pdf import generer_pdf
+
+router = APIRouter(prefix="/rapports", tags=["rapports"])
+
+DIRECTION = (Role.DECIDEUR, Role.ADMINISTRATEUR)
+TYPES = {
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "pdf": "application/pdf",
+}
+
+
+@router.get("/activite")
+def rapport_activite(
+        periode: Literal["jour", "mois", "annee"] = "mois",
+        jour: date | None = Query(None, description="Un jour de la période voulue (défaut : aujourd'hui)"),
+        format_fichier: Literal["xlsx", "pdf"] = Query("xlsx", alias="format"),
+        session: Session = Depends(get_session),
+        utilisateur: Utilisateur = Depends(exiger_roles(*DIRECTION))):
+    rapport = construire_rapport(session, periode, jour or date.today())
+    if format_fichier == "xlsx":
+        contenu = generer_excel(rapport)
+    else:
+        contenu = generer_pdf(rapport)
+
+    session.add(Journal(
+        utilisateur_id=utilisateur.id, action="rapport_genere", entite="rapport", entite_id=0,
+        details={"periode": periode, "debut": str(rapport["debut"]),
+                 "fin": str(rapport["fin"]), "format": format_fichier}))
+    session.commit()
+
+    nom = f"rapport_activite_{periode}_{rapport['debut']}.{format_fichier}"
+    return Response(content=contenu, media_type=TYPES[format_fichier],
+                    headers={"Content-Disposition": f'attachment; filename="{nom}"'})

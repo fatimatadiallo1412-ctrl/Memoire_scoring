@@ -47,12 +47,6 @@ class ClientIn(BaseModel):
         if age < 18:
             raise ValueError("Le client doit être majeur")
         return valeur
-    @field_validator("profession")
-    @classmethod
-    def profession_connue(cls, valeur):
-        if valeur is not None and valeur not in PROFESSION:
-            raise ValueError(f"Profession inconnue. Choix possibles : {', '.join(PROFESSION)}")
-        return valeur
 
 
 class ClientOut(ClientIn):
@@ -61,6 +55,7 @@ class ClientOut(ClientIn):
     id: int
     code_client: str
     gestionnaire_id: int | None = None
+    categorie_profession: str | None = None
     cree_le: datetime
     maj_le: datetime
 

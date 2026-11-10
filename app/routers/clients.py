@@ -6,6 +6,7 @@ from sqlalchemy import func, or_, select, text, update
 from sqlalchemy.orm import Session
 
 from app.db import get_session
+from app.metiers import resoudre_metier
 from app.deps import exiger_roles
 from app.models import Agence, Client, DemandeCredit, Journal, Utilisateur
 from app.models.enums import Role, StatutDossier
@@ -52,8 +53,18 @@ def creer_client(donnees: ClientIn, session: Session = Depends(get_session),
 
     # On réserve le numéro d'identifiant pour en déduire le code client (CL000123)
     prochain_id = session.scalar(text("SELECT nextval(pg_get_serial_sequence('ops.client', 'id'))"))
+    # Profession : on reconnaît le métier (ou on le crée « à classer »)
+    champs = donnees.model_dump()
+    categorie = None
+    if champs.get("profession"):
+        try:
+            metier = resoudre_metier(session, champs["profession"], utilisateur)
+        except ValueError:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Profession vide")
+        champs["profession"] = metier.code
+        categorie = metier.categorie_modele
     client = Client(id=prochain_id, code_client=f"CL{prochain_id:06d}",
-                    gestionnaire_id=gestionnaire, **donnees.model_dump())
+                    gestionnaire_id=gestionnaire, categorie_profession=categorie, **champs)
     session.add(client)
     session.add(Journal(utilisateur_id=utilisateur.id, action="client_cree",
                         entite="client", entite_id=prochain_id,
@@ -113,6 +124,19 @@ def modifier_client(client_id: int, donnees: ClientMaj, session: Session = Depen
                      for e in erreur.errors() if e["loc"] and e["loc"][0] in envoyes]
         if problemes:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, problemes)
+
+    # Profession : on reconnaît le métier (ou on le crée « à classer ») et on retient son code
+    # et la catégorie que le modèle utilisera.
+    if "profession" in envoyes:
+        if envoyes["profession"] is None:
+            envoyes["categorie_profession"] = None
+        else:
+            try:
+                metier = resoudre_metier(session, envoyes["profession"], utilisateur)
+            except ValueError:
+                raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Profession vide")
+            envoyes["profession"] = metier.code
+            envoyes["categorie_profession"] = metier.categorie_modele
 
     changes = {champ: valeur for champ, valeur in envoyes.items()
                if getattr(client, champ) != valeur}

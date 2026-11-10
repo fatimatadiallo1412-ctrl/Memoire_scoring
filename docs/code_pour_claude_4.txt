@@ -1,0 +1,116 @@
+=== app/referentiels.py ===
+# Saisie dans l'application  ->  catégorie connue du modèle (jeu Home Credit)
+
+TYPE_REVENU = {
+    "salarie_prive": "Working",
+    "fonctionnaire": "State servant",
+    "independant": "Commercial associate",
+    "retraite": "Pensioner",
+}
+
+SITUATION_FAMILIALE = {
+    "celibataire": "Single / not married",
+    "marie": "Married",
+    "divorce": "Separated",
+    "veuf": "Widow",
+}
+
+TYPE_LOGEMENT = {
+    "proprietaire": "House / apartment",
+    "locataire": "Rented apartment",
+    "famille": "With parents",
+    "logement_fonction": "Office apartment",
+}
+
+PROFESSION = {
+    "commercant": "Sales staff",
+    "artisan": "Laborers",
+    "agriculteur_eleveur_pecheur": "Laborers",      # pas d'équivalent dans le jeu d'origine
+    "chauffeur_transporteur": "Drivers",
+    "ouvrier_manoeuvre": "Low-skill Laborers",
+    "enseignant_employe_administratif": "Core staff",
+    "cadre_gerant": "Managers",
+    "comptable": "Accountants",
+    "secretaire": "Secretaries",
+    "sante": "Medicine staff",
+    "securite": "Security staff",
+    "restauration_cuisine": "Cooking staff",
+    "nettoyage": "Cleaning staff",
+    "services_personne": "Private service staff",
+    "serveur": "Waiters/barmen staff",
+    "informatique": "IT staff",
+    "technicien": "High skill tech staff",
+}
+=== profession dans schemas.py ===
+5-from pydantic import Field, field_validator
+6-from app.models.enums import StatutDossier
+7:from app.referentiels import PROFESSION
+8-from app.models.enums import TypeDecision
+9-
+10-class UtilisateurOut(BaseModel):
+11-    model_config = ConfigDict(from_attributes=True)
+12-
+13-    id: int
+14-    email: str
+15-    nom_complet: str
+16-    role: Role
+17-
+18-
+19-class Jeton(BaseModel):
+--
+30-    agence_id: int
+31-    type_revenu: Literal["salarie_prive", "fonctionnaire", "independant", "retraite"]
+32:    profession: str | None = Field(default=None, max_length=60)
+33-    situation_familiale: Literal["celibataire", "marie", "divorce", "veuf"]
+34-    type_logement: Literal["proprietaire", "locataire", "famille", "logement_fonction"]
+35-    anciennete_activite_mois: int = Field(default=0, ge=0)
+36-    nb_enfants: int = Field(default=0, ge=0, le=30)
+37-    taille_menage: int = Field(default=1, ge=1, le=40)
+38-    possede_bien_immobilier: bool = False
+39-    possede_vehicule: bool = False
+40-    revenu_mensuel: int = Field(default=0, ge=0)
+41-
+42-    @field_validator("date_naissance")
+43-    @classmethod
+44-    def majeur(cls, valeur: date) -> date:
+--
+48-            raise ValueError("Le client doit être majeur")
+49-        return valeur
+50:    @field_validator("profession")
+51-    @classmethod
+52:    def profession_connue(cls, valeur):
+53:        if valeur is not None and valeur not in PROFESSION:
+54:            raise ValueError(f"Profession inconnue. Choix possibles : {', '.join(PROFESSION)}")
+55-        return valeur
+56-
+57-
+58-class ClientOut(ClientIn):
+59-    model_config = ConfigDict(from_attributes=True)
+60-
+61-    id: int
+62-    code_client: str
+63-    gestionnaire_id: int | None = None
+64-    cree_le: datetime
+65-    maj_le: datetime
+66-
+--
+221-    agence_id: int | None = None
+222-    type_revenu: Literal["salarie_prive", "fonctionnaire", "independant", "retraite"] | None = None
+223:    profession: str | None = Field(default=None, max_length=60)
+224-    situation_familiale: Literal["celibataire", "marie", "divorce", "veuf"] | None = None
+225-    type_logement: Literal["proprietaire", "locataire", "famille", "logement_fonction"] | None = None
+226-    anciennete_activite_mois: int | None = Field(default=None, ge=0)
+227-    nb_enfants: int | None = Field(default=None, ge=0, le=30)
+228-    taille_menage: int | None = Field(default=None, ge=1, le=40)
+229-    possede_bien_immobilier: bool | None = None
+230-    possede_vehicule: bool | None = None
+231-    revenu_mensuel: int | None = Field(default=None, ge=0)
+
+=== usages de PROFESSION ===
+app/schemas.py:7:from app.referentiels import PROFESSION
+app/schemas.py:53:        if valeur is not None and valeur not in PROFESSION:
+app/schemas.py:54:            raise ValueError(f"Profession inconnue. Choix possibles : {', '.join(PROFESSION)}")
+app/main.py:4:from app.routers import assistant, auth, clients, credits, decisions, demandes, moi, parametres, rapports, referentiels
+app/main.py:33:app.include_router(referentiels.router)
+app/scoring.py:6:from app import referentiels as R
+app/scoring.py:39:        "OCCUPATION_TYPE": R.PROFESSION.get(client.profession, "Non renseigné"),

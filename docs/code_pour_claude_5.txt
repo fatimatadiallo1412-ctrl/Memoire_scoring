@@ -1,0 +1,130 @@
+=== app/scoring.py (début) ===
+import json
+from functools import lru_cache
+
+import joblib
+
+from app import referentiels as R
+from src.features import PLAFOND_ENFANTS, PLAFOND_FAMILLE
+from src.modeling import COLONNES, RACINE
+from src.suggestion import construire_ligne, suggerer_montant
+
+VERSION_MODELE = "xgb_home_credit_v3"
+
+# Facteur appliqué au seuil de défaut pour un client dont l'incident passé est régularisé
+# (1.0 = règle désactivée). La valeur réelle vient de ops.parametre.
+FACTEUR_PRUDENCE_DEFAUT = 0.8
+
+
+@lru_cache(maxsize=1)
+def charger_modele():
+    """Le modèle est chargé une seule fois, au premier appel."""
+    return joblib.load(RACINE / "models" / f"{VERSION_MODELE}.joblib")
+
+
+def profil_client(client, jour) -> dict:
+    """Traduit la fiche client en variables du modèle (hors ratios)."""
+    mois = client.anciennete_activite_mois
+    # Dans les données d'entraînement, retraités et sans emploi ont sans_emploi = 1 et ancienneté 0
+    sans_emploi = client.type_revenu == "retraite" or mois == 0
+    age = (jour - client.date_naissance).days / 365.25
+    return {
+        "CNT_CHILDREN": min(client.nb_enfants, PLAFOND_ENFANTS),
+        "CNT_FAM_MEMBERS": min(client.taille_menage, PLAFOND_FAMILLE),
+        "age_ans": age,
+        "anciennete_emploi_ans": 0.0 if sans_emploi else mois / 12,
+        "sans_emploi": int(sans_emploi),
+        "NAME_INCOME_TYPE": R.TYPE_REVENU[client.type_revenu],
+        "NAME_FAMILY_STATUS": R.SITUATION_FAMILIALE[client.situation_familiale],
+        "NAME_HOUSING_TYPE": R.TYPE_LOGEMENT[client.type_logement],
+        "OCCUPATION_TYPE": R.PROFESSION.get(client.profession, "Non renseigné"),
+        "FLAG_OWN_REALTY": "Y" if client.possede_bien_immobilier else "N",
+        "FLAG_OWN_CAR": "Y" if client.possede_vehicule else "N",
+    }
+
+
+def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun"):
+    """Renvoie la recommandation (accord / accord_reduit / refus) et les variables d'entrée.
+
+    antecedent (voir app/historique.py) :
+      "aucun"      : aucun incident, évaluation normale
+      "regularise" : défaut passé régularisé, seuil d'acceptation resserré
+      "en_cours"   : crédit en retard de plus de 90 jours, recommandation de refus
+    La probabilité du modèle n'est jamais modifiée.
+    """
+    modele = charger_modele()
+    profil = profil_client(client, demande.date_demande)
+    taux = float(produit.taux_annuel) / 100
+
+    seuil_base = float(parametres["seuil_defaut"])
+    facteur = float(parametres.get("facteur_prudence_antecedent", FACTEUR_PRUDENCE_DEFAUT))
+    seuil = seuil_base * facteur if antecedent == "regularise" else seuil_base
+
+    recommandation = suggerer_montant(
+        modele, profil, demande.montant_demande, demande.duree_mois,
+        client.revenu_mensuel, COLONNES,
+        seuil=seuil, pas=int(parametres["pas_montant"]),
+        montant_min=produit.montant_min, ratio_min=parametres["ratio_min"],
+        taux_annuel=taux, endettement_max=parametres["endettement_max"])
+
+    if antecedent == "en_cours":
+        recommandation["decision"] = "refus"
+        recommandation["montant"] = None
+        recommandation["p_defaut"] = None
+        recommandation["motifs"].append(
+            "Crédit en retard de plus de 90 jours : à régulariser avant tout nouveau crédit")
+    elif antecedent == "regularise":
+        recommandation["motifs"].append(
+            f"Incident de paiement passé, régularisé : seuil de risque resserré "
+            f"({seuil:.3f} au lieu de {seuil_base:.3f})")
+    recommandation["seuil_applique"] = seuil
+
+    ligne = construire_ligne(profil, demande.montant_demande, demande.duree_mois,
+                             client.revenu_mensuel, COLONNES, taux)
+    variables = json.loads(ligne.to_json(orient="records"))[0]
+    variables["antecedent_defaut"] = antecedent
+    return recommandation, variables
+=== classe Client (ops.py) ===
+54:class Client(Base):
+55-    __tablename__ = "client"
+56-    __table_args__ = (
+57-        Index("ix_client_nom_prenom", "nom", "prenom"),
+58-        CheckConstraint("revenu_mensuel >= 0", name="revenu_positif"),
+59-        CheckConstraint("nb_enfants >= 0", name="enfants_positif"),
+60-        CheckConstraint("taille_menage >= 1", name="menage_minimum"),
+61-        {"schema": SCHEMA},
+62-    )
+63-
+64-    id: Mapped[int] = mapped_column(primary_key=True)
+65-    code_client: Mapped[str] = mapped_column(String(20), unique=True)
+66-
+67-    # Identité
+68-    nom: Mapped[str] = mapped_column(String(100))
+69-    prenom: Mapped[str] = mapped_column(String(100))
+70-    date_naissance: Mapped[date] = mapped_column(Date)
+71-    sexe: Mapped[str | None] = mapped_column(String(1))   # identification et audit seulement, jamais donné au modèle
+72-    telephone: Mapped[str | None] = mapped_column(String(20), index=True)
+73-    adresse: Mapped[str | None] = mapped_column(String(200))
+74-    agence_id: Mapped[int] = mapped_column(ForeignKey(f"{SCHEMA}.agence.id"))
+75-
+76-    # Portefeuille : gestionnaire (agent de crédit) responsable de ce client
+77-    gestionnaire_id: Mapped[int | None] = mapped_column(
+78-        ForeignKey(f"{SCHEMA}.utilisateur.id", use_alter=True, name="fk_client_gestionnaire"),
+79-        index=True)
+80-
+81-    # Variables utilisées par le modèle
+82-    type_revenu: Mapped[str] = mapped_column(String(30))
+83-    profession: Mapped[str | None] = mapped_column(String(60))
+84-    situation_familiale: Mapped[str] = mapped_column(String(30))
+85-    type_logement: Mapped[str] = mapped_column(String(30))
+86-    anciennete_activite_mois: Mapped[int] = mapped_column(Integer, default=0)
+
+=== appels de scoring ===
+app/routers/demandes.py:12:from app.scoring import VERSION_MODELE, evaluer_dossier
+
+=== donnees_modifiees_le ===
+app/routers/demandes.py:112:    demande.donnees_modifiees_le = text("now()")   # le score éventuel devient périmé
+app/routers/demandes.py:199:    resultat.valide = demande.donnees_modifiees_le <= score.calcule_le   # sinon : score périmé
+app/routers/demandes.py:206:    if demande.donnees_modifiees_le > score.calcule_le:
+app/routers/clients.py:131:            .values(donnees_modifiees_le=text("now()")))
+app/models/ops.py:139:    donnees_modifiees_le: Mapped[datetime] = mapped_column(

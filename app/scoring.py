@@ -36,7 +36,8 @@ def profil_client(client, jour) -> dict:
         "NAME_INCOME_TYPE": R.TYPE_REVENU[client.type_revenu],
         "NAME_FAMILY_STATUS": R.SITUATION_FAMILIALE[client.situation_familiale],
         "NAME_HOUSING_TYPE": R.TYPE_LOGEMENT[client.type_logement],
-        "OCCUPATION_TYPE": R.PROFESSION.get(client.profession, "Non renseigné"),
+        "OCCUPATION_TYPE": (getattr(client, "categorie_profession", None)
+                            or R.PROFESSION.get(client.profession, "Non renseigné")),
         "FLAG_OWN_REALTY": "Y" if client.possede_bien_immobilier else "N",
         "FLAG_OWN_CAR": "Y" if client.possede_vehicule else "N",
     }

@@ -81,6 +81,8 @@ class Client(Base):
     # Variables utilisées par le modèle
     type_revenu: Mapped[str] = mapped_column(String(30))
     profession: Mapped[str | None] = mapped_column(String(60))
+    # Catégorie du modèle correspondant à la profession (tenue à jour par l'API ; vide = à classer)
+    categorie_profession: Mapped[str | None] = mapped_column(String(40))
     situation_familiale: Mapped[str] = mapped_column(String(30))
     type_logement: Mapped[str] = mapped_column(String(30))
     anciennete_activite_mois: Mapped[int] = mapped_column(Integer, default=0)
@@ -236,3 +238,24 @@ class Paiement(Base):
     enregistre_par: Mapped[int] = mapped_column(ForeignKey("ops.utilisateur.id"))
     cree_le: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now())
+
+
+class Rappel(Base):
+    """Rappel de remboursement affiché dans l'espace client : un seul par (échéance, type)."""
+    __tablename__ = "rappel"
+    __table_args__ = (
+        UniqueConstraint("echeance_id", "type_rappel", name="uq_rappel_echeance_type"),
+        {"schema": "ops"},
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    client_id: Mapped[int] = mapped_column(ForeignKey("ops.client.id"), index=True)
+    credit_id: Mapped[int] = mapped_column(ForeignKey("ops.credit.id"))
+    echeance_id: Mapped[int] = mapped_column(ForeignKey("ops.echeance.id"))
+    type_rappel: Mapped[str] = mapped_column(String(20))
+    canal: Mapped[str] = mapped_column(String(20), default="espace_client",
+                                       server_default="espace_client")
+    jour: Mapped[date] = mapped_column(Date)            # le jour pour lequel il a été généré
+    message: Mapped[str] = mapped_column(Text)
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    lu_le: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
