@@ -4,4 +4,5 @@ __pycache__/
 .env
 data/raw/
 data/interim/
-data/processed/docs/code_pour_claude_*.txt
+data/processed/
+docs/code_pour_claude_*.txt
