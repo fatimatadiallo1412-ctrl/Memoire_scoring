@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Check } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { appeler } from "./api";
 import { useAuth } from "./auth.jsx";
@@ -18,17 +19,124 @@ function pct(x) {
   return (Number(x) * 100).toFixed(1).replace(".", ",") + " %";
 }
 
+// Niveau de risque : celui de la recommandation du modèle (couleur + forme + texte).
+const TON_RECOMMANDATION = { accord: "vert", accord_reduit: "orange", refus: "rouge" };
+const COULEUR_JAUGE = { vert: "bg-risque-faible", orange: "bg-risque-moyen", rouge: "bg-risque-eleve" };
+
+function JaugeScore({ p, seuil, ton }) {
+  const [rempli, setRempli] = useState(false);
+  useEffect(() => {
+    const image = requestAnimationFrame(() => setRempli(true));
+    return () => cancelAnimationFrame(image);
+  }, []);
+  const maximum = Math.min(1, Math.max(0.5, seuil * 1.6, p * 1.15));
+  const largeur = Math.min(100, (p / maximum) * 100);
+  const positionSeuil = Math.min(96, Math.max(4, (seuil / maximum) * 100));
+  return (
+    <div>
+      <div
+        role="meter" aria-label="Probabilité de défaut" aria-valuemin={0} aria-valuemax={100}
+        aria-valuenow={Math.round(p * 1000) / 10}
+        className="relative h-4 rounded-full bg-slate-200"
+      >
+        <div
+          className={"h-full rounded-full transition-[width] duration-700 ease-out " + COULEUR_JAUGE[ton]}
+          style={{ width: rempli ? largeur + "%" : "0%" }}
+        />
+        <div className="absolute -bottom-1.5 -top-1.5 w-0.5 bg-texte" style={{ left: positionSeuil + "%" }} />
+      </div>
+      <div className="relative mt-2 h-5 text-xs text-texte-doux">
+        <span className="absolute left-0">0 %</span>
+        <span className="absolute -translate-x-1/2 whitespace-nowrap font-medium text-texte" style={{ left: positionSeuil + "%" }}>
+          Seuil appliqué : {pct(seuil)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Avancement du dossier sur son parcours normal (pas affiché pour refusé, ajourné, contentieux).
+const PARCOURS = ["brouillon", "complet", "score", "instruit", "soumis_decision", "accorde", "decaisse", "en_remboursement"];
+const RANG_SPECIAL = { accorde_modifie: 5, solde: 7 };
+
+function ParcoursDossier({ statut }) {
+  const courantRef = useRef(null);
+  useEffect(() => {
+    // Sur petit écran, l'étape en cours est amenée au centre du parcours.
+    if (courantRef.current) courantRef.current.scrollIntoView({ inline: "center", block: "nearest" });
+  }, [statut]);
+  const rang = statut in RANG_SPECIAL ? RANG_SPECIAL[statut] : PARCOURS.indexOf(statut);
+  if (rang < 0) return null;
+  const termine = statut === "solde";
+  return (
+    <nav aria-label="Avancement du dossier" className="mb-5 overflow-x-auto rounded-carte border border-bord bg-white p-4 animate-apparition">
+      <ol className="flex min-w-[40rem] items-start">
+        {PARCOURS.map((etape, i) => {
+          const fait = termine ? i <= rang : i < rang;
+          const courant = !termine && i === rang;
+          return (
+            <li key={etape} ref={courant ? courantRef : undefined}
+              className="relative flex flex-1 flex-col items-center text-center"
+              aria-current={courant ? "step" : undefined}>
+              {i > 0 && (
+                <span aria-hidden="true"
+                  className={"absolute left-[-50%] top-4 h-0.5 w-full " + (i <= rang ? "bg-marque-700" : "bg-slate-200")} />
+              )}
+              <span className={"relative z-10 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold " +
+                (fait ? "bg-marque-700 text-white"
+                  : courant ? "bg-white text-marque-700 ring-2 ring-marque-700"
+                    : "bg-slate-100 text-texte-doux")}>
+                {fait ? <Check className="h-4 w-4" aria-hidden="true" /> : i + 1}
+              </span>
+              <span className={"mt-2 px-1 text-xs " + (courant ? "font-semibold text-marque-700" : "text-texte-doux")}>
+                {LIBELLE_STATUT[etape]}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
+function ValeurFacteur({ valeur }) {
+  if (valeur === null || valeur === undefined) return "—";
+  if (Array.isArray(valeur)) {
+    if (valeur.length === 0) return "—";
+    return (
+      <ul className="list-disc space-y-0.5 pl-5">
+        {valeur.map((x, k) => <li key={k}>{typeof x === "object" ? JSON.stringify(x) : String(x)}</li>)}
+      </ul>
+    );
+  }
+  if (typeof valeur === "object") {
+    return (
+      <span className="flex flex-wrap gap-1.5">
+        {Object.entries(valeur).map(([k, v]) => (
+          <span key={k} className="inline-flex rounded bg-slate-100 px-2 py-0.5 text-xs">
+            <span className="text-texte-doux">{k}</span>
+            <span className="mx-1 text-texte-doux">:</span>
+            <span className="font-medium">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
+          </span>
+        ))}
+      </span>
+    );
+  }
+  return String(valeur);
+}
+
 function Facteurs({ facteurs }) {
   if (!facteurs) return null;
-  const lignes = Array.isArray(facteurs) ? facteurs.map((x, i) => [i + 1, x]) : Object.entries(facteurs);
+  const lignes = Array.isArray(facteurs) ? facteurs.map((x, i) => [String(i + 1), x]) : Object.entries(facteurs);
   return (
-    <ul className="mt-2 list-disc space-y-1 pl-5 text-sm">
+    <dl className="mt-2 divide-y divide-slate-100 rounded-champ border border-bord text-sm">
       {lignes.map(([cle, valeur]) => (
-        <li key={cle}>
-          <strong>{cle}</strong> : {typeof valeur === "object" ? JSON.stringify(valeur) : String(valeur)}
-        </li>
+        <div key={cle} className="grid gap-1 px-3 py-2.5 sm:grid-cols-[minmax(10rem,14rem)_1fr] sm:gap-4">
+          <dt className="font-medium text-slate-700">{cle}</dt>
+          <dd className="text-texte"><ValeurFacteur valeur={valeur} /></dd>
+        </div>
       ))}
-    </ul>
+    </dl>
   );
 }
 
@@ -116,6 +224,8 @@ export default function FicheDossier() {
       {message && <Alerte ton="succes">{message}</Alerte>}
       {erreur && <Alerte>{erreur}</Alerte>}
 
+      <ParcoursDossier statut={d.statut} />
+
       <Panneau titre="Demande">
         <Infos>
           <Info libelle="Client">
@@ -143,15 +253,30 @@ export default function FicheDossier() {
               Ce score n'est plus valide : les données du client ont changé depuis le calcul. Il faut le recalculer.
             </Alerte>
           )}
-          <Infos>
-            <Info libelle="Probabilité de défaut">{pct(score.p_defaut)}</Info>
-            <Info libelle="Seuil appliqué">{pct(score.seuil_applique)}</Info>
-            <Info libelle="Recommandation">{RECOMMANDATION[score.recommandation] || score.recommandation}</Info>
-            <Info libelle="Montant suggéré">{score.montant_suggere ? fcfa(score.montant_suggere) : "—"}</Info>
-            <Info libelle="Modèle">{score.version_modele}</Info>
-          </Infos>
+          <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-center md:gap-10">
+            <div>
+              <p className="text-xs uppercase tracking-wide text-texte-doux">Probabilité de défaut</p>
+              <p className="mt-1 text-[clamp(2.25rem,1.5rem+3vw,3.25rem)] font-bold leading-none tabular-nums text-texte">
+                {pct(score.p_defaut)}
+              </p>
+              <p className="mt-4 text-xs uppercase tracking-wide text-texte-doux">Recommandation</p>
+              <div className="mt-1">
+                <Badge ton={TON_RECOMMANDATION[score.recommandation] || "neutre"}>
+                  {RECOMMANDATION[score.recommandation] || score.recommandation}
+                </Badge>
+              </div>
+            </div>
+            <JaugeScore key={score.p_defaut} p={Number(score.p_defaut)} seuil={Number(score.seuil_applique)}
+              ton={TON_RECOMMANDATION[score.recommandation] || "vert"} />
+          </div>
+          <div className="mt-6 border-t border-slate-100 pt-4">
+            <Infos>
+              <Info libelle="Montant suggéré">{score.montant_suggere ? fcfa(score.montant_suggere) : "—"}</Info>
+              <Info libelle="Modèle">{score.version_modele}</Info>
+            </Infos>
+          </div>
           {score.facteurs && (
-            <div className="mt-4">
+            <div className="mt-5">
               <h3 className="text-sm font-semibold text-slate-700">Facteurs</h3>
               <Facteurs facteurs={score.facteurs} />
             </div>

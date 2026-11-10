@@ -70,9 +70,9 @@ export default function ChangerMotDePasse() {
 
   if (obligatoire) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-marque-700 to-marque-800 px-4">
-        <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl sm:p-8">
-          <h1 className="text-xl font-semibold text-slate-900">Choisissez votre mot de passe</h1>
+      <div className="flex min-h-screen items-center justify-center bg-marque-800 px-4">
+        <div className="w-full max-w-sm animate-apparition rounded-carte bg-white p-6 sm:p-8">
+          <h1 className="text-sous-titre font-semibold text-texte">Choisissez votre mot de passe</h1>
           <p className="mb-4 mt-1 text-sm text-slate-500">
             Pour la sécurité de votre compte, remplacez le mot de passe temporaire par le vôtre.
           </p>

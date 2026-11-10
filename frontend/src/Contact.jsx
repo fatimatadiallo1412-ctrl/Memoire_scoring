@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
 import { appeler } from "./api";
 import { MARQUE } from "./marque.js";
 import Vitrine from "./Vitrine.jsx";
@@ -7,7 +8,8 @@ import { Alerte, Bouton, Champ, classeSaisie } from "./ui.jsx";
 const VIDE = { nom: "", email: "", objet: "", message: "", site_web: "" };
 
 export default function Contact() {
-  const [f, setF] = useState(VIDE);
+  const lieu = useLocation();
+  const [f, setF] = useState({ ...VIDE, objet: (lieu.state && lieu.state.objet) || "" });
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState("");
   const [succes, setSucces] = useState("");

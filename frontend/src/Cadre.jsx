@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import LogoMarque from "./LogoMarque.jsx";
 import { Link, NavLink } from "react-router-dom";
 import { MARQUE } from "./marque.js";
 import { appeler } from "./api";
@@ -57,7 +58,10 @@ export default function Cadre({ titre, actions, children }) {
     <div className="min-h-screen bg-fond text-texte">
       <header className="sticky top-0 z-40 bg-marque-700 text-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <Link to="/" className="text-base font-semibold hover:text-blue-100 sm:text-lg">{MARQUE.nom}</Link>
+          <Link to="/" className="flex items-center gap-2 text-base font-semibold hover:text-blue-100 sm:text-lg">
+            <LogoMarque clair className="h-8 w-8" />
+            {MARQUE.nom}
+          </Link>
 
           <nav className="hidden flex-1 items-center gap-1 lg:flex">{menu}</nav>
 
@@ -66,13 +70,12 @@ export default function Cadre({ titre, actions, children }) {
               <span className="block font-medium">{utilisateur.nom_complet}</span>
               <span className="block text-xs text-blue-200">{LIBELLE_ROLE[utilisateur.role]}</span>
             </span>
-            <Link to="/changer-mot-de-passe" className="text-sm text-blue-100 underline hover:text-white" onClick={() => setOuvert(false)}>Mon mot de passe</Link>
             <Bouton variante="secondaire" onClick={deconnecter}>Déconnexion</Bouton>
           </div>
 
           <button
             type="button"
-            className="flex h-11 w-11 items-center justify-center rounded-champ transition-colors duration-150 hover:bg-white/10 lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-champ bg-transparent p-0 transition-colors duration-150 hover:bg-white/10 lg:hidden"
             aria-label="Ouvrir le menu"
             aria-expanded={ouvert}
             onClick={() => setOuvert(!ouvert)}
@@ -89,7 +92,6 @@ export default function Cadre({ titre, actions, children }) {
                 <span className="block font-medium">{utilisateur.nom_complet}</span>
                 <span className="block text-xs text-blue-200">{LIBELLE_ROLE[utilisateur.role]}</span>
               </span>
-              <Link to="/changer-mot-de-passe" className="text-sm text-blue-100 underline hover:text-white" onClick={() => setOuvert(false)}>Mon mot de passe</Link>
             <Bouton variante="secondaire" onClick={deconnecter}>Déconnexion</Bouton>
             </div>
           </div>
