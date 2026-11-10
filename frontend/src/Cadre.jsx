@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { MARQUE } from "./marque.js";
 import { appeler } from "./api";
@@ -42,7 +43,7 @@ export default function Cadre({ titre, actions, children }) {
   const liens = LIENS[utilisateur.role];
 
   const classeLien = ({ isActive }) =>
-    "flex items-center rounded-md px-3 py-2 text-sm font-medium transition " +
+    "flex min-h-11 items-center rounded-champ px-3 text-sm font-medium transition-colors duration-150 " +
     (isActive ? "bg-white/20 text-white" : "text-blue-100 hover:bg-white/10 hover:text-white");
 
   const menu = liens.map(([chemin, libelle]) => (
@@ -53,8 +54,8 @@ export default function Cadre({ titre, actions, children }) {
   ));
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800">
-      <header className="bg-marque-700 text-white shadow">
+    <div className="min-h-screen bg-fond text-texte">
+      <header className="sticky top-0 z-40 bg-marque-700 text-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <Link to="/" className="text-base font-semibold hover:text-blue-100 sm:text-lg">{MARQUE.nom}</Link>
 
@@ -71,16 +72,12 @@ export default function Cadre({ titre, actions, children }) {
 
           <button
             type="button"
-            className="rounded-md p-2 hover:bg-white/10 lg:hidden"
+            className="flex h-11 w-11 items-center justify-center rounded-champ transition-colors duration-150 hover:bg-white/10 lg:hidden"
             aria-label="Ouvrir le menu"
             aria-expanded={ouvert}
             onClick={() => setOuvert(!ouvert)}
           >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              {ouvert
-                ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M6 18L18 6" />
-                : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
-            </svg>
+            {ouvert ? <X className="h-6 w-6" aria-hidden="true" /> : <Menu className="h-6 w-6" aria-hidden="true" />}
           </button>
         </div>
 
@@ -99,9 +96,9 @@ export default function Cadre({ titre, actions, children }) {
         )}
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl animate-apparition px-4 py-6 sm:px-6">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold text-slate-900">{titre}</h1>
+          <h1 className="text-titre font-semibold text-texte">{titre}</h1>
           {actions}
         </div>
         {children}

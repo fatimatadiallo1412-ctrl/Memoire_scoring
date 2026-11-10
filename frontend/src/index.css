@@ -2,10 +2,73 @@
 @import "tailwindcss";
 @import "./ancien.css" layer(legacy);
 
+/* ------------------------------------------------------------------
+   Design tokens (aplats uniquement, aucun dégradé).
+   Pour un futur mode sombre, il suffira de redéfinir ces variables.
+   ------------------------------------------------------------------ */
 @theme {
+  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+
+  /* Primaire : bleu institutionnel */
   --color-marque-50: #eef4fb;
   --color-marque-100: #d9e6f4;
   --color-marque-600: #2a6199;
   --color-marque-700: #1f4e79;
   --color-marque-800: #183d5e;
+
+  /* Neutres */
+  --color-fond: #f3f5f8;
+  --color-bord: #d9dee6;
+  --color-texte: #1b2430;
+  --color-texte-doux: #566274;
+
+  /* Niveaux de risque (contraste AA sur leur fond) */
+  --color-risque-faible: #176b43;
+  --color-risque-faible-fond: #e6f4ec;
+  --color-risque-moyen: #8f5200;
+  --color-risque-moyen-fond: #fcf1dc;
+  --color-risque-eleve: #a61b1b;
+  --color-risque-eleve-fond: #fbe9e9;
+
+  /* Formes */
+  --radius-carte: 0.75rem;
+  --radius-champ: 0.5rem;
+
+  /* Typographie fluide */
+  --text-titre: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+  --text-sous-titre: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+
+  /* Mouvement */
+  --animate-apparition: apparition 220ms ease-out both;
+  @keyframes apparition {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-marque-600);
+    outline-offset: 2px;
+  }
+}
+
+/* Dans la couche "components" pour passer devant les styles hérités (ancien.css) */
+@layer components {
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-fond);
+    color: var(--color-texte);
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Respect de la préférence « réduire les animations » */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
