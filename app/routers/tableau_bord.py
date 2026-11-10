@@ -18,7 +18,7 @@ load_dotenv()
 
 router = APIRouter(prefix="/tableau-de-bord", tags=["tableau de bord"])
 
-DIRECTION = (Role.DECIDEUR, Role.ADMINISTRATEUR)
+DIRECTION = (Role.DECIDEUR,)
 DUREE_LIEN_SECONDES = 600  # le lien signé expire après 10 minutes
 
 

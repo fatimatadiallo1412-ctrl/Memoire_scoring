@@ -9,3 +9,4 @@ __all__ = ["Base", "Agence", "Client", "Credit", "Decision", "DemandeCredit",
            "Utilisateur"]
 from app.models.metier import Metier  # noqa: E402,F401
 from app.models.contact import MessageContact  # noqa
+from app.models.reinitialisation import DemandeReinitialisation  # noqa

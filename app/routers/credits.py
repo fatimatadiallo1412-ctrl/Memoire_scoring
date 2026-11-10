@@ -24,7 +24,7 @@ router = APIRouter(tags=["crédits"])
 def decaisser(demande_id: int, donnees: DecaissementIn | None = None,
               session: Session = Depends(get_session),
               utilisateur: Utilisateur = Depends(
-                  exiger_roles(Role.AGENT_CREDIT, Role.ADMINISTRATEUR))):
+                  exiger_roles(Role.AGENT_CREDIT))):
     demande = charger_demande(session, demande_id, utilisateur)
     if demande.statut not in (StatutDossier.ACCORDE, StatutDossier.ACCORDE_MODIFIE):
         raise HTTPException(status.HTTP_409_CONFLICT,
@@ -41,14 +41,14 @@ def decaisser(demande_id: int, donnees: DecaissementIn | None = None,
     produit = session.get(ProduitCredit, demande.produit_id)
     taux = float(produit.taux_annuel) / 100          # 24.00 (%) -> 0.24
     montant, duree = decision.montant_accorde, decision.duree_accordee
-    jour = (donnees.date_decaissement if donnees and donnees.date_decaissement
-            else date.today())
+    jour, mode, reference = _controler_decaissement(donnees, decision)
 
     credit = Credit(
         demande_id=demande.id, client_id=demande.client_id,
         montant_accorde=montant, duree_mois=duree, taux_annuel=taux,
         mensualite=mensualite_constante(montant, duree, taux),
-        date_decaissement=jour, decaisse_par=utilisateur.id)
+        date_decaissement=jour, decaisse_par=utilisateur.id,
+        mode_decaissement=mode, reference_decaissement=reference)
     session.add(credit)
     session.flush()          # attribue credit.id sans valider la transaction
 
@@ -60,7 +60,8 @@ def decaisser(demande_id: int, donnees: DecaissementIn | None = None,
     session.add(Journal(utilisateur_id=utilisateur.id, action="decaissement",
                         entite="credit", entite_id=credit.id,
                         details={"demande_id": demande.id, "montant": montant,
-                                 "duree_mois": duree}))
+                                 "duree_mois": duree, "date": jour.isoformat(),
+                                 "mode": mode, "reference": reference}))
     session.commit()
     session.refresh(credit)
     return credit
@@ -103,7 +104,7 @@ def _situation(session: Session, credit: Credit) -> dict:
 def enregistrer_paiement(credit_id: int, donnees: PaiementIn,
                          session: Session = Depends(get_session),
                          utilisateur: Utilisateur = Depends(
-                             exiger_roles(Role.AGENT_CREDIT, Role.ADMINISTRATEUR))):
+                             exiger_roles(Role.AGENT_CREDIT))):
     credit = _credit_ou_404(session, credit_id, utilisateur)
     demande = session.get(DemandeCredit, credit.demande_id)
     if demande.statut not in (StatutDossier.EN_REMBOURSEMENT, StatutDossier.CONTENTIEUX):
@@ -161,3 +162,69 @@ def _credit_ou_404(session: Session, credit_id: int, utilisateur: Utilisateur) -
     if not credit_accessible(session, credit_id, utilisateur):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Crédit introuvable")
     return _credit_brut(session, credit_id)
+
+
+# ---------- Décaissement : contrôles, aperçu, détail ----------
+def _controler_decaissement(donnees, decision):
+    """Règles : mode obligatoire, date ni future ni antérieure à la décision,
+    référence obligatoire hors espèces."""
+    if donnees is None or not donnees.mode_decaissement:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            "Précisez le mode de décaissement")
+    jour = donnees.date_decaissement or date.today()
+    if jour > date.today():
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            "La date de décaissement ne peut pas être dans le futur")
+    if decision.decide_le is not None and jour < decision.decide_le.date():
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            "La date de décaissement précède la décision du directeur")
+    reference = (donnees.reference or "").strip() or None
+    if donnees.mode_decaissement != "especes" and not reference:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+                            "Indiquez la référence de la transaction (mobile money ou virement)")
+    return jour, donnees.mode_decaissement, reference
+
+
+@router.get("/demandes/{demande_id}/apercu-decaissement")
+def apercu_decaissement(demande_id: int, date_decaissement: date | None = None,
+                        session: Session = Depends(get_session),
+                        utilisateur: Utilisateur = Depends(exiger_roles(Role.AGENT_CREDIT))):
+    """Calcule le récapitulatif et le calendrier SANS rien enregistrer."""
+    demande = charger_demande(session, demande_id, utilisateur=utilisateur)
+    if demande.statut not in (StatutDossier.ACCORDE, StatutDossier.ACCORDE_MODIFIE):
+        raise HTTPException(status.HTTP_409_CONFLICT, "Seul un dossier accordé peut être décaissé")
+    decision = session.scalars(
+        select(Decision).where(Decision.demande_id == demande_id)
+        .order_by(Decision.decide_le.desc()).limit(1)).first()
+    if decision is None or decision.montant_accorde is None:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Aucune décision d'accord trouvée")
+    produit = session.get(ProduitCredit, demande.produit_id)
+    taux = float(produit.taux_annuel) / 100
+    montant, duree = decision.montant_accorde, decision.duree_accordee
+    jour = date_decaissement or date.today()
+    calendrier = generer_calendrier(montant, duree, taux, jour)
+    total = sum(l["montant_du"] for l in calendrier)
+    return {
+        "client_id": demande.client_id, "montant": montant, "duree_mois": duree,
+        "taux_annuel": taux, "mensualite": mensualite_constante(montant, duree, taux),
+        "total_a_rembourser": total, "cout_credit": total - montant,
+        "date_min": decision.decide_le.date().isoformat() if decision.decide_le else None,
+        "date_max": date.today().isoformat(),
+        "calendrier": calendrier,
+    }
+
+
+@router.get("/credits/{credit_id}/decaissement")
+def detail_decaissement(credit_id: int, session: Session = Depends(get_session),
+                        utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
+    credit = _credit_ou_404(session, credit_id)
+    charger_demande(session, credit.demande_id, utilisateur=utilisateur)      # applique la règle de portefeuille
+    agent = session.get(Utilisateur, credit.decaisse_par)
+    return {
+        "credit_id": credit.id, "date_decaissement": credit.date_decaissement,
+        "mode_decaissement": credit.mode_decaissement,
+        "reference_decaissement": credit.reference_decaissement,
+        "decaisse_par": agent.nom_complet if agent else None,
+        "montant_accorde": credit.montant_accorde, "duree_mois": credit.duree_mois,
+        "taux_annuel": float(credit.taux_annuel), "mensualite": credit.mensualite,
+    }

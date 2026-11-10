@@ -12,8 +12,8 @@ from app.routers.clients import STATUTS_OUVERTS
 
 router = APIRouter(prefix="/professions", tags=["professions"])
 
-PERSONNEL = (Role.AGENT_CREDIT, Role.DECIDEUR, Role.ADMINISTRATEUR)
-RESPONSABLES = (Role.DECIDEUR, Role.ADMINISTRATEUR)
+PERSONNEL = (Role.AGENT_CREDIT, Role.DECIDEUR)
+RESPONSABLES = (Role.DECIDEUR,)
 
 # Catégories de métiers que le modèle connaît (celles déjà utilisées par le référentiel)
 CATEGORIES = sorted(set(R.PROFESSION.values()))

@@ -16,6 +16,12 @@ export function AuthProvider({ children }) {
     setUtilisateur(null);
   }, []);
 
+  const rafraichir = useCallback(async () => {
+    const moi = await appeler("/auth/me");
+    setUtilisateur(moi);
+    return moi;
+  }, []);
+
   useEffect(() => {
     if (!lireJeton()) return;
     appeler("/auth/me")
@@ -41,7 +47,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <Contexte.Provider value={{ utilisateur, chargement, connecter, deconnecter }}>
+    <Contexte.Provider value={{ utilisateur, chargement, connecter, deconnecter, rafraichir }}>
       {children}
     </Contexte.Provider>
   );

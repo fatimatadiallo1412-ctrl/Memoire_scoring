@@ -18,8 +18,8 @@ from app.historique import niveau_antecedent
 
 router = APIRouter(prefix="/demandes", tags=["demandes"])
 
-SAISIE = (Role.AGENT_CREDIT, Role.ADMINISTRATEUR)
-LECTURE = (Role.AGENT_CREDIT, Role.DECIDEUR, Role.ADMINISTRATEUR)
+SAISIE = (Role.AGENT_CREDIT,)
+LECTURE = (Role.AGENT_CREDIT, Role.DECIDEUR)
 MODIFIABLES = (StatutDossier.BROUILLON, StatutDossier.COMPLET,
                StatutDossier.SCORE, StatutDossier.INSTRUIT)
 

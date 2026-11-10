@@ -7,6 +7,7 @@ import { LIBELLE_CATEGORIE, LOGEMENTS, SITUATIONS, TYPES_REVENU } from "./listes
 import { invaliderMetiers } from "./metiers.js";
 import ChampMetier from "./ChampMetier.jsx";
 import AssistantPersonnel from "./AssistantPersonnel.jsx";
+import AccesClient from "./AccesClient.jsx";
 import Cadre from "./Cadre.jsx";
 import { Alerte, Bouton, Case, Champ, Chargement, LienBouton, Liste, Panneau, classeSaisie } from "./ui.jsx";
 
@@ -54,8 +55,8 @@ function valeurApi(cle, valeur) {
 export default function FicheClient() {
   const { id } = useParams();
   const { utilisateur } = useAuth();
-  const peutDemander = ["agent_credit", "administrateur"].includes(utilisateur.role);
-  const responsable = ["decideur", "administrateur"].includes(utilisateur.role);
+  const peutDemander = utilisateur.role === "agent_credit";
+  const responsable = utilisateur.role === "decideur";
   const [client, setClient] = useState(null);
   const [metiers, setMetiers] = useState([]);
   const [f, setF] = useState(null);
@@ -226,6 +227,7 @@ export default function FicheClient() {
         </form>
       </Panneau>
       <AssistantPersonnel clientId={client.id} />
+      {peutDemander && <AccesClient clientId={client.id} />}
     </Cadre>
   );
 }

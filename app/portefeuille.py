@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.models import Client, Credit, DemandeCredit, Utilisateur
 from app.models.enums import Role
 
-VOIT_TOUT = (Role.ADMINISTRATEUR, Role.DECIDEUR)
+VOIT_TOUT = (Role.DECIDEUR,)
 
 
 def voit_tout(utilisateur: Utilisateur) -> bool:

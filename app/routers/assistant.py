@@ -15,7 +15,7 @@ from app.routers.moi import client_connecte
 
 router = APIRouter()
 
-PERSONNEL = (Role.AGENT_CREDIT, Role.DECIDEUR, Role.ADMINISTRATEUR)
+PERSONNEL = (Role.AGENT_CREDIT, Role.DECIDEUR)
 
 
 class QuestionIn(BaseModel):

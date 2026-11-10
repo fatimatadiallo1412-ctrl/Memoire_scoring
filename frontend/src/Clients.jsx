@@ -8,7 +8,7 @@ import { Alerte, LienBouton, TD, TH, Tableau, classeSaisie } from "./ui.jsx";
 
 export default function Clients() {
   const { utilisateur } = useAuth();
-  const peutCreer = ["agent_credit", "administrateur"].includes(utilisateur.role);
+  const peutCreer = utilisateur.role === "agent_credit";
   const [q, setQ] = useState("");
   const [clients, setClients] = useState([]);
   const [erreur, setErreur] = useState("");

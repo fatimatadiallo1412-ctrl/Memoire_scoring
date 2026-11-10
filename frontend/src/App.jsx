@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useAuth } from "./auth.jsx";
-import { ACCUEIL } from "./roles.js";
+import { ACCUEIL, accueilDe } from "./roles.js";
 import Connexion from "./Connexion.jsx";
 import Clients from "./Clients.jsx";
 import FicheClient from "./FicheClient.jsx";
@@ -17,27 +17,39 @@ import Accueil from "./Accueil.jsx";
 import Produits from "./Produits.jsx";
 import Contact from "./Contact.jsx";
 import Messages from "./Messages.jsx";
+import Comptes from "./Comptes.jsx";
+import MotDePasseOublie from "./MotDePasseOublie.jsx";
+import Reinitialisations from "./Reinitialisations.jsx";
+import ChangerMotDePasse from "./ChangerMotDePasse.jsx";
 import Parametres from "./Parametres.jsx";
 import Rapports from "./Rapports.jsx";
 import TableauBord from "./TableauBord.jsx";
 
-const PERSONNEL = ["agent_credit", "administrateur", "decideur"];
-const SAISIE = ["agent_credit", "administrateur"];
-const RESPONSABLES = ["decideur", "administrateur"];
+const PERSONNEL = ["agent_credit", "decideur"];
+const SAISIE = ["agent_credit"];
+const RESPONSABLES = ["decideur"];
 const CLIENT = ["client"];
 
 function Protegee({ roles, children }) {
   const { utilisateur, chargement } = useAuth();
   if (chargement) return <p className="centre">Chargement…</p>;
   if (!utilisateur) return <Navigate to="/connexion" replace />;
+  if (utilisateur.doit_changer_mdp) return <Navigate to="/changer-mot-de-passe" replace />;
   if (!roles.includes(utilisateur.role)) return <Navigate to={ACCUEIL[utilisateur.role]} replace />;
+  return children;
+}
+
+function Connectee({ children }) {
+  const { utilisateur, chargement } = useAuth();
+  if (chargement) return <p className="centre">Chargement…</p>;
+  if (!utilisateur) return <Navigate to="/connexion" replace />;
   return children;
 }
 
 function Racine() {
   const { utilisateur, chargement } = useAuth();
   if (chargement) return <p className="centre">Chargement…</p>;
-  return <Navigate to={utilisateur ? ACCUEIL[utilisateur.role] : "/connexion"} replace />;
+  return <Navigate to={utilisateur ? accueilDe(utilisateur) : "/connexion"} replace />;
 }
 
 export default function App() {
@@ -57,6 +69,10 @@ export default function App() {
       <Route path="/parametres" element={<Protegee roles={PERSONNEL}><Parametres /></Protegee>} />
       <Route path="/tableau-de-bord" element={<Protegee roles={RESPONSABLES}><TableauBord /></Protegee>} />
       <Route path="/rapports" element={<Protegee roles={RESPONSABLES}><Rapports /></Protegee>} />
+      <Route path="/changer-mot-de-passe" element={<Connectee><ChangerMotDePasse /></Connectee>} />
+      <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+      <Route path="/reinitialisations" element={<Protegee roles={["administrateur"]}><Reinitialisations /></Protegee>} />
+      <Route path="/comptes" element={<Protegee roles={["administrateur"]}><Comptes /></Protegee>} />
       <Route path="/messages" element={<Protegee roles={["administrateur"]}><Messages /></Protegee>} />
       <Route path="/espace" element={<Protegee roles={CLIENT}><Espace /></Protegee>} />
       <Route path="/espace/credits/:id" element={<Protegee roles={CLIENT}><CreditClient /></Protegee>} />

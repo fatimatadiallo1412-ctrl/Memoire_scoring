@@ -15,9 +15,9 @@ from app.schemas import ClientIn, ClientMaj, ClientOut
 
 router = APIRouter(prefix="/clients", tags=["clients"])
 
-SAISIE = (Role.AGENT_CREDIT, Role.ADMINISTRATEUR)
-LECTURE = (Role.AGENT_CREDIT, Role.DECIDEUR, Role.ADMINISTRATEUR)
-AFFECTATION = (Role.DECIDEUR, Role.ADMINISTRATEUR)
+SAISIE = (Role.AGENT_CREDIT,)
+LECTURE = (Role.AGENT_CREDIT, Role.DECIDEUR)
+AFFECTATION = (Role.DECIDEUR,)
 STATUTS_OUVERTS = [StatutDossier.BROUILLON, StatutDossier.COMPLET, StatutDossier.SCORE,
                    StatutDossier.INSTRUIT, StatutDossier.SOUMIS]
 

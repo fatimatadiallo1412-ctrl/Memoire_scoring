@@ -54,7 +54,7 @@ export default function CreditClient() {
         <dl className="grille-info">
           {credit && <div><dt>Montant accordé</dt><dd>{fcfa(credit.montant_accorde)}</dd></div>}
           {credit && <div><dt>Mensualité</dt><dd>{fcfa(credit.mensualite)}</dd></div>}
-          {credit && <div><dt>Taux annuel</dt><dd>{credit.taux_annuel} %</dd></div>}
+          {credit && <div><dt>Taux annuel</dt><dd>{(Number(credit.taux_annuel) * 100).toFixed(1).replace(".", ",")} %</dd></div>}
           <div><dt>Total à rembourser</dt><dd>{fcfa(situation.total_du)}</dd></div>
           <div><dt>Déjà payé</dt><dd>{fcfa(situation.total_paye)}</dd></div>
           <div><dt>Reste à payer</dt><dd>{fcfa(situation.reste_a_payer)}</dd></div>

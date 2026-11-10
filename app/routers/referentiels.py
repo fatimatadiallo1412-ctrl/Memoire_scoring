@@ -11,6 +11,7 @@ from app.models.ops import Agence, ProduitCredit
 router = APIRouter(tags=["référentiels"])
 
 PERSONNEL = (Role.AGENT_CREDIT, Role.DECIDEUR, Role.ADMINISTRATEUR)
+COMMERCIAL = (Role.AGENT_CREDIT, Role.DECIDEUR)
 
 
 class AgenceOut(BaseModel):
@@ -48,7 +49,7 @@ def lister_agences(
 @router.get("/produits", response_model=list[ProduitOut])
 def lister_produits(
     session: Session = Depends(get_session),
-    _=Depends(exiger_roles(*PERSONNEL)),
+    _=Depends(exiger_roles(*COMMERCIAL)),
 ):
     """Produits de crédit (montants et durées autorisés), pour le formulaire de demande."""
     requete = select(ProduitCredit).order_by(ProduitCredit.libelle)

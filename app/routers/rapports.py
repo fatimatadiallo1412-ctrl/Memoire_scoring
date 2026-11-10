@@ -13,7 +13,7 @@ from app.rapports.pdf import generer_pdf
 
 router = APIRouter(prefix="/rapports", tags=["rapports"])
 
-DIRECTION = (Role.DECIDEUR, Role.ADMINISTRATEUR)
+DIRECTION = (Role.DECIDEUR,)
 TYPES = {
     "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "pdf": "application/pdf",

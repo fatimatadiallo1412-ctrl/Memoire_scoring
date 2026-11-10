@@ -110,6 +110,9 @@ class Utilisateur(Base):
     client_id: Mapped[int | None] = mapped_column(ForeignKey(f"{SCHEMA}.client.id"), unique=True)
     actif: Mapped[bool] = mapped_column(Boolean, default=True, server_default="true")
     derniere_connexion: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    doit_changer_mdp: Mapped[bool] = mapped_column(Boolean, default=False, server_default="false")
+    echecs_connexion: Mapped[int] = mapped_column(default=0, server_default="0")
+    verrouille_jusqua: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -201,6 +204,8 @@ class Credit(Base):
     mensualite: Mapped[int] = mapped_column(BigInteger)
     date_decaissement: Mapped[date] = mapped_column(Date)
     decaisse_par: Mapped[int] = mapped_column(ForeignKey("ops.utilisateur.id"))
+    mode_decaissement: Mapped[str | None] = mapped_column(String(20))
+    reference_decaissement: Mapped[str | None] = mapped_column(String(60))
     cree_le: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )

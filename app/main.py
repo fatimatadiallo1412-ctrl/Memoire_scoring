@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import assistant, auth, clients, credits, decisions, demandes, moi, parametres, rapports, referentiels, professions
-from app.routers import contact, tableau_bord  # noqa: E402
+from app.routers import comptes, contact, reinitialisations, tableau_bord  # noqa: E402
 
 app = FastAPI(
     title="Plateforme de scoring de crédit - microfinance",
@@ -36,3 +36,6 @@ app.include_router(referentiels.router)
 app.include_router(professions.router)
 app.include_router(contact.router)
 app.include_router(tableau_bord.router)
+app.include_router(comptes.router)
+app.include_router(comptes.router_mdp)
+app.include_router(reinitialisations.router)

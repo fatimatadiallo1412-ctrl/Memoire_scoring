@@ -1,5 +1,5 @@
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,7 @@ schema_oauth = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def utilisateur_courant(
+    requete: Request,
     jeton: str = Depends(schema_oauth),
     session: Session = Depends(get_session),
 ) -> Utilisateur:
@@ -24,6 +25,8 @@ def utilisateur_courant(
     utilisateur = session.get(Utilisateur, utilisateur_id)
     if utilisateur is None or not utilisateur.actif:
         raise erreur
+    if utilisateur.doit_changer_mdp and requete.url.path not in ("/auth/me", "/auth/mot-de-passe"):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Vous devez d'abord changer votre mot de passe.")
     return utilisateur
 
 

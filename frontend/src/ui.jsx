@@ -142,3 +142,33 @@ const TONS_DOSSIER = {
 export function tonDossier(statut) {
   return TONS_DOSSIER[statut] || "neutre";
 }
+
+import { useState } from "react";
+
+export function MotDePasseTemp({ email, motDePasse, onFermer }) {
+  const [copie, setCopie] = useState(false);
+  async function copier() {
+    try {
+      await navigator.clipboard.writeText(motDePasse);
+      setCopie(true);
+    } catch {
+      // copie impossible : le mot de passe reste affiché
+    }
+  }
+  return (
+    <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+      <p className="font-semibold">Mot de passe temporaire pour {email}</p>
+      <p className="my-2 select-all rounded bg-white px-3 py-2 font-mono text-lg tracking-wider text-slate-900 ring-1 ring-amber-200">
+        {motDePasse}
+      </p>
+      <p>
+        Il n'est affiché qu'<strong>une seule fois</strong> et ne peut pas être retrouvé. Communiquez-le à la personne
+        après avoir vérifié son identité : elle devra le remplacer à sa première connexion.
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Bouton variante="secondaire" onClick={copier}>{copie ? "Copié" : "Copier"}</Bouton>
+        <Bouton variante="secondaire" onClick={onFermer}>J'ai noté le mot de passe, fermer</Bouton>
+      </div>
+    </div>
+  );
+}

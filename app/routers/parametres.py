@@ -15,7 +15,7 @@ router = APIRouter(prefix="/parametres", tags=["paramètres"])
 @router.get("", response_model=list[ParametreOut])
 def lister_parametres(session: Session = Depends(get_session),
                       utilisateur: Utilisateur = Depends(
-                          exiger_roles(Role.AGENT_CREDIT, Role.DECIDEUR, Role.ADMINISTRATEUR))):
+                          exiger_roles(Role.AGENT_CREDIT, Role.DECIDEUR))):
     en_base = {p.cle: p for p in session.scalars(select(Parametre))}
     resultat = []
     for cle, (defaut, description, _, _) in PARAMETRES_DEFAUT.items():

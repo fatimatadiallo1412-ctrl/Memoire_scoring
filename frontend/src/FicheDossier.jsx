@@ -5,6 +5,7 @@ import { useAuth } from "./auth.jsx";
 import { dateFr, fcfa } from "./formats.js";
 import { LIBELLE_DECISION, LIBELLE_STATUT } from "./listes.js";
 import Cadre from "./Cadre.jsx";
+import { EncadreDecaissement, PanneauDecaissement } from "./Decaissement.jsx";
 import {
   Alerte, Badge, Bouton, Champ, Chargement, Info, Infos, LienBouton, Panneau,
   TD, TH, Tableau, classeSaisie, tonDossier,
@@ -34,7 +35,7 @@ function Facteurs({ facteurs }) {
 export default function FicheDossier() {
   const { id } = useParams();
   const { utilisateur } = useAuth();
-  const gestion = ["agent_credit", "administrateur"].includes(utilisateur.role);
+  const gestion = utilisateur.role === "agent_credit";
   const directeur = utilisateur.role === "decideur";
 
   const [d, setD] = useState(null);
@@ -42,6 +43,7 @@ export default function FicheDossier() {
   const [score, setScore] = useState(null);
   const [decisions, setDecisions] = useState([]);
   const [credit, setCredit] = useState(null);
+  const [ouvrirDec, setOuvrirDec] = useState(false);
   const [erreur, setErreur] = useState("");
   const [message, setMessage] = useState("");
   const [occupe, setOccupe] = useState(false);
@@ -185,7 +187,7 @@ export default function FicheDossier() {
             </Bouton>
           )}
           {["accorde", "accorde_modifie"].includes(d.statut) && (
-            <Bouton disabled={occupe} onClick={() => agir("/decaisser", undefined, "Crédit décaissé.")}>
+            <Bouton disabled={occupe} onClick={() => setOuvrirDec(true)}>
               Décaisser le crédit
             </Bouton>
           )}
@@ -267,12 +269,18 @@ export default function FicheDossier() {
           <Infos>
             <Info libelle="Montant accordé">{fcfa(credit.montant_accorde)}</Info>
             <Info libelle="Durée">{credit.duree_mois} mois</Info>
-            <Info libelle="Taux annuel">{credit.taux_annuel}</Info>
+            <Info libelle="Taux annuel">{(Number(credit.taux_annuel) * 100).toFixed(1).replace(".", ",")} %</Info>
             <Info libelle="Mensualité">{fcfa(credit.mensualite)}</Info>
             <Info libelle="Décaissé le">{dateFr(credit.date_decaissement)}</Info>
           </Infos>
         </Panneau>
       )}
+
+      {ouvrirDec && (
+        <PanneauDecaissement demandeId={id} client={client} onFermer={() => setOuvrirDec(false)}
+          onFini={() => { setOuvrirDec(false); setMessage("Crédit décaissé."); charger(); }} />
+      )}
+      {credit && <EncadreDecaissement credit={credit} client={client} />}
 
       <p><Link className="text-marque-700 underline" to="/dossiers">Retour aux dossiers</Link></p>
     </Cadre>

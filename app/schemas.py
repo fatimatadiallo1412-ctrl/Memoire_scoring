@@ -14,6 +14,7 @@ class UtilisateurOut(BaseModel):
     email: str
     nom_complet: str
     role: Role
+    doit_changer_mdp: bool = False
 
 
 class Jeton(BaseModel):
@@ -135,9 +136,14 @@ class ParametreOut(BaseModel):
     description: str
     modifie_le: datetime | None = None  
 
+from typing import Literal
+
+
 class DecaissementIn(BaseModel):
-    # Facultative : par défaut, la date du jour
+    # Date facultative : par défaut, la date du jour
     date_decaissement: date | None = None
+    mode_decaissement: Literal["especes", "mobile_money", "virement"] | None = None
+    reference: str | None = None   # n° de transaction (obligatoire hors espèces)
 
 
 class CreditOut(BaseModel):
@@ -151,6 +157,8 @@ class CreditOut(BaseModel):
     mensualite: int
     date_decaissement: date
     decaisse_par: int
+    mode_decaissement: str | None = None
+    reference_decaissement: str | None = None
 
 
 class EcheanceOut(BaseModel):

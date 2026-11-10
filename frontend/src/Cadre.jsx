@@ -8,7 +8,7 @@ import { Bouton } from "./ui.jsx";
 
 const LIENS = {
   agent_credit: [["/clients", "Clients"], ["/dossiers", "Dossiers"]],
-  administrateur: [["/clients", "Clients"], ["/dossiers", "Dossiers"], ["/metiers", "Métiers"], ["/messages", "Messages"], ["/parametres", "Paramètres"], ["/rapports", "Rapports"], ["/tableau-de-bord", "Tableau de bord"]],
+  administrateur: [["/comptes", "Comptes"], ["/reinitialisations", "Réinitialisations"], ["/messages", "Messages"]],
   decideur: [["/dossiers", "Dossiers"], ["/clients", "Clients"], ["/metiers", "Métiers"], ["/parametres", "Paramètres"], ["/rapports", "Rapports"], ["/tableau-de-bord", "Tableau de bord"]],
   client: [["/espace", "Mon espace"], ["/espace/assistant", "Assistant"]],
 };
@@ -65,6 +65,7 @@ export default function Cadre({ titre, actions, children }) {
               <span className="block font-medium">{utilisateur.nom_complet}</span>
               <span className="block text-xs text-blue-200">{LIBELLE_ROLE[utilisateur.role]}</span>
             </span>
+            <Link to="/changer-mot-de-passe" className="text-sm text-blue-100 underline hover:text-white" onClick={() => setOuvert(false)}>Mon mot de passe</Link>
             <Bouton variante="secondaire" onClick={deconnecter}>Déconnexion</Bouton>
           </div>
 
@@ -91,7 +92,8 @@ export default function Cadre({ titre, actions, children }) {
                 <span className="block font-medium">{utilisateur.nom_complet}</span>
                 <span className="block text-xs text-blue-200">{LIBELLE_ROLE[utilisateur.role]}</span>
               </span>
-              <Bouton variante="secondaire" onClick={deconnecter}>Déconnexion</Bouton>
+              <Link to="/changer-mot-de-passe" className="text-sm text-blue-100 underline hover:text-white" onClick={() => setOuvert(false)}>Mon mot de passe</Link>
+            <Bouton variante="secondaire" onClick={deconnecter}>Déconnexion</Bouton>
             </div>
           </div>
         )}
