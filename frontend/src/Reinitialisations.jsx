@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
+import { Clock, KeyRound, Mail, Phone, ShieldCheck, UserCog, Users, X } from "lucide-react";
 import { appeler } from "./api";
 import { LIBELLE_ROLE } from "./roles.js";
 import Cadre from "./Cadre.jsx";
-import { Alerte, Badge, Bouton, Chargement, MotDePasseTemp, Panneau } from "./ui.jsx";
+import Pagination from "./Pagination.jsx";
+import { usePagination } from "./usePagination.js";
+import { Alerte, Avatar, Badge, Bouton, Chargement, MotDePasseTemp } from "./ui.jsx";
 
 function dateHeure(iso) {
   const d = new Date(iso);
@@ -11,6 +14,7 @@ function dateHeure(iso) {
 
 export default function Reinitialisations() {
   const [liste, setListe] = useState(null);
+  const pageDemandes = usePagination(liste, 5);
   const [confirmer, setConfirmer] = useState(null);
   const [secret, setSecret] = useState(null);
   const [erreur, setErreur] = useState("");
@@ -63,27 +67,54 @@ export default function Reinitialisations() {
       {secret && <MotDePasseTemp email={secret.email} motDePasse={secret.motDePasse} onFermer={() => setSecret(null)} />}
       {!liste && !erreur && <Chargement />}
       {liste && liste.length === 0 && (
-        <Panneau><p className="text-sm text-slate-600">Aucune demande en attente.</p></Panneau>
+        <div className="flex animate-apparition flex-col items-center rounded-carte border border-dashed border-bord bg-white px-6 py-12 text-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-baobab-50 text-baobab">
+            <ShieldCheck className="h-7 w-7" aria-hidden="true" />
+          </span>
+          <p className="mt-3 text-sm text-slate-600">Aucune demande en attente.</p>
+        </div>
       )}
-      {liste && liste.map((d) => (
-        <Panneau key={d.id} titre={d.nom_complet} droite={<Badge ton="orange">En attente</Badge>}>
-          <dl className="grid gap-2 text-sm sm:grid-cols-2">
-            <div><dt className="text-xs uppercase text-slate-500">E-mail</dt><dd>{d.email}</dd></div>
-            <div><dt className="text-xs uppercase text-slate-500">Rôle</dt><dd>{LIBELLE_ROLE[d.role] || d.role}</dd></div>
-            {d.gestionnaire && (
-              <div><dt className="text-xs uppercase text-slate-500">Gestionnaire du client</dt><dd>{d.gestionnaire}</dd></div>
-            )}
-            <div><dt className="text-xs uppercase text-slate-500">Téléphone indiqué</dt><dd>{d.contact || "—"}</dd></div>
-            <div><dt className="text-xs uppercase text-slate-500">Demandé le</dt><dd>{dateHeure(d.cree_le)}</dd></div>
+      <div key={pageDemandes.page} className="grid animate-apparition gap-4">
+      {liste && pageDemandes.elements.map((d) => (
+        <article key={d.id} className="rounded-carte border border-bord border-l-4 border-l-soleil bg-white p-5 transition duration-300 hover:shadow-md sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Avatar nom={d.nom_complet} taille="h-12 w-12 text-base" />
+              <h2 className="text-lg font-bold text-encre">{d.nom_complet}</h2>
+            </div>
+            <Badge ton="orange">En attente</Badge>
+          </div>
+          <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              [Mail, "E-mail", d.email],
+              [UserCog, "Rôle", LIBELLE_ROLE[d.role] || d.role],
+              ...(d.gestionnaire ? [[Users, "Gestionnaire du client", d.gestionnaire]] : []),
+              [Phone, "Téléphone indiqué", d.contact || "—"],
+              [Clock, "Demandé le", dateHeure(d.cree_le)],
+            ].map(([Icone, libelle, valeur]) => (
+              <div key={libelle} className="flex items-start gap-3 rounded-xl bg-fond p-3">
+                <Icone className="mt-0.5 h-4 w-4 shrink-0 text-marque-600" aria-hidden="true" />
+                <div className="min-w-0">
+                  <dt className="text-xs uppercase text-slate-500">{libelle}</dt>
+                  <dd className="truncate font-medium text-encre">{valeur}</dd>
+                </div>
+              </div>
+            ))}
           </dl>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Bouton variante={confirmer === d.id ? "danger" : "primaire"} onClick={() => traiter(d)}>
+          <div className="mt-5 flex flex-wrap gap-2 border-t border-bord pt-4">
+            <Bouton variante={confirmer === d.id ? "danger" : "primaire"} className="gap-1.5" onClick={() => traiter(d)}>
+              <KeyRound className="h-4 w-4" aria-hidden="true" />
               {confirmer === d.id ? "Identité vérifiée : confirmer ?" : "Générer un mot de passe temporaire"}
             </Bouton>
-            <Bouton variante="secondaire" onClick={() => rejeter(d)}>Rejeter</Bouton>
+            <Bouton variante="secondaire" className="gap-1.5" onClick={() => rejeter(d)}>
+              <X className="h-4 w-4" aria-hidden="true" />
+              Rejeter
+            </Bouton>
           </div>
-        </Panneau>
+        </article>
       ))}
+      </div>
+      {liste && <Pagination {...pageDemandes} />}
     </Cadre>
   );
 }

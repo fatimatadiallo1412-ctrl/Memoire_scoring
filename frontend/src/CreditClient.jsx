@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { appeler } from "./api";
 import { dateFr, fcfa } from "./formats.js";
 import Cadre from "./Cadre.jsx";
+import { LienRetour } from "./ui.jsx";
+import Pagination from "./Pagination.jsx";
+import { usePagination } from "./usePagination.js";
 
 function joli(texte) {
   const t = String(texte).replace(/_/g, " ");
@@ -14,6 +17,7 @@ export default function CreditClient() {
   const [situation, setSituation] = useState(null);
   const [credit, setCredit] = useState(null);
   const [erreur, setErreur] = useState("");
+  const pageEcheances = usePagination(situation ? situation.echeances : null, 10);
 
   useEffect(() => {
     Promise.all([appeler("/moi/credits/" + id + "/situation"), appeler("/moi/credits")])
@@ -28,7 +32,7 @@ export default function CreditClient() {
     return (
       <Cadre titre="Mon crédit">
         <p className="erreur">{erreur}</p>
-        <Link to="/espace">Retour</Link>
+        <LienRetour to="/espace">Retour</LienRetour>
       </Cadre>
     );
   }
@@ -74,8 +78,8 @@ export default function CreditClient() {
           <thead>
             <tr><th>N°</th><th>Date</th><th>À payer</th><th>Payé</th><th>Reste</th><th>État</th></tr>
           </thead>
-          <tbody>
-            {situation.echeances.map((e) => (
+          <tbody key={pageEcheances.page} className="animate-apparition">
+            {pageEcheances.elements.map((e) => (
               <tr key={e.numero}>
                 <td>{e.numero}</td>
                 <td>{dateFr(e.date_echeance)}</td>
@@ -91,8 +95,9 @@ export default function CreditClient() {
             ))}
           </tbody>
         </table>
+        <Pagination {...pageEcheances} />
       </section>
-      <p><Link to="/espace">Retour à mon espace</Link></p>
+      <p><LienRetour to="/espace">Retour à mon espace</LienRetour></p>
     </Cadre>
   );
 }

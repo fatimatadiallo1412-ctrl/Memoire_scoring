@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { appeler } from "./api";
 import { useAuth } from "./auth.jsx";
 import { dateFr } from "./formats.js";
 import Cadre from "./Cadre.jsx";
-import { Alerte, LienBouton, TD, TH, Tableau, classeSaisie } from "./ui.jsx";
+import Pagination from "./Pagination.jsx";
+import { usePagination } from "./usePagination.js";
+import { Alerte, LienBouton, TD, TH, Tableau, classeSaisie, LienOuvrir } from "./ui.jsx";
 
 export default function Clients() {
   const { utilisateur } = useAuth();
@@ -13,6 +14,7 @@ export default function Clients() {
   const [clients, setClients] = useState([]);
   const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(true);
+  const pageClients = usePagination(clients, 10);
 
   useEffect(() => {
     const terme = q.trim();
@@ -61,8 +63,8 @@ export default function Clients() {
             <th className={TH}></th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 bg-white">
-          {clients.map((c) => (
+        <tbody key={pageClients.page} className="animate-apparition divide-y divide-slate-100 bg-white">
+          {pageClients.elements.map((c) => (
             <tr key={c.id} className="hover:bg-slate-50">
               <td className={TD}>{c.code_client}</td>
               <td className={TD + " font-medium"}>{c.nom}</td>
@@ -71,12 +73,13 @@ export default function Clients() {
               <td className={TD}>{c.telephone}</td>
               <td className={TD + " hidden lg:table-cell"}>{c.adresse}</td>
               <td className={TD + " text-right"}>
-                <Link className="text-marque-700 underline" to={"/clients/" + c.id}>Ouvrir</Link>
+                <LienOuvrir to={"/clients/" + c.id}>Ouvrir</LienOuvrir>
               </td>
             </tr>
           ))}
         </tbody>
       </Tableau>
+      <Pagination {...pageClients} />
     </Cadre>
   );
 }

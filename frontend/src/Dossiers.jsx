@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { appeler } from "./api";
 import { useAuth } from "./auth.jsx";
 import { dateFr, fcfa } from "./formats.js";
 import { LIBELLE_STATUT } from "./listes.js";
 import Cadre from "./Cadre.jsx";
-import { Alerte, Badge, TD, TH, Tableau, classeSaisie, tonDossier } from "./ui.jsx";
+import Pagination from "./Pagination.jsx";
+import { usePagination } from "./usePagination.js";
+import { Alerte, Badge, TD, TH, Tableau, classeSaisie, tonDossier, LienOuvrir } from "./ui.jsx";
 
 function nomClient(c) {
   return c.prenom + " " + c.nom + " (" + c.code_client + ")";
@@ -20,6 +21,7 @@ export default function Dossiers() {
   const [nbClients, setNbClients] = useState(null);
   const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(true);
+  const pageDossiers = usePagination(demandes, 10);
 
   useEffect(() => {
     const terme = q.trim();
@@ -106,8 +108,8 @@ export default function Dossiers() {
             <th className={TH}>Statut</th><th className={TH}></th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-slate-100 bg-white">
-          {demandes.map((d) => (
+        <tbody key={pageDossiers.page} className="animate-apparition divide-y divide-slate-100 bg-white">
+          {pageDossiers.elements.map((d) => (
             <tr key={d.id} className="hover:bg-slate-50">
               <td className={TD}>{d.numero}</td>
               <td className={TD}>{noms[d.client_id] || "…"}</td>
@@ -116,12 +118,13 @@ export default function Dossiers() {
               <td className={TD + " hidden md:table-cell"}>{dateFr(d.date_demande)}</td>
               <td className={TD}><Badge ton={tonDossier(d.statut)}>{LIBELLE_STATUT[d.statut] || d.statut}</Badge></td>
               <td className={TD + " text-right"}>
-                <Link className="text-marque-700 underline" to={"/dossiers/" + d.id}>Ouvrir</Link>
+                <LienOuvrir to={"/dossiers/" + d.id}>Ouvrir</LienOuvrir>
               </td>
             </tr>
           ))}
         </tbody>
       </Tableau>
+      <Pagination {...pageDossiers} />
     </Cadre>
   );
 }

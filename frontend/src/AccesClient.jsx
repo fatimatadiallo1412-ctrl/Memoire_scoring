@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { appeler } from "./api";
 import { Alerte, Bouton, Champ, MotDePasseTemp, Panneau, classeSaisie } from "./ui.jsx";
+import { AIDE_GMAIL, GMAIL } from "./validation.js";
 
 export default function AccesClient({ clientId }) {
   const [email, setEmail] = useState("");
@@ -39,8 +40,8 @@ export default function AccesClient({ clientId }) {
       {secret && <MotDePasseTemp email={secret.email} motDePasse={secret.motDePasse} onFermer={() => setSecret(null)} />}
       <form className="flex flex-col gap-3 sm:flex-row sm:items-end" onSubmit={creer}>
         <div className="flex-1">
-          <Champ label="E-mail du client (identifiant de connexion)">
-            <input className={classeSaisie} type="email" value={email} required onChange={(e) => setEmail(e.target.value)} />
+          <Champ label="E-mail du client (identifiant de connexion)" aide={AIDE_GMAIL}>
+            <input className={classeSaisie} type="email" value={email} required {...GMAIL} onChange={(e) => setEmail(e.target.value)} />
           </Champ>
         </div>
         <Bouton type="submit" disabled={envoi}>{envoi ? "Création…" : "Créer l'accès"}</Bouton>

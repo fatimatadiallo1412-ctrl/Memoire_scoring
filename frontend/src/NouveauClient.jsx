@@ -6,6 +6,7 @@ import Cadre from "./Cadre.jsx";
 import ChampMetier from "./ChampMetier.jsx";
 import { invaliderMetiers } from "./metiers.js";
 import { Alerte, Bouton, Case, Champ, Liste, Panneau, classeSaisie } from "./ui.jsx";
+import { AIDE_TELEPHONE, TELEPHONE } from "./validation.js";
 
 const VIDE = {
   nom: "", prenom: "", date_naissance: "", sexe: "", telephone: "", adresse: "",
@@ -90,8 +91,8 @@ export default function NouveauClient() {
             <Liste valeur={f.sexe} onChange={(v) => changer("sexe", v)} facultatif
               options={[["F", "Féminin"], ["M", "Masculin"]]} />
           </Champ>
-          <Champ label="Téléphone">
-            <input className={classeSaisie} type="tel" value={f.telephone} maxLength={20}
+          <Champ label="Téléphone" aide={AIDE_TELEPHONE}>
+            <input className={classeSaisie} type="tel" value={f.telephone} maxLength={20} {...TELEPHONE}
               onChange={(e) => changer("telephone", e.target.value)} />
           </Champ>
           <Champ label="Adresse">

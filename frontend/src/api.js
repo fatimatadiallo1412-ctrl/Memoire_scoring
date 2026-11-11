@@ -22,7 +22,7 @@ export class ErreurApi extends Error {
 function texteErreur(detail, statut) {
   if (typeof detail === "string") return detail;
   if (Array.isArray(detail)) {
-    return detail.map((d) => (d.loc || []).slice(1).join(".") + " : " + d.msg).join(" ; ");
+    return detail.map((d) => (d.loc || []).slice(1).join(".") + " : " + String(d.msg).replace(/^Value error, /, "")).join(" ; ");
   }
   return "Erreur " + statut;
 }

@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { appeler } from "./api";
 import { useAuth } from "./auth.jsx";
 import { dateFr, fcfa } from "./formats.js";
 import Cadre from "./Cadre.jsx";
+import Pagination from "./Pagination.jsx";
+import { usePagination } from "./usePagination.js";
 import {
-  Alerte, Badge, Bouton, Champ, Chargement, Info, Infos, Panneau, TD, TH, Tableau, classeSaisie,
-} from "./ui.jsx";
+  Alerte, Badge, Bouton, Champ, Chargement, Info, Infos, Panneau, TD, TH, Tableau, classeSaisie, LienRetour } from "./ui.jsx";
 
 const MODES = { especes: "Espèces", mobile_money: "Mobile money", virement: "Virement" };
 
@@ -34,6 +35,8 @@ export default function CreditPersonnel() {
   const [datePaiement, setDatePaiement] = useState(new Date().toISOString().slice(0, 10));
   const [mode, setMode] = useState("especes");
   const [envoi, setEnvoi] = useState(false);
+  const pageEcheances = usePagination(situation ? situation.echeances : null, 10);
+  const pagePaiements = usePagination(paiements, 10);
 
   const charger = useCallback(async () => {
     try {
@@ -156,8 +159,8 @@ export default function CreditPersonnel() {
               <th className={TH}>Payé</th><th className={TH}>Reste</th><th className={TH}>État</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
-            {situation.echeances.map((e) => (
+          <tbody key={pageEcheances.page} className="animate-apparition divide-y divide-slate-100">
+            {pageEcheances.elements.map((e) => (
               <tr key={e.numero}>
                 <td className={TD}>{e.numero}</td>
                 <td className={TD}>{dateFr(e.date_echeance)}</td>
@@ -173,6 +176,7 @@ export default function CreditPersonnel() {
             ))}
           </tbody>
         </Tableau>
+        <Pagination {...pageEcheances} />
       </Panneau>
 
       <Panneau titre="Historique des paiements">
@@ -182,8 +186,8 @@ export default function CreditPersonnel() {
             <thead className="bg-slate-50">
               <tr><th className={TH}>Date</th><th className={TH}>Montant</th><th className={TH}>Mode</th></tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
-              {paiements.map((p, i) => (
+            <tbody key={pagePaiements.page} className="animate-apparition divide-y divide-slate-100">
+              {pagePaiements.elements.map((p, i) => (
                 <tr key={p.id ?? i}>
                   <td className={TD}>{dateFr(p.date_paiement)}</td>
                   <td className={TD}>{fcfa(p.montant)}</td>
@@ -193,8 +197,9 @@ export default function CreditPersonnel() {
             </tbody>
           </Tableau>
         )}
+        <Pagination {...pagePaiements} />
       </Panneau>
-      <p><Link className="text-marque-700 underline" to="/dossiers">Retour aux dossiers</Link></p>
+      <p><LienRetour to="/dossiers">Retour aux dossiers</LienRetour></p>
     </Cadre>
   );
 }

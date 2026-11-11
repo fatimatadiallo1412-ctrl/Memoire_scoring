@@ -9,8 +9,7 @@ import Cadre from "./Cadre.jsx";
 import { EncadreDecaissement, PanneauDecaissement } from "./Decaissement.jsx";
 import {
   Alerte, Badge, Bouton, Champ, Chargement, Info, Infos, LienBouton, Panneau,
-  TD, TH, Tableau, classeSaisie, tonDossier,
-} from "./ui.jsx";
+  TD, TH, Tableau, classeSaisie, tonDossier, LienRetour } from "./ui.jsx";
 
 const RECOMMANDATION = { accord: "Accord", accord_reduit: "Accord réduit", refus: "Refus" };
 const STATUTS_CREDIT = ["decaisse", "en_remboursement", "solde", "contentieux"];
@@ -213,7 +212,7 @@ export default function FicheDossier() {
     return (
       <Cadre titre="Dossier">
         {erreur ? <Alerte>{erreur}</Alerte> : <Chargement />}
-        <Link className="text-marque-700 underline" to="/dossiers">Retour aux dossiers</Link>
+        <LienRetour to="/dossiers">Retour aux dossiers</LienRetour>
       </Cadre>
     );
   }
@@ -407,7 +406,7 @@ export default function FicheDossier() {
       )}
       {credit && <EncadreDecaissement credit={credit} client={client} />}
 
-      <p><Link className="text-marque-700 underline" to="/dossiers">Retour aux dossiers</Link></p>
+      <p><LienRetour to="/dossiers">Retour aux dossiers</LienRetour></p>
     </Cadre>
   );
 }

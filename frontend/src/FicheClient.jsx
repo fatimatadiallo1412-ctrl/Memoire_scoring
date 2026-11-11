@@ -9,7 +9,8 @@ import ChampMetier from "./ChampMetier.jsx";
 import AssistantPersonnel from "./AssistantPersonnel.jsx";
 import AccesClient from "./AccesClient.jsx";
 import Cadre from "./Cadre.jsx";
-import { Alerte, Bouton, Case, Champ, Chargement, LienBouton, Liste, Panneau, classeSaisie } from "./ui.jsx";
+import { Alerte, Bouton, Case, Champ, Chargement, LienBouton, LienRetour, Liste, Panneau, classeSaisie } from "./ui.jsx";
+import { AIDE_TELEPHONE, TELEPHONE } from "./validation.js";
 
 // Champs d'identité : les modifier n'invalide pas les scores existants.
 const IDENTITE = ["nom", "prenom", "telephone", "adresse", "sexe"];
@@ -112,7 +113,7 @@ export default function FicheClient() {
     return (
       <Cadre titre="Client">
         <Alerte>{erreur}</Alerte>
-        <Link className="text-marque-700 underline" to="/clients">Retour à la liste</Link>
+        <LienRetour to="/clients">Retour à la liste</LienRetour>
       </Cadre>
     );
   }
@@ -177,8 +178,8 @@ export default function FicheClient() {
             <Liste valeur={f.sexe} onChange={(v) => changer("sexe", v)} facultatif
               options={[["F", "Féminin"], ["M", "Masculin"]]} />
           </Champ>
-          <Champ label="Téléphone">
-            <input className={classeSaisie} type="tel" value={f.telephone} maxLength={20}
+          <Champ label="Téléphone" aide={AIDE_TELEPHONE}>
+            <input className={classeSaisie} type="tel" value={f.telephone} maxLength={20} {...TELEPHONE}
               onChange={(e) => changer("telephone", e.target.value)} />
           </Champ>
           <Champ label="Adresse">
@@ -222,7 +223,7 @@ export default function FicheClient() {
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
             <Bouton type="submit" disabled={envoi}>{envoi ? "Enregistrement…" : "Enregistrer"}</Bouton>
-            <Link className="text-sm text-marque-700 underline" to="/clients">Retour à la liste</Link>
+            <LienRetour to="/clients">Retour à la liste</LienRetour>
           </div>
         </form>
       </Panneau>
