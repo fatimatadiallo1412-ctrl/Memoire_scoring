@@ -28,4 +28,18 @@ export const PRODUITS = [
     montant: "50 000 à 25 000 000 FCFA",
     duree: "3 mois à 5 ans",
   },
+  {
+    nom: "Crédit petite entreprise",
+    pour: "Boutiques, ateliers, transporteurs, pêcheurs en croissance",
+    description: "Financer l'extension d'une petite entreprise : stock plus important, nouvel équipement, second point de vente.",
+    montant: "500 000 à 5 000 000 FCFA",
+    duree: "6 à 24 mois",
+  },
+  {
+    nom: "Crédit salarié",
+    pour: "Salariés du privé et fonctionnaires",
+    description: "Un crédit remboursé chaque mois sur le salaire, pour un projet personnel ou familial.",
+    montant: "100 000 à 2 000 000 FCFA",
+    duree: "6 à 24 mois",
+  },
 ];

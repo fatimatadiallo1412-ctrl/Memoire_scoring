@@ -1,6 +1,6 @@
-import { ArrowRight, Clock, Coins, Hammer, Sofa, Store, Wheat } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Clock, Coins, Hammer, Sofa, Store, Wallet, Wheat } from "lucide-react";
 import { Link } from "react-router-dom";
-import { SceneChamp, SceneCouture, SceneMarche, SceneTransfert } from "./IllustrationsHero.jsx";
+import { SceneChamp, SceneCouture, SceneMarche, ScenePirogue, SceneSuivi, SceneTransfert } from "./IllustrationsHero.jsx";
 import Revele from "./Revele.jsx";
 import { PRODUITS } from "./vitrine.js";
 import Vitrine from "./Vitrine.jsx";
@@ -11,6 +11,8 @@ const HABILLAGES = [
   { icone: Hammer, scene: SceneCouture, fond: "bg-marque-50", tuile: "bg-marque-700 text-white" },
   { icone: Wheat, scene: SceneChamp, fond: "bg-baobab-50", tuile: "bg-baobab text-white" },
   { icone: Sofa, scene: SceneTransfert, fond: "bg-terre-50", tuile: "bg-terre text-white" },
+  { icone: BriefcaseBusiness, scene: ScenePirogue, fond: "bg-marque-50", tuile: "bg-encre text-white" },
+  { icone: Wallet, scene: SceneSuivi, fond: "bg-soleil-50", tuile: "bg-marque-700 text-white" },
 ];
 
 export default function Produits() {
