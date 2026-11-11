@@ -229,8 +229,8 @@ export default function FicheClient() {
           </div>
         </form>
       </Panneau>
-      <AssistantPersonnel key={client.id} clientId={client.id} />
-      {peutDemander && <AccesClient key={client.id} clientId={client.id} />}
+      <AssistantPersonnel key={"assistant-" + client.id} clientId={client.id} />
+      {peutDemander && <AccesClient key={"acces-" + client.id} clientId={client.id} />}
     </Cadre>
   );
 }
