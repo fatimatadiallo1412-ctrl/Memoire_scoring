@@ -44,7 +44,7 @@ export default function Vitrine({ children }) {
     "flex min-h-12 items-center rounded-xl px-4 text-base font-medium transition-colors duration-150 " +
     (isActive ? "bg-marque-50 text-marque-700" : "text-encre hover:bg-fond");
 
-  // Connecté : accès à son espace. Sinon : se connecter ou s'inscrire.
+  // Connecté : accès à son espace. Sinon : se connecter, ou prendre contact pour devenir client.
   const boutons = utilisateur ? (
     <Link to={ACCUEIL[utilisateur.role]} className={PRIMAIRE + " group"}>
       Mon espace
@@ -55,8 +55,8 @@ export default function Vitrine({ children }) {
       <Link to="/connexion" className={SECONDAIRE}>
         Se connecter
       </Link>
-      <Link to="/contact" state={{ objet: "Demande d'inscription" }} className={PRIMAIRE + " group"}>
-        S'inscrire
+      <Link to="/contact" state={{ objet: "Devenir client" }} className={PRIMAIRE + " group"}>
+        Devenir client
         <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
       </Link>
     </>

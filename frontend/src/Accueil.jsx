@@ -36,7 +36,7 @@ const ETAPES = [
   ["Demande", "Le client présente son projet à son gestionnaire en agence.", FileText],
   ["Évaluation", "Le dossier est analysé et le modèle calcule un score expliqué.", Gauge],
   ["Décision", "Le directeur étudie le dossier et décide, avec un commentaire si besoin.", BadgeCheck],
-  ["Suivi", "Après décaissement, échéances, paiements et rappels restent visibles.", CalendarCheck],
+  ["Suivi", "Après décaissement, le client reçoit ses identifiants : il suit en ligne ses échéances et ses rappels, et pose ses questions à l'assistant.", CalendarCheck],
 ];
 
 // Les publics de l'inclusion financière : commerçants, artisans, agriculteurs, salariés (décoratif).

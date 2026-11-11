@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell, CalendarDays, Eye, EyeOff, MessageCircle, TriangleAlert } from "lucide-react";
+import { Bell, CalendarDays, Eye, EyeOff, Info, MessageCircle, TriangleAlert } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "./useAuth.js";
 import { SceneSuivi } from "./IllustrationsHero.jsx";
@@ -102,6 +102,15 @@ export default function Connexion() {
               <Link className="font-medium text-marque-700 underline-offset-4 hover:underline" to="/mot-de-passe-oublie" state={{ email }}>Mot de passe oublié ?</Link>
             </p>
           )}
+          <div className="flex gap-2.5 rounded-champ bg-fond p-3.5 text-sm leading-relaxed text-texte-doux">
+            <Info className="mt-0.5 h-4 w-4 shrink-0 text-marque-600" aria-hidden="true" />
+            <p>
+              <span className="font-semibold text-encre">Vous êtes client ?</span> Votre accès est ouvert en agence par
+              votre gestionnaire, qui vous remet un mot de passe temporaire à changer à la première connexion.{" "}
+              <Link className="font-medium text-marque-700 underline-offset-4 hover:underline" to="/contact"
+                state={{ objet: "Devenir client" }}>Pas encore client ?</Link>
+            </p>
+          </div>
         </form>
 
         <aside className="relative flex animate-apparition flex-col justify-between overflow-clip rounded-[2rem] bg-marque-900 p-7 text-white sm:p-10">
