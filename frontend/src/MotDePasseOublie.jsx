@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { appeler } from "./api";
 import { MARQUE } from "./marque.js";
-import { Alerte, Bouton, Champ, classeSaisie } from "./ui.jsx";
+import LogoMarque from "./LogoMarque.jsx";
+import { Alerte, Bouton, Champ, LienRetour, classeSaisie } from "./ui.jsx";
+import { AIDE_TELEPHONE, TELEPHONE } from "./validation.js";
 
 export default function MotDePasseOublie() {
   const lieu = useLocation();
@@ -30,13 +32,17 @@ export default function MotDePasseOublie() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-marque-800 px-4">
-      <div className="w-full max-w-sm animate-apparition rounded-carte bg-white p-6 sm:p-8">
-        <h1 className="text-sous-titre font-semibold text-texte">Mot de passe oublié</h1>
+    <div className="relative flex min-h-screen items-center justify-center overflow-clip bg-marque-900 px-4 py-10">
+        <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-marque-800" aria-hidden="true" />
+        <div className="pointer-events-none absolute -bottom-20 -right-16 h-64 w-64 rounded-full bg-marque-800" aria-hidden="true" />
+        <div className="pointer-events-none absolute bottom-24 left-[15%] h-6 w-6 animate-flotter rounded-full bg-soleil" aria-hidden="true" />
+      <div className="relative w-full max-w-md animate-apparition rounded-[2rem] bg-white p-7 shadow-2xl sm:p-10">
+        <LogoMarque className="mb-5 h-12 w-12" />
+        <h1 className="text-2xl font-extrabold text-encre">Mot de passe oublié</h1>
         {reponse ? (
           <div className="mt-4 space-y-4">
             <Alerte ton="succes">{reponse}</Alerte>
-            <Link className="text-sm text-marque-700 underline" to="/connexion">Retour à la connexion</Link>
+            <div><LienRetour to="/connexion">Retour à la connexion</LienRetour></div>
           </div>
         ) : (
           <form onSubmit={soumettre} className="mt-4 grid gap-4">
@@ -48,12 +54,12 @@ export default function MotDePasseOublie() {
             <Champ label="E-mail du compte">
               <input className={classeSaisie} type="email" value={email} required onChange={(e) => setEmail(e.target.value)} />
             </Champ>
-            <Champ label="Téléphone pour vous joindre (facultatif)">
-              <input className={classeSaisie} type="tel" value={contact} maxLength={100}
+            <Champ label="Téléphone pour vous joindre (facultatif)" aide={AIDE_TELEPHONE}>
+              <input className={classeSaisie} type="tel" value={contact} maxLength={100} {...TELEPHONE}
                 onChange={(e) => setContact(e.target.value)} />
             </Champ>
             <Bouton type="submit" disabled={envoi}>{envoi ? "Envoi…" : "Envoyer la demande"}</Bouton>
-            <Link className="text-center text-sm text-slate-500 underline" to="/connexion">Retour à la connexion</Link>
+            <LienRetour to="/connexion">Retour à la connexion</LienRetour>
           </form>
         )}
         <p className="mt-4 text-center text-xs text-slate-400">{MARQUE.nom}</p>

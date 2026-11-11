@@ -4,6 +4,7 @@ import { appeler } from "./api";
 import { useAuth } from "./auth.jsx";
 import { accueilDe } from "./roles.js";
 import Cadre from "./Cadre.jsx";
+import LogoMarque from "./LogoMarque.jsx";
 import { Alerte, Bouton, Champ, Panneau, classeSaisie } from "./ui.jsx";
 
 export default function ChangerMotDePasse() {
@@ -70,9 +71,13 @@ export default function ChangerMotDePasse() {
 
   if (obligatoire) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-marque-800 px-4">
-        <div className="w-full max-w-sm animate-apparition rounded-carte bg-white p-6 sm:p-8">
-          <h1 className="text-sous-titre font-semibold text-texte">Choisissez votre mot de passe</h1>
+      <div className="relative flex min-h-screen items-center justify-center overflow-clip bg-marque-900 px-4 py-10">
+        <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-marque-800" aria-hidden="true" />
+        <div className="pointer-events-none absolute -bottom-20 -right-16 h-64 w-64 rounded-full bg-marque-800" aria-hidden="true" />
+        <div className="pointer-events-none absolute bottom-24 left-[15%] h-6 w-6 animate-flotter rounded-full bg-soleil" aria-hidden="true" />
+        <div className="relative w-full max-w-md animate-apparition rounded-[2rem] bg-white p-7 shadow-2xl sm:p-10">
+        <LogoMarque className="mb-5 h-12 w-12" />
+          <h1 className="text-2xl font-extrabold text-encre">Choisissez votre mot de passe</h1>
           <p className="mb-4 mt-1 text-sm text-slate-500">
             Pour la sécurité de votre compte, remplacez le mot de passe temporaire par le vôtre.
           </p>

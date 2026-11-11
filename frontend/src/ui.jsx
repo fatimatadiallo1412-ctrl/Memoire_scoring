@@ -1,4 +1,4 @@
-import { CircleCheck, CircleX, TriangleAlert } from "lucide-react";
+import { ArrowLeft, ArrowRight, CircleCheck, CircleX, TriangleAlert } from "lucide-react";
 
 const TONS_BADGE = {
   neutre: "bg-slate-100 text-slate-700",
@@ -21,24 +21,24 @@ const TONS_ALERTE = {
 const ICONE_ALERTE = { erreur: CircleX, succes: CircleCheck, attention: TriangleAlert };
 
 const VARIANTES = {
-  primaire: "bg-marque-700 text-white hover:bg-marque-800 active:bg-marque-800",
-  secondaire: "bg-white text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50 active:bg-slate-100",
-  danger: "bg-risque-eleve text-white hover:bg-red-900 active:bg-red-900",
+  primaire: "bg-marque-700 text-white shadow-sm hover:bg-marque-800 hover:shadow-md active:bg-marque-800",
+  secondaire: "bg-white text-encre ring-1 ring-inset ring-bord hover:bg-fond hover:ring-marque-200 active:bg-marque-50",
+  danger: "bg-risque-eleve text-white shadow-sm hover:bg-red-900 active:bg-red-900",
   lien: "text-marque-700 underline hover:text-marque-800 !px-0 !py-0 !min-h-0",
 };
 
 export const classeSaisie =
-  "block w-full min-h-11 rounded-champ border border-slate-300 bg-white px-3 py-2 text-base placeholder:text-slate-400 transition-colors duration-150 hover:border-slate-400 focus:border-marque-600 focus:outline-none focus:ring-2 focus:ring-marque-600/30 disabled:bg-slate-100 sm:text-sm";
+  "block w-full min-h-11 rounded-champ border border-bord bg-white px-3.5 py-2 text-base placeholder:text-slate-400 transition duration-200 hover:border-marque-200 focus:border-marque-600 focus:outline-none focus:ring-4 focus:ring-marque-600/15 disabled:bg-fond sm:text-sm";
 
-export const TH = "whitespace-nowrap bg-slate-50 px-3 py-2.5 text-left font-semibold text-texte-doux";
-export const TD = "px-3 py-2.5";
+export const TH = "whitespace-nowrap bg-fond px-4 py-3 text-left text-[0.8125rem] font-semibold text-texte-doux";
+export const TD = "px-4 py-3";
 
 export function Bouton({ variante = "primaire", className = "", type = "button", ...reste }) {
   return (
     <button
       type={type}
       className={
-        "inline-flex min-h-11 items-center justify-center rounded-champ px-4 py-2 text-sm font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-50 " +
+        "inline-flex min-h-11 items-center justify-center rounded-champ px-4 py-2 text-sm font-semibold transition duration-200 ease-out active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 " +
         VARIANTES[variante] + " " + className
       }
       {...reste}
@@ -71,10 +71,10 @@ export function Alerte({ ton = "erreur", children }) {
 
 export function Panneau({ titre, droite, children, className = "" }) {
   return (
-    <section className={"mb-5 rounded-carte border border-bord bg-white p-4 animate-apparition sm:p-6 " + className}>
+    <section className={"mb-6 rounded-carte border border-bord bg-white p-5 shadow-[0_1px_2px_rgba(18,24,40,0.04)] animate-apparition transition-shadow duration-300 hover:shadow-md sm:p-7 " + className}>
       {(titre || droite) && (
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          {titre && <h2 className="text-sous-titre font-semibold text-texte">{titre}</h2>}
+          {titre && <h2 className="text-sous-titre font-bold text-encre">{titre}</h2>}
           {droite}
         </div>
       )}
@@ -86,7 +86,7 @@ export function Panneau({ titre, droite, children, className = "" }) {
 export function Champ({ label, aide, children }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-encre">{label}</span>
       {children}
       {aide && <span className="mt-1 block text-xs text-texte-doux">{aide}</span>}
     </label>
@@ -95,8 +95,8 @@ export function Champ({ label, aide, children }) {
 
 export function Tableau({ children }) {
   return (
-    <div className="overflow-x-auto rounded-champ border border-bord">
-      <table className="min-w-full divide-y divide-slate-200 text-sm [&_tbody_tr]:transition-colors [&_tbody_tr]:duration-150 [&_tbody_tr:hover]:bg-marque-50/60">
+    <div className="overflow-x-auto rounded-carte border border-bord bg-white">
+      <table className="min-w-full divide-y divide-bord text-sm [&_tbody]:divide-y [&_tbody]:divide-bord [&_tbody_tr]:transition-colors [&_tbody_tr]:duration-150 [&_tbody_tr:hover]:bg-marque-50/70">
         {children}
       </table>
     </div>
@@ -122,7 +122,7 @@ export function Squelette({ lignes = 3 }) {
   return (
     <div className="space-y-2.5" aria-hidden="true">
       {Array.from({ length: lignes }, (_, i) => (
-        <div key={i} className={"h-4 animate-pulse rounded bg-slate-200 " + largeurs[i % largeurs.length]} />
+        <div key={i} className={"h-4 animate-pulse rounded-full bg-bord " + largeurs[i % largeurs.length]} />
       ))}
     </div>
   );
@@ -162,10 +162,10 @@ export function Case({ libelle, checked, onChange }) {
 
 export function LienBouton({ to, variante = "primaire", children }) {
   const style = variante === "primaire"
-    ? "bg-marque-700 text-white hover:bg-marque-800"
-    : "bg-white text-slate-700 ring-1 ring-inset ring-slate-300 hover:bg-slate-50";
+    ? "bg-marque-700 text-white shadow-sm hover:bg-marque-800 hover:shadow-md"
+    : "bg-white text-encre ring-1 ring-inset ring-bord hover:bg-fond hover:ring-marque-200";
   return (
-    <Link to={to} className={"inline-flex min-h-11 items-center justify-center rounded-champ px-4 py-2 text-sm font-medium transition-colors duration-150 " + style}>
+    <Link to={to} className={"inline-flex min-h-11 items-center justify-center rounded-champ px-4 py-2 text-sm font-semibold transition duration-200 ease-out active:scale-[0.98] " + style}>
       {children}
     </Link>
   );
@@ -207,5 +207,55 @@ export function MotDePasseTemp({ email, motDePasse, onFermer }) {
         <Bouton variante="secondaire" onClick={onFermer}>J'ai noté le mot de passe, fermer</Bouton>
       </div>
     </div>
+  );
+}
+
+// Lien d'ouverture d'une ligne de liste, présenté comme un bouton.
+export function LienOuvrir({ to, children }) {
+  return (
+    <Link to={to}
+      className="group inline-flex min-h-9 items-center gap-1.5 rounded-lg bg-marque-50 px-3 text-sm font-semibold text-marque-700 ring-1 ring-inset ring-marque-100 transition duration-200 hover:bg-marque-700 hover:text-white hover:shadow-md active:scale-95">
+      {children}
+      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
+    </Link>
+  );
+}
+
+// Pastille ronde avec les initiales d'une personne (décorative).
+const TONS_AVATAR = ["bg-marque-100 text-marque-800", "bg-soleil-50 text-soleil-fonce", "bg-baobab-50 text-baobab", "bg-terre-50 text-terre-fonce"];
+export function Avatar({ nom, taille = "h-10 w-10 text-sm" }) {
+  const mots = String(nom || "").split(/\s+/).filter(Boolean);
+  const initiales = mots.slice(0, 2).map((m) => m[0].toUpperCase()).join("");
+  const ton = TONS_AVATAR[[...String(nom || "")].reduce((a, c) => a + c.charCodeAt(0), 0) % TONS_AVATAR.length];
+  return (
+    <span className={"flex shrink-0 items-center justify-center rounded-full font-display font-bold " + taille + " " + ton} aria-hidden="true">
+      {initiales}
+    </span>
+  );
+}
+
+// Carte de statistique : un nombre, un libellé et une icône.
+export function Statistique({ icone: Icone, valeur, libelle, ton = "bg-marque-50 text-marque-700" }) {
+  return (
+    <div className="flex animate-apparition items-center gap-4 rounded-carte border border-bord bg-white p-4 transition duration-300 hover:shadow-md motion-safe:hover:-translate-y-0.5">
+      <span className={"flex h-12 w-12 shrink-0 items-center justify-center rounded-xl " + ton}>
+        <Icone className="h-6 w-6" aria-hidden="true" />
+      </span>
+      <div>
+        <p className="font-display text-2xl font-extrabold leading-none text-encre">{valeur}</p>
+        <p className="mt-1 text-sm text-texte-doux">{libelle}</p>
+      </div>
+    </div>
+  );
+}
+
+// Lien de retour vers une liste, présenté comme un bouton secondaire.
+export function LienRetour({ to, children }) {
+  return (
+    <Link to={to}
+      className="group inline-flex min-h-11 items-center justify-center gap-2 rounded-champ bg-white px-4 py-2 text-sm font-semibold text-encre ring-1 ring-inset ring-bord transition duration-200 hover:bg-fond hover:ring-marque-200 active:scale-[0.98]">
+      <ArrowLeft className="h-4 w-4 transition-transform duration-200 group-hover:-translate-x-0.5" aria-hidden="true" />
+      {children}
+    </Link>
   );
 }

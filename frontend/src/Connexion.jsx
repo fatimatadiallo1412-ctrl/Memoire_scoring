@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Bell, CalendarDays, Eye, EyeOff, MessageCircle, TriangleAlert } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "./auth.jsx";
+import { SceneSuivi } from "./IllustrationsHero.jsx";
+import LogoMarque from "./LogoMarque.jsx";
 import { MARQUE } from "./marque.js";
 import { accueilDe } from "./roles.js";
 import { Alerte, Bouton, Champ, classeSaisie } from "./ui.jsx";
@@ -52,12 +54,14 @@ export default function Connexion() {
 
   return (
     <Vitrine>
-      <section className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-10 sm:py-16 md:grid-cols-2 md:gap-16">
+      <section className="bg-fond">
+      <div className="mx-auto grid max-w-7xl items-stretch gap-8 px-4 py-10 sm:px-6 sm:py-16 lg:grid-cols-2 lg:gap-10">
         <form onSubmit={soumettre}
-          className="w-full max-w-md animate-apparition space-y-4 justify-self-center rounded-carte border border-bord bg-white p-6 sm:p-8 md:justify-self-start">
+          className="w-full max-w-md animate-apparition space-y-5 self-center justify-self-center rounded-[2rem] bg-white p-7 shadow-xl ring-1 ring-bord sm:p-10">
           <div className="text-center">
-            <h1 className="text-titre font-semibold text-texte">Connexion</h1>
-            <Link to="/" className="mt-1 inline-block text-sm font-medium text-marque-700 underline">{MARQUE.nom}</Link>
+            <LogoMarque className="mx-auto mb-5 h-14 w-14" />
+            <h1 className="text-[clamp(1.75rem,1.4rem+1vw,2.25rem)] font-extrabold text-encre">Connexion</h1>
+            <Link to="/" className="mt-1 inline-block text-sm font-medium text-marque-700 underline-offset-4 hover:underline">{MARQUE.nom}</Link>
           </div>
           {erreur && <Alerte>{erreur}</Alerte>}
           {proposer && (
@@ -92,30 +96,39 @@ export default function Connexion() {
               </span>
             )}
           </Champ>
-          <Bouton type="submit" className="w-full" disabled={envoi}>{envoi ? "Connexion…" : "Se connecter"}</Bouton>
+          <Bouton type="submit" className="w-full !min-h-12" disabled={envoi}>{envoi ? "Connexion…" : "Se connecter"}</Bouton>
           {!proposer && (
             <p className="text-center text-sm text-slate-500">
-              <Link className="underline" to="/mot-de-passe-oublie" state={{ email }}>Mot de passe oublié ?</Link>
+              <Link className="font-medium text-marque-700 underline-offset-4 hover:underline" to="/mot-de-passe-oublie" state={{ email }}>Mot de passe oublié ?</Link>
             </p>
           )}
         </form>
 
-        <aside className="animate-apparition">
-          <h2 className="text-sous-titre font-semibold text-texte">Accédez à votre espace</h2>
-          <ul className="mt-5 grid gap-4">
-            {AVANTAGES.map(([Icone, titre, texte]) => (
-              <li key={titre} className="flex items-start gap-4">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-champ bg-marque-50 text-marque-700">
-                  <Icone className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="font-medium text-texte">{titre}</p>
-                  <p className="text-sm text-texte-doux">{texte}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+        <aside className="relative flex animate-apparition flex-col justify-between overflow-clip rounded-[2rem] bg-marque-900 p-7 text-white sm:p-10">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-marque-800" aria-hidden="true" />
+          <div className="relative">
+            <span className="mb-4 block h-1.5 w-10 rounded-full bg-soleil" aria-hidden="true" />
+            <h2 className="text-[clamp(1.5rem,1.2rem+1vw,2rem)] font-bold">Accédez à votre espace</h2>
+            <ul className="mt-7 grid gap-3">
+              {AVANTAGES.map(([Icone, titre, texte], i) => (
+                <li key={titre} className="flex animate-apparition items-start gap-4 rounded-2xl bg-white/[0.06] p-4 ring-1 ring-inset ring-white/10 transition-colors duration-300 hover:bg-white/10"
+                  style={{ animationDelay: 150 + i * 120 + "ms" }}>
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-soleil text-encre">
+                    <Icone className="h-5 w-5" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="font-semibold text-white">{titre}</p>
+                    <p className="text-sm text-marque-100">{texte}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="relative mx-auto mt-8 hidden w-full max-w-[15rem] sm:block" aria-hidden="true">
+            <SceneSuivi />
+          </div>
         </aside>
+      </div>
       </section>
     </Vitrine>
   );

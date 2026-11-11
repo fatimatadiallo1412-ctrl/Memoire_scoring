@@ -1,4 +1,4 @@
-:root { --bleu: #1f4e79; --gris: #f3f5f8; --texte: #1b2430; --rouge: #b3261e; }
+:root { --bleu: #2d3db3; --gris: #f3f5f8; --texte: #1b2430; --rouge: #b3261e; }
 * { box-sizing: border-box; }
 body { margin: 0; font-family: system-ui, Arial, sans-serif; background: var(--gris); color: var(--texte); }
 h1 { font-size: 1.4rem; margin: 0 0 1rem; }
@@ -40,7 +40,7 @@ button:disabled { opacity: .6; cursor: default; }
 .filtre { max-width: 260px; margin-bottom: .8rem; }
 .pastille { display: inline-block; min-width: 1.3rem; padding: 0 .35rem; margin-left: .35rem; border-radius: 999px; background: #d93025; color: #fff; font-size: .75rem; text-align: center; }
 .rappel { border-left: 4px solid #c3cad4; padding: .4rem .8rem; margin: .5rem 0; background: #f8fafc; }
-.rappel.nonlu { border-left-color: var(--bleu); font-weight: 600; background: #eef4fb; }
+.rappel.nonlu { border-left-color: var(--bleu); font-weight: 600; background: #eef1ff; }
 .bouton-lien { background: none; color: var(--bleu); padding: 0 0 0 .8rem; text-decoration: underline; }
 .badge.rouge { background: #fde7e5; color: #b3261e; }
 .badge.vert { background: #e3f4e8; color: #1b7a3a; }

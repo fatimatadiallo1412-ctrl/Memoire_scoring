@@ -8,19 +8,42 @@
    ------------------------------------------------------------------ */
 @theme {
   --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-display: "Plus Jakarta Sans Variable", "Inter Variable", system-ui, sans-serif;
 
-  /* Primaire : bleu institutionnel */
-  --color-marque-50: #eef4fb;
-  --color-marque-100: #d9e6f4;
-  --color-marque-600: #2a6199;
-  --color-marque-700: #1f4e79;
-  --color-marque-800: #183d5e;
+  /* Primaire : indigo royal (moderne, institutionnel, contraste AA dès le 600) */
+  --color-marque-50: #eef1ff;
+  --color-marque-100: #dfe4ff;
+  --color-marque-200: #c2cbfb;
+  --color-marque-400: #7085f0;
+  --color-marque-600: #3a4fd8;
+  --color-marque-700: #2d3db3;
+  --color-marque-800: #212d84;
+  --color-marque-900: #121a4a;
 
-  /* Neutres */
-  --color-fond: #f3f5f8;
-  --color-bord: #d9dee6;
-  --color-texte: #1b2430;
-  --color-texte-doux: #566274;
+  /* Encre : fonds sombres (pied de page) et titres */
+  --color-encre: #0b1126;
+
+  /* Accents inspirés du Sénégal (aplats) :
+     soleil (or), terre (corail latérite), baobab (émeraude), sable (fond chaud).
+     Les teintes "-fonce" servent au texte sur fond clair (contraste AA). */
+  --color-soleil: #f5b70a;
+  --color-soleil-clair: #fcd34d;
+  --color-soleil-50: #fef6dc;
+  --color-soleil-fonce: #7a5600;
+  --color-terre: #e8603c;
+  --color-terre-clair: #f2875f;
+  --color-terre-50: #fdede7;
+  --color-terre-fonce: #a53d1c;
+  --color-baobab: #0f8a63;
+  --color-baobab-clair: #34b383;
+  --color-baobab-50: #e3f5ee;
+  --color-sable: #fbf8f2;
+
+  /* Neutres (légèrement teintés d'indigo) */
+  --color-fond: #f5f6fb;
+  --color-bord: #e3e6ef;
+  --color-texte: #121828;
+  --color-texte-doux: #5b6478;
 
   /* Niveaux de risque (contraste AA sur leur fond) */
   --color-risque-faible: #176b43;
@@ -31,8 +54,8 @@
   --color-risque-eleve-fond: #fbe9e9;
 
   /* Formes */
-  --radius-carte: 0.75rem;
-  --radius-champ: 0.5rem;
+  --radius-carte: 1rem;
+  --radius-champ: 0.75rem;
 
   /* Typographie fluide */
   --text-titre: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
@@ -43,6 +66,136 @@
   @keyframes apparition {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Animations des illustrations de la page d'accueil */
+  --animate-tiroir: tiroir 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes tiroir {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+
+  --animate-flotter: flotter 6s ease-in-out infinite;
+  @keyframes flotter {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  --animate-balancer: balancer 5s ease-in-out infinite alternate;
+  @keyframes balancer {
+    from { transform: translateY(0) rotate(-2.5deg); }
+    to { transform: translateY(5px) rotate(2.5deg); }
+  }
+  --animate-monter: monter 4.5s ease-out infinite;
+  @keyframes monter {
+    0% { transform: translateY(0) scale(0.6); opacity: 0; }
+    15% { opacity: 1; transform: translateY(-12px) scale(1); }
+    100% { transform: translateY(-110px) scale(1); opacity: 0; }
+  }
+  --animate-tourner: tourner 40s linear infinite;
+  @keyframes tourner {
+    to { transform: rotate(360deg); }
+  }
+  --animate-vague: vague 7s linear infinite;
+  @keyframes vague {
+    to { transform: translateX(-80px); }
+  }
+  --animate-aiguille: aiguille 7s cubic-bezier(0.34, 1.3, 0.64, 1) infinite;
+  @keyframes aiguille {
+    0%, 8% { transform: rotate(70deg); }
+    40%, 90% { transform: rotate(-58deg); }
+    100% { transform: rotate(70deg); }
+  }
+  --animate-cocher: cocher 7s ease-out infinite;
+  @keyframes cocher {
+    0%, 6% { transform: scale(0); }
+    12% { transform: scale(1.2); }
+    16%, 90% { transform: scale(1); }
+    100% { transform: scale(0); }
+  }
+  --animate-onde: onde 2.6s ease-out infinite;
+  @keyframes onde {
+    from { transform: scale(1); opacity: 0.55; }
+    to { transform: scale(1.9); opacity: 0; }
+  }
+  --animate-sonner: sonner 3.2s ease-in-out infinite;
+  @keyframes sonner {
+    0%, 40%, 100% { transform: rotate(0); }
+    8% { transform: rotate(16deg); }
+    16% { transform: rotate(-14deg); }
+    24% { transform: rotate(9deg); }
+    32% { transform: rotate(-5deg); }
+  }
+  --animate-clignoter: clignoter 1.2s ease-in-out infinite;
+  @keyframes clignoter {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+  }
+  --animate-derive: derive 30s ease-in-out infinite alternate;
+  @keyframes derive {
+    from { transform: translate(0, 0); }
+    to { transform: translate(-40px, 24px); }
+  }
+  --animate-coudre: coudre 0.32s ease-in-out infinite alternate;
+  @keyframes coudre {
+    from { transform: translateY(0); }
+    to { transform: translateY(7px); }
+  }
+  --animate-pousser: pousser 1.6s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+  @keyframes pousser {
+    from { transform: scaleY(0.1); }
+    to { transform: scaleY(1); }
+  }
+  --animate-goutte: goutte 1.6s ease-in infinite;
+  @keyframes goutte {
+    0% { transform: translateY(0); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(38px); opacity: 0; }
+  }
+  --animate-defiler-haut: defiler-haut 40s linear infinite;
+  @keyframes defiler-haut {
+    from { transform: translateY(0); }
+    to { transform: translateY(calc(-50% - 0.625rem)); }
+  }
+  --animate-defiler-bas: defiler-bas 46s linear infinite;
+  @keyframes defiler-bas {
+    from { transform: translateY(calc(-50% - 0.625rem)); }
+    to { transform: translateY(0); }
+  }
+  --animate-transfert: transfert 3s ease-in-out infinite;
+  @keyframes transfert {
+    0% { offset-distance: 0%; opacity: 0; }
+    10%, 85% { opacity: 1; }
+    100% { offset-distance: 100%; opacity: 0; }
+  }
+  --animate-remplir: remplir 7s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  @keyframes remplir {
+    0%, 8% { width: 8%; }
+    45%, 90% { width: 78%; }
+    100% { width: 8%; }
+  }
+  --animate-anneau: anneau 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes anneau {
+    from { stroke-dashoffset: 340; }
+  }
+  --animate-barre: barre 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes barre {
+    from { transform: scaleX(0); }
+  }
+  --animate-pointilles: pointilles 0.9s linear infinite;
+  @keyframes pointilles {
+    to { stroke-dashoffset: -16; }
+  }
+}
+
+/* Les éléments SVG animés tournent / grossissent autour de leur propre centre */
+@layer utilities {
+  .svg-centre {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .svg-bas {
+    transform-box: fill-box;
+    transform-origin: bottom center;
   }
 }
 
@@ -60,6 +213,10 @@
     background: var(--color-fond);
     color: var(--color-texte);
     -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
   }
 }
 
