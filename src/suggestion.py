@@ -2,7 +2,7 @@ import pandas as pd
 
 from src.features import PLAFOND_RATIO_CREDIT
 
-SEUIL_DEFAUT = 0.15        # probabilité maximale de défaut acceptée (politique de l'IMF)
+SEUIL_DEFAUT = 0.12        # probabilité maximale de défaut acceptée (valeur de démonstration, à fixer par l'IMF)
 ENDETTEMENT_MAX = 0.40     # mensualité maximale, en part du revenu mensuel
 
 

@@ -5,7 +5,7 @@ from app.models import Parametre
 
 # clé : (valeur par défaut, description, minimum, maximum)
 PARAMETRES_DEFAUT = {
-    "seuil_defaut": (0.15, "Probabilité maximale de défaut acceptée", 0.01, 0.60),
+    "seuil_defaut": (0.12, "Probabilité maximale de défaut acceptée", 0.01, 0.60),
     "endettement_max": (0.40, "Mensualité maximale, en part du revenu mensuel", 0.10, 0.80),
     "ratio_min": (0.50, "Part minimale du montant demandé proposable en réduction", 0.10, 1.00),
     "pas_montant": (10_000, "Pas de réduction du montant (FCFA)", 1_000, 1_000_000),

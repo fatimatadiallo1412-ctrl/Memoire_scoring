@@ -11,9 +11,20 @@ from types import SimpleNamespace
 from datetime import date
 
 import pytest
+from dotenv import load_dotenv
+
+RACINE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(RACINE))
 
 os.environ["SECRET_KEY"] = "cle-de-test-uniquement-" + "x" * 40
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+# ---- Garde-fou : les tests ne doivent JAMAIS se connecter à la base de développement ----------
+# Le nom de la base est remplacé AVANT tout import de l'application (app.db lit POSTGRES_DB).
+load_dotenv(RACINE / ".env")
+BASE_REELLE = os.environ.get("POSTGRES_DB")
+BASE_TEST = os.environ.get("TEST_POSTGRES_DB")
+BASE_TEST_VALIDE = bool(BASE_TEST) and BASE_TEST != BASE_REELLE and "test" in BASE_TEST.lower()
+os.environ["POSTGRES_DB"] = BASE_TEST if BASE_TEST_VALIDE else "aucune_base_de_test_configuree"
 
 
 @pytest.fixture
@@ -28,5 +39,5 @@ def client_type():
 
 @pytest.fixture
 def parametres():
-    return {"seuil_defaut": 0.15, "facteur_prudence_antecedent": 0.8, "endettement_max": 0.40,
+    return {"seuil_defaut": 0.12, "facteur_prudence_antecedent": 0.8, "endettement_max": 0.40,
             "pas_montant": 50_000, "ratio_min": 0.5}

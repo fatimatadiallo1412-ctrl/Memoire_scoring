@@ -228,4 +228,28 @@ Décision de la propriétaire du projet : **la traçabilité est conservée**. L
 | 11/11/2026 | Tests automatisés (1re partie : règles métier, sans base) | Dossier `tests/` et `pytest.ini`, lancement par `pytest`. 92 tests : formats de saisie (téléphone, Gmail, client majeur), calendrier de remboursement, mensualité et endettement, suggestion de montant (modèle factice), transitions du dossier, concordance, mots de passe et jetons, propriétés du modèle v4 (monotonie selon le montant et selon la durée), évaluation d'un accord modifié, explication SHAP (additivité). Aucun test n'ouvre de connexion à la base ; une clé de signature propre aux tests est utilisée. | 92 tests réussis. Contrôle par mutation : la faille de concordance réintroduite fait échouer le test prévu. Le test de durée échoue sur le modèle v3 (12,9 / 14,2 / 14,2 / 11,0 / 27,2 %…) et passe sur le v4. |
 | 11/11/2026 | Faille de concordance | Règle déplacée dans `est_concordante` (`app/workflow.py`) : un accord modifié n'est concordant avec un « accord réduit » que si le montant accordé ne dépasse pas le montant suggéré. Au-delà, la décision compte comme contraire au modèle et un motif est exigé. Les décisions déjà enregistrées ne sont pas recalculées (tables en ajout seul). | Tests `test_workflow.py`. |
 
-Reste du point 7 : tests de l'API (rôles, cloisonnement des portefeuilles, circuit complet d'un dossier, ajout seul) sur une base de test dédiée, à créer par la propriétaire du projet.
+| 11/11/2026 | Tests automatisés (2e partie : API sur base de test) | Base PostgreSQL `scoring_test` dans le conteneur `scoring-db`, désignée par `TEST_POSTGRES_DB`. Garde-fou dans `tests/conftest.py` : le nom de la base est remplacé avant tout import de l'application ; sans base de test valide (absente, identique à la vraie base ou sans « test » dans le nom), les tests de l'API sont ignorés et aucune connexion n'est ouverte. À chaque lancement, la base de test est vidée puis recréée par les migrations Alembic (déclencheurs compris) ; comptes de test créés avec un mot de passe tiré au hasard. 32 tests : connexion, jetons, verrouillage après 5 échecs, droits par rôle, cloisonnement des portefeuilles (404), pagination, circuit complet jusqu'au solde, motif obligatoire, concordance de l'accord modifié, simulation en lecture seule, score périmé, étapes dans le désordre, tables en ajout seul, journalisation de chaque étape. | 124 tests réussis (92 + 32) en 11 s. Sans `TEST_POSTGRES_DB` : 32 ignorés. Vraie base inchangée après les tests (dernière décision n° 1484, 1 505 dossiers, aucun compte de test). |
+
+Constat relevé par les tests : sur les profils essayés, les refus et les réductions viennent de la règle d'endettement (40 % du revenu) et non du seuil de risque du modèle, que le v4 dépasse rarement. À prendre en compte dans la révision du seuil (point suivant de l'audit).
+
+### Révision du seuil de risque (11/11/2026)
+
+**Cadre officiel.** Aucun texte de la BCEAO ne fixe de seuil de probabilité de défaut : il relève de la politique de risque de chaque institution. Les repères officiels sont le taux de l'usure (24 % par an pour les institutions de microfinance à compter du 1er juin 2026, avis BCEAO n° 007-12-2025) et la norme prudentielle de 3 % au plus pour le taux brut de dégradation du portefeuille des SFD (7,5 % observé dans l'UMOA à fin décembre 2025). Le plafond d'endettement de 33 à 40 % du revenu relève de la pratique de marché, sans texte officiel.
+
+**Effet du seuil, modèle v4, échantillon de test (taux de défaut moyen : 8,35 %)**
+
+| Seuil | Dossiers acceptés | Défaut observé chez les acceptés | Défaut prévu chez les acceptés | Défaut chez les refusés |
+|---|---|---|---|---|
+| 6 % | 33,8 % | 4,58 % | 4,54 % | 10,27 % |
+| 8 % | 55,6 % | 5,59 % | 5,47 % | 11,80 % |
+| 10 % | 71,3 % | 6,28 % | 6,23 % | 13,46 % |
+| **12 %** | **82,6 %** | **6,88 %** | **6,88 %** | **15,29 %** |
+| 15 % (ancien) | 92,7 % | 7,56 % | 7,58 % | 18,26 % |
+
+Les dossiers gagnés en passant de 10 à 12 % (11,3 % des dossiers) font défaut à environ 10,7 % ; ceux de la tranche 12 à 15 % à environ 13,1 %.
+
+**Décision : seuil de démonstration fixé à 12 %** (`app/parametres.py`, `src/suggestion.py`). C'est un choix en faveur de l'inclusion, que la microfinance a pour mission : 83 % des dossiers acceptés, avec un défaut chez les acceptés (6,9 %) inférieur à la moyenne (8,35 %) et égal à la prévision du modèle, qui est bien calibré. Avec un incident passé régularisé, le seuil devient 9,6 % (facteur de prudence 0,8). Le seuil reste un paramètre de politique modifiable par l'administrateur : dans une institution réelle, il serait recalculé sur ses propres données de remboursement et fixé avec sa direction des risques.
+
+Limites : ces taux sont mesurés sur les données Home Credit ; la norme de 3 % porte sur l'encours en retard à une date donnée et ne se compare pas directement à une probabilité de défaut sur la durée du crédit.
+
+À faire par la propriétaire du projet : la base de développement conserve sa valeur enregistrée (`seuil_defaut` = 0,151), qui prime sur la valeur par défaut ; la passer à 12 % depuis la page Paramètres, puis relancer `simulation/audit_inclusion.py` si ses résultats sont cités dans le mémoire (le script reprend désormais la politique par défaut de l'application).

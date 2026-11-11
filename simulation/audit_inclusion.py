@@ -8,13 +8,14 @@ from types import SimpleNamespace
 
 import pandas as pd
 
+from app.parametres import PARAMETRES_DEFAUT
 from app.scoring import evaluer_dossier
 from simulation.profils import DATE_REFERENCE, generer_profils
 from src.modeling import RACINE
 
 N_PROFILS = 2000
-PARAMETRES = {"seuil_defaut": 0.15, "endettement_max": 0.40,
-              "ratio_min": 0.50, "pas_montant": 10_000}
+# Politique par défaut de l'application (app/parametres.py), pour rester aligné sur elle
+PARAMETRES = {cle: valeur[0] for cle, valeur in PARAMETRES_DEFAUT.items()}
 PRODUIT = SimpleNamespace(taux_annuel=24.0, montant_min=50_000, montant_max=1_000_000)
 DUREE_MOIS = 12
 MOIS_DE_REVENU = 3          # montant demandé = 3 × revenu mensuel (dans les limites du produit)

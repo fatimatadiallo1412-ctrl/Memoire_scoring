@@ -23,8 +23,8 @@ def modele():
 # ---- Règles de politique, sans modèle -------------------------------------------------------
 
 def test_seuil_resserre_apres_un_incident_regularise(parametres):
-    assert seuil_applicable(parametres) == 0.15
-    assert seuil_applicable(parametres, "regularise") == pytest.approx(0.12)
+    assert seuil_applicable(parametres) == 0.12
+    assert seuil_applicable(parametres, "regularise") == pytest.approx(0.096)
 
 
 def test_profil_retraite_sans_activite(client_type):
@@ -75,7 +75,7 @@ def test_evaluer_montant_dans_la_politique(client_type, parametres):
     r = evaluer_montant(client_type, DEMANDE, PRODUIT, parametres, 100_000, 12)
     assert r["mensualite"] == 9_456
     assert r["endettement"] == pytest.approx(9_456 / 150_000, abs=1e-3)
-    assert r["dans_politique"] == (r["p_defaut"] <= 0.15)
+    assert r["dans_politique"] == (r["p_defaut"] <= parametres["seuil_defaut"])
 
 
 def test_evaluer_montant_hors_politique(client_type, parametres):
@@ -111,3 +111,10 @@ def test_explication_regroupee_et_lisible(modele, client_type):
     forces = [abs(c["contribution"]) for c in top]
     assert forces == sorted(forces, reverse=True)
     assert all(c["libelle"] != c["variable"] for c in top)                        # libellés en français
+
+
+def test_seuil_par_defaut_de_l_application():
+    """Seuil de démonstration retenu : 12 % (voir le rapport d'audit, section 11)."""
+    from app.parametres import PARAMETRES_DEFAUT
+    from src.suggestion import SEUIL_DEFAUT
+    assert PARAMETRES_DEFAUT["seuil_defaut"][0] == SEUIL_DEFAUT == 0.12
