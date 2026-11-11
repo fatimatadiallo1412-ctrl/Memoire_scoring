@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { appeler } from "./api";
 import { dateFr, fcfa } from "./formats.js";
 import Cadre from "./Cadre.jsx";
-import { Alerte, Badge, Bouton, Chargement, Panneau, TD, TH, Tableau } from "./ui.jsx";
+import { Alerte, Badge, Bouton, Chargement, LienOuvrir, Panneau, TD, TH, Tableau } from "./ui.jsx";
 
 export default function Espace() {
   const [prochaine, setProchaine] = useState(undefined);
@@ -108,7 +108,7 @@ export default function Espace() {
                   <td className={TD}>{c.duree_mois} mois</td>
                   <td className={TD}>{fcfa(c.mensualite)}</td>
                   <td className={TD + " text-right"}>
-                    <Link className="text-marque-700 underline" to={"/espace/credits/" + c.id}>Détails</Link>
+                    <LienOuvrir to={"/espace/credits/" + c.id}>Détails</LienOuvrir>
                   </td>
                 </tr>
               ))}

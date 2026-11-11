@@ -3,14 +3,10 @@ import { useParams } from "react-router-dom";
 import { appeler } from "./api";
 import { dateFr, fcfa } from "./formats.js";
 import Cadre from "./Cadre.jsx";
+import { libelleEcheance } from "./statuts.js";
 import { LienRetour } from "./ui.jsx";
 import Pagination from "./Pagination.jsx";
 import { usePagination } from "./usePagination.js";
-
-function joli(texte) {
-  const t = String(texte).replace(/_/g, " ");
-  return t.charAt(0).toUpperCase() + t.slice(1);
-}
 
 export default function CreditClient() {
   const { id } = useParams();
@@ -88,7 +84,7 @@ export default function CreditClient() {
                 <td>{fcfa(e.reste_du)}</td>
                 <td>
                   <span className={e.jours_retard > 0 ? "badge rouge" : "badge"}>
-                    {joli(e.statut)}{e.jours_retard > 0 ? " (" + e.jours_retard + " j)" : ""}
+                    {libelleEcheance(e.statut)}{e.jours_retard > 0 ? " (" + e.jours_retard + " j)" : ""}
                   </span>
                 </td>
               </tr>

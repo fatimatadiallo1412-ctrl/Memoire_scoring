@@ -4,17 +4,13 @@ import { appeler } from "./api";
 import { useAuth } from "./useAuth.js";
 import { aujourdhuiIso, dateFr, fcfa } from "./formats.js";
 import Cadre from "./Cadre.jsx";
+import { libelleEcheance } from "./statuts.js";
 import Pagination from "./Pagination.jsx";
 import { usePagination } from "./usePagination.js";
 import {
   Alerte, Badge, Bouton, Champ, Chargement, Info, Infos, Panneau, TD, TH, Tableau, classeSaisie, LienRetour } from "./ui.jsx";
 
 const MODES = { especes: "Espèces", mobile_money: "Mobile money", virement: "Virement" };
-
-function joli(texte) {
-  const t = String(texte).replace(/_/g, " ");
-  return t.charAt(0).toUpperCase() + t.slice(1);
-}
 
 function tonStatut(statut, retard) {
   const s = String(statut).toLowerCase();
@@ -170,7 +166,7 @@ export default function CreditPersonnel() {
                 <td className={TD}>{fcfa(e.reste_du)}</td>
                 <td className={TD}>
                   <Badge ton={tonStatut(e.statut, e.jours_retard)}>
-                    {joli(e.statut)}{e.jours_retard > 0 ? " (" + e.jours_retard + " j)" : ""}
+                    {libelleEcheance(e.statut)}{e.jours_retard > 0 ? " (" + e.jours_retard + " j)" : ""}
                   </Badge>
                 </td>
               </tr>

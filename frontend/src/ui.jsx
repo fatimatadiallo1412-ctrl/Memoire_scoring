@@ -26,7 +26,7 @@ const VARIANTES = {
   primaire: "bg-marque-700 text-white shadow-sm hover:bg-marque-800 hover:shadow-md active:bg-marque-800",
   secondaire: "bg-white text-encre ring-1 ring-inset ring-bord hover:bg-fond hover:ring-marque-200 active:bg-marque-50",
   danger: "bg-risque-eleve text-white shadow-sm hover:bg-red-900 active:bg-red-900",
-  lien: "text-marque-700 underline hover:text-marque-800 !px-0 !py-0 !min-h-0",
+  lien: "bg-transparent text-marque-700 underline hover:text-marque-800 !px-0 !py-0 !min-h-0",
 };
 
 export const classeSaisie =

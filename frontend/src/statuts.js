@@ -8,3 +8,12 @@ const TONS_DOSSIER = {
 export function tonDossier(statut) {
   return TONS_DOSSIER[statut] || "neutre";
 }
+
+// Libellé affiché de l'état d'une échéance (valeurs renvoyées par l'API).
+const LIBELLES_ECHEANCE = {
+  payee: "Payée", en_retard: "En retard", partielle: "Partiellement payée", a_venir: "À venir",
+};
+
+export function libelleEcheance(statut) {
+  return LIBELLES_ECHEANCE[statut] || String(statut).replace(/_/g, " ");
+}

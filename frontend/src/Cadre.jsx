@@ -85,7 +85,7 @@ export default function Cadre({ titre, actions, children }) {
   const menu = liens.map(([chemin, libelle]) => {
     const Icone = ICONES[chemin] || FolderOpen;
     return (
-      <NavLink key={chemin} to={chemin} className={classeLien} onClick={() => setOuvert(false)}>
+      <NavLink key={chemin} to={chemin} end={chemin === "/espace"} className={classeLien} onClick={() => setOuvert(false)}>
         <Icone className="h-5 w-5 shrink-0 transition-transform duration-200 motion-safe:group-hover:scale-110" aria-hidden="true" />
         <span className="flex-1">{libelle}</span>
         {utilisateur.role === "client" && chemin === "/espace" && <PastilleRappels />}
