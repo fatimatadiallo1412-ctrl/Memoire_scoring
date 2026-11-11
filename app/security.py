@@ -22,6 +22,12 @@ load_dotenv()
 
 CLE_SECRETE = os.environ["SECRET_KEY"]
 ALGORITHME = "HS256"
+LONGUEUR_MIN_CLE = 32  # octets : minimum recommandé pour HS256 (RFC 7518, § 3.2)
+
+if len(CLE_SECRETE.encode()) < LONGUEUR_MIN_CLE:
+    raise RuntimeError(
+        f"SECRET_KEY trop courte ({len(CLE_SECRETE.encode())} octets, minimum {LONGUEUR_MIN_CLE}). "
+        "Générez-en une avec : python -c \"import secrets; print(secrets.token_urlsafe(48))\"")
 DUREE_JETON_MINUTES = 480
 
 
