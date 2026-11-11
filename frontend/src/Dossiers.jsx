@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
-import { appeler } from "./api";
+import { appeler, appelerPage } from "./api";
 import { useAuth } from "./auth.jsx";
 import { dateFr, fcfa } from "./formats.js";
 import { LIBELLE_STATUT } from "./listes.js";
 import Cadre from "./Cadre.jsx";
 import Pagination from "./Pagination.jsx";
-import { usePagination } from "./usePagination.js";
+import { bornesPage, usePagination } from "./usePagination.js";
+
+const PAR_PAGE = 10;
 import { Alerte, Badge, TD, TH, Tableau, classeSaisie, tonDossier, LienOuvrir } from "./ui.jsx";
 
 function nomClient(c) {
@@ -21,7 +23,15 @@ export default function Dossiers() {
   const [nbClients, setNbClients] = useState(null);
   const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(true);
-  const pageDossiers = usePagination(demandes, 10);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  // Sans recherche : pagination par l'API. Avec recherche par client : pagination des résultats chargés.
+  const pageRecherche = usePagination(demandes, PAR_PAGE);
+  const enRecherche = nbClients !== null;
+  const pagination = enRecherche
+    ? pageRecherche
+    : { ...bornesPage(page, total, PAR_PAGE, demandes.length), allerA: setPage };
+  const lignes = enRecherche ? pageRecherche.elements : demandes;
 
   useEffect(() => {
     const terme = q.trim();
@@ -32,10 +42,13 @@ export default function Dossiers() {
       setErreur("");
       try {
         if (!terme) {
-          const liste = await appeler("/demandes", { params: { statut, limite: 50 } });
+          const { elements, total: nb } = await appelerPage("/demandes", {
+            params: { statut, limite: PAR_PAGE, decalage: (page - 1) * PAR_PAGE },
+          });
           if (!annule) {
             setNbClients(null);
-            setDemandes(liste);
+            setDemandes(elements);
+            setTotal(nb);
           }
         } else {
           const clients = await appeler("/clients", { params: { q: terme, limite: 20 } });
@@ -58,7 +71,7 @@ export default function Dossiers() {
       annule = true;
       clearTimeout(minuteur);
     };
-  }, [q, statut]);
+  }, [q, statut, page]);
 
   // Noms des clients de la liste (hors recherche)
   useEffect(() => {
@@ -81,9 +94,9 @@ export default function Dossiers() {
           type="search"
           placeholder="Rechercher un client : nom, prénom, téléphone ou code (2 caractères minimum)"
           value={q}
-          onChange={(e) => setQ(e.target.value)}
+          onChange={(e) => { setQ(e.target.value); setPage(1); }}
         />
-        <select className={classeSaisie} value={statut} onChange={(e) => setStatut(e.target.value)}
+        <select className={classeSaisie} value={statut} onChange={(e) => { setStatut(e.target.value); setPage(1); }}
           aria-label="Filtrer par statut">
           <option value="">Tous les statuts</option>
           {Object.entries(LIBELLE_STATUT).map(([cle, libelle]) => (
@@ -95,7 +108,7 @@ export default function Dossiers() {
       <p className="mb-3 text-sm text-slate-500">
         {chargement
           ? "Chargement…"
-          : demandes.length + " dossier(s)" +
+          : (enRecherche ? demandes.length : total) + " dossier(s)" +
             (nbClients !== null ? " pour " + nbClients + " client(s) trouvé(s)" : "") + "." +
             (nbClients === 20 ? " Résultats limités : précisez la recherche." : "")}
       </p>
@@ -108,8 +121,8 @@ export default function Dossiers() {
             <th className={TH}>Statut</th><th className={TH}></th>
           </tr>
         </thead>
-        <tbody key={pageDossiers.page} className="animate-apparition divide-y divide-slate-100 bg-white">
-          {pageDossiers.elements.map((d) => (
+        <tbody key={pagination.page} className="animate-apparition divide-y divide-slate-100 bg-white">
+          {lignes.map((d) => (
             <tr key={d.id} className="hover:bg-slate-50">
               <td className={TD}>{d.numero}</td>
               <td className={TD}>{noms[d.client_id] || "…"}</td>
@@ -124,7 +137,7 @@ export default function Dossiers() {
           ))}
         </tbody>
       </Tableau>
-      <Pagination {...pageDossiers} />
+      <Pagination {...pagination} />
     </Cadre>
   );
 }

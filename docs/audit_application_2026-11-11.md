@@ -208,3 +208,11 @@ Note : l'AUC de v3 mesurée ici (0,693) diffère légèrement de celle du notebo
 - Le palier entre 12 et 18 mois reste marqué : c'est la façon dont les arbres découpent la variable, et il reste cohérent (croissant).
 
 **À mettre à jour dans le mémoire** : le tableau des résultats finaux, la calibration, l'audit d'équité et l'explication des variables (SHAP) du notebook 03, ainsi que la justification du choix de v4 (motif de durée propre à Home Credit, voir plus haut).
+
+---
+
+## 11. Suivi des corrections (suite)
+
+| Date | Constat | Correction | Vérification |
+|---|---|---|---|
+| 11/11/2026 | Listes limitées à 50 éléments (pagination côté interface seulement) | `GET /clients` et `GET /demandes` acceptent `decalage` et renvoient le total dans l'en-tête `X-Total-Count` (`app/pagination.py`, exposé par CORS). Pages Clients et Dossiers paginées par l'API (10 par page) ; la recherche de dossiers par nom de client garde une pagination locale. | API : 1 505 dossiers et 1 506 clients comptés, pages disjointes, filtre de statut et portefeuille de l'agent respectés (198 clients) ; build du front OK. Pages non vues à l'écran (connexion nécessaire). |

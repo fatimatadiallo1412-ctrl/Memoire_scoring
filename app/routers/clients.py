@@ -1,6 +1,6 @@
 import unicodedata
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from pydantic import BaseModel, ValidationError
 from sqlalchemy import func, or_, select, text, update
 from sqlalchemy.orm import Session
@@ -10,6 +10,7 @@ from app.metiers import resoudre_metier
 from app.deps import exiger_roles
 from app.models import Agence, Client, DemandeCredit, Journal, Utilisateur
 from app.models.enums import Role, StatutDossier
+from app.pagination import paginer
 from app.portefeuille import exiger_client, filtrer_clients
 from app.schemas import ClientIn, ClientMaj, ClientOut
 
@@ -76,16 +77,18 @@ def creer_client(donnees: ClientIn, session: Session = Depends(get_session),
 
 @router.get("", response_model=list[ClientOut])
 def rechercher_clients(
+    reponse: Response,
     q: str | None = Query(default=None, min_length=2,
                           description="Nom, prénom, téléphone ou code client (accents ignorés)"),
     limite: int = Query(default=20, ge=1, le=100),
+    decalage: int = Query(default=0, ge=0, description="Nombre de clients à sauter (pagination)"),
     session: Session = Depends(get_session),
     utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE)),
 ):
-    """Liste tous les clients correspondants (homonymes compris) dans le portefeuille de l'utilisateur."""
+    """Liste les clients correspondants (homonymes compris) dans le portefeuille de l'utilisateur.
+    Le nombre total de résultats est renvoyé dans l'en-tête X-Total-Count."""
     requete = filtrer_clients(select(Client), utilisateur)
-    requete = requete.order_by(Client.nom, Client.prenom, Client.date_naissance,
-                               Client.id).limit(limite)
+    requete = requete.order_by(Client.nom, Client.prenom, Client.date_naissance, Client.id)
     if q:
         for mot in sans_accents(q).split():
             motif = f"%{mot}%"
@@ -94,7 +97,7 @@ def rechercher_clients(
                 colonne_sans_accents(Client.prenom).like(motif),
                 Client.telephone.ilike(motif),
                 Client.code_client.ilike(motif)))
-    return session.scalars(requete).all()
+    return paginer(session, requete, reponse, limite, decalage)
 
 
 @router.get("/{client_id}", response_model=ClientOut)

@@ -28,6 +28,17 @@ function texteErreur(detail, statut) {
 }
 
 export async function appeler(chemin, options = {}) {
+  return (await requete(chemin, options)).donnees;
+}
+
+// Liste paginée : renvoie les éléments et le nombre total (en-tête X-Total-Count de l'API).
+export async function appelerPage(chemin, options = {}) {
+  const { donnees, reponse } = await requete(chemin, options);
+  const total = Number(reponse.headers.get("X-Total-Count"));
+  return { elements: donnees, total: Number.isFinite(total) ? total : donnees.length };
+}
+
+async function requete(chemin, options = {}) {
   const { methode = "GET", json, formulaire, params } = options;
   const url = new URL(BASE + chemin);
   if (params) {
@@ -66,7 +77,7 @@ export async function appeler(chemin, options = {}) {
   if (!reponse.ok) {
     throw new ErreurApi(reponse.status, texteErreur(donnees && donnees.detail, reponse.status));
   }
-  return donnees;
+  return { donnees, reponse };
 }
 
 

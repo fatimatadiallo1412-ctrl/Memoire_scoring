@@ -14,7 +14,8 @@ app.add_middleware(
     allow_origins=["http://localhost:5173"],   # l'interface React
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Content-Disposition"],    # React doit lire le nom du fichier téléchargé
+    # React doit lire le nom du fichier téléchargé et le total des listes paginées
+    expose_headers=["Content-Disposition", "X-Total-Count"],
 )
 
 

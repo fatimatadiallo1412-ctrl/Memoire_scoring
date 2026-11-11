@@ -1,6 +1,6 @@
 from datetime import date, datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 
@@ -11,6 +11,7 @@ from app.models.enums import Role, StatutDossier
 from app.schemas import DemandeIn, DemandeOut, InstructionIn, ScoreOut
 from app.scoring import VERSION_MODELE, evaluer_dossier
 from app.workflow import changer_statut
+from app.pagination import paginer
 from app.portefeuille import client_accessible, filtrer_demandes
 from app.parametres import lire_parametres
 from app.historique import niveau_antecedent
@@ -75,19 +76,22 @@ def creer_demande(donnees: DemandeIn, session: Session = Depends(get_session),
 
 @router.get("", response_model=list[DemandeOut])
 def lister_demandes(
+    reponse: Response,
     statut: StatutDossier | None = None,
     client_id: int | None = None,
     limite: int = Query(default=20, ge=1, le=100),
+    decalage: int = Query(default=0, ge=0, description="Nombre de dossiers à sauter (pagination)"),
     session: Session = Depends(get_session),
     utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE)),
 ):
-    requete = select(DemandeCredit).order_by(DemandeCredit.id.desc()).limit(limite)
+    """Dossiers du portefeuille, du plus récent au plus ancien. Total dans l'en-tête X-Total-Count."""
+    requete = select(DemandeCredit).order_by(DemandeCredit.id.desc())
     requete = filtrer_demandes(requete, utilisateur)
     if statut:
         requete = requete.where(DemandeCredit.statut == statut)
     if client_id:
         requete = requete.where(DemandeCredit.client_id == client_id)
-    return session.scalars(requete).all()
+    return paginer(session, requete, reponse, limite, decalage)
 
 
 @router.get("/{demande_id}", response_model=DemandeOut)

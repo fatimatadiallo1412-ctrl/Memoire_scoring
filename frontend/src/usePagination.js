@@ -23,3 +23,10 @@ export function usePagination(liste, parPage = 10) {
     allerA: (p) => setEtat({ page: Math.min(Math.max(1, p), nbPages), total }),
   };
 }
+
+// Pagination côté serveur : la page courante est chargée par l'API, qui fournit le total.
+export function bornesPage(page, total, parPage, nbElements) {
+  const nbPages = Math.max(1, Math.ceil(total / parPage));
+  const debut = (page - 1) * parPage;
+  return { page, nbPages, total, debut, fin: debut + nbElements };
+}

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { appeler } from "./api";
+import { appelerPage } from "./api";
 import { useAuth } from "./auth.jsx";
 import { dateFr } from "./formats.js";
 import Cadre from "./Cadre.jsx";
 import Pagination from "./Pagination.jsx";
-import { usePagination } from "./usePagination.js";
+import { bornesPage } from "./usePagination.js";
+
+const PAR_PAGE = 10;
 import { Alerte, LienBouton, TD, TH, Tableau, classeSaisie, LienOuvrir } from "./ui.jsx";
 
 export default function Clients() {
@@ -14,7 +16,8 @@ export default function Clients() {
   const [clients, setClients] = useState([]);
   const [erreur, setErreur] = useState("");
   const [chargement, setChargement] = useState(true);
-  const pageClients = usePagination(clients, 10);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     const terme = q.trim();
@@ -24,8 +27,13 @@ export default function Clients() {
       setChargement(true);
       setErreur("");
       try {
-        const liste = await appeler("/clients", { params: { q: terme, limite: 50 } });
-        if (!annule) setClients(liste);
+        const { elements, total: nb } = await appelerPage("/clients", {
+          params: { q: terme, limite: PAR_PAGE, decalage: (page - 1) * PAR_PAGE },
+        });
+        if (!annule) {
+          setClients(elements);
+          setTotal(nb);
+        }
       } catch (e) {
         if (!annule) setErreur(e.message);
       } finally {
@@ -36,7 +44,7 @@ export default function Clients() {
       annule = true;
       clearTimeout(minuteur);
     };
-  }, [q]);
+  }, [q, page]);
 
   return (
     <Cadre titre="Clients" actions={peutCreer && <LienBouton to="/clients/nouveau">+ Nouveau client</LienBouton>}>
@@ -45,13 +53,13 @@ export default function Clients() {
         type="search"
         placeholder="Nom, prénom, téléphone ou code client (2 caractères minimum)"
         value={q}
-        onChange={(e) => setQ(e.target.value)}
+        onChange={(e) => { setQ(e.target.value); setPage(1); }}
       />
       {erreur && <Alerte>{erreur}</Alerte>}
       <p className="mb-3 text-sm text-slate-500">
         {chargement
           ? "Recherche…"
-          : clients.length + " client(s). Plusieurs clients peuvent porter le même nom : repérez le bon par la date de naissance, le téléphone ou le code client."}
+          : total + " client(s). Plusieurs clients peuvent porter le même nom : repérez le bon par la date de naissance, le téléphone ou le code client."}
       </p>
       <Tableau>
         <thead className="bg-slate-50">
@@ -63,8 +71,8 @@ export default function Clients() {
             <th className={TH}></th>
           </tr>
         </thead>
-        <tbody key={pageClients.page} className="animate-apparition divide-y divide-slate-100 bg-white">
-          {pageClients.elements.map((c) => (
+        <tbody key={page} className="animate-apparition divide-y divide-slate-100 bg-white">
+          {clients.map((c) => (
             <tr key={c.id} className="hover:bg-slate-50">
               <td className={TD}>{c.code_client}</td>
               <td className={TD + " font-medium"}>{c.nom}</td>
@@ -79,7 +87,7 @@ export default function Clients() {
           ))}
         </tbody>
       </Tableau>
-      <Pagination {...pageClients} />
+      <Pagination {...bornesPage(page, total, PAR_PAGE, clients.length)} allerA={setPage} />
     </Cadre>
   );
 }
