@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { appeler } from "./api";
 import { Alerte, Bouton, Champ, MotDePasseTemp, Panneau, classeSaisie } from "./ui.jsx";
 import { AIDE_GMAIL, GMAIL } from "./validation.js";
@@ -9,11 +9,6 @@ export default function AccesClient({ clientId }) {
   const [erreur, setErreur] = useState("");
   const [secret, setSecret] = useState(null);
 
-  useEffect(() => {
-    setEmail("");
-    setErreur("");
-    setSecret(null);
-  }, [clientId]);
 
   async function creer(e) {
     e.preventDefault();

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { appelerPage } from "./api";
-import { useAuth } from "./auth.jsx";
+import { useAuth } from "./useAuth.js";
 import { dateFr } from "./formats.js";
 import Cadre from "./Cadre.jsx";
 import Pagination from "./Pagination.jsx";

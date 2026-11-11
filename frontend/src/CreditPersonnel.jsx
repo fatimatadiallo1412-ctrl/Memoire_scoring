@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { appeler } from "./api";
-import { useAuth } from "./auth.jsx";
-import { dateFr, fcfa } from "./formats.js";
+import { useAuth } from "./useAuth.js";
+import { aujourdhuiIso, dateFr, fcfa } from "./formats.js";
 import Cadre from "./Cadre.jsx";
 import Pagination from "./Pagination.jsx";
 import { usePagination } from "./usePagination.js";
@@ -32,7 +32,7 @@ export default function CreditPersonnel() {
   const [succes, setSucces] = useState("");
 
   const [montant, setMontant] = useState("");
-  const [datePaiement, setDatePaiement] = useState(new Date().toISOString().slice(0, 10));
+  const [datePaiement, setDatePaiement] = useState(aujourdhuiIso);
   const [mode, setMode] = useState("especes");
   const [envoi, setEnvoi] = useState(false);
   const pageEcheances = usePagination(situation ? situation.echeances : null, 10);
@@ -52,6 +52,7 @@ export default function CreditPersonnel() {
   }, [id]);
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- chargement depuis l'API (système externe)
     charger();
   }, [charger]);
 

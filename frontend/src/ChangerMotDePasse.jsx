@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { appeler } from "./api";
-import { useAuth } from "./auth.jsx";
+import { useAuth } from "./useAuth.js";
 import { accueilDe } from "./roles.js";
 import Cadre from "./Cadre.jsx";
 import LogoMarque from "./LogoMarque.jsx";

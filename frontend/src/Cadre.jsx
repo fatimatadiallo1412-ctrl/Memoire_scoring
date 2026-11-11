@@ -7,7 +7,7 @@ import LogoMarque from "./LogoMarque.jsx";
 import { Link, NavLink } from "react-router-dom";
 import { MARQUE } from "./marque.js";
 import { appeler } from "./api";
-import { useAuth } from "./auth.jsx";
+import { useAuth } from "./useAuth.js";
 import { LIBELLE_ROLE } from "./roles.js";
 import { Bouton } from "./ui.jsx";
 

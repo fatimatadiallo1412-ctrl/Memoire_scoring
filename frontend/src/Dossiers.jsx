@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { appeler, appelerPage } from "./api";
-import { useAuth } from "./auth.jsx";
+import { useAuth } from "./useAuth.js";
 import { dateFr, fcfa } from "./formats.js";
 import { LIBELLE_STATUT } from "./listes.js";
 import Cadre from "./Cadre.jsx";
@@ -8,7 +8,8 @@ import Pagination from "./Pagination.jsx";
 import { bornesPage, usePagination } from "./usePagination.js";
 
 const PAR_PAGE = 10;
-import { Alerte, Badge, TD, TH, Tableau, classeSaisie, tonDossier, LienOuvrir } from "./ui.jsx";
+import { Alerte, Badge, TD, TH, Tableau, classeSaisie, LienOuvrir } from "./ui.jsx";
+import { tonDossier } from "./statuts.js";
 
 function nomClient(c) {
   return c.prenom + " " + c.nom + " (" + c.code_client + ")";

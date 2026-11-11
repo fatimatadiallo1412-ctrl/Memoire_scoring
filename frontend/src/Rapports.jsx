@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { telecharger } from "./api";
+import { aujourdhuiIso } from "./formats.js";
 import Cadre from "./Cadre.jsx";
 import { Alerte, Bouton, Champ, Panneau, classeSaisie } from "./ui.jsx";
 
@@ -7,7 +8,7 @@ const PERIODES = [["jour", "Journalier"], ["mois", "Mensuel"], ["annee", "Annuel
 
 export default function Rapports() {
   const [periode, setPeriode] = useState("mois");
-  const [jour, setJour] = useState(new Date().toISOString().slice(0, 10));
+  const [jour, setJour] = useState(aujourdhuiIso);
   const [format, setFormat] = useState("xlsx");
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState("");

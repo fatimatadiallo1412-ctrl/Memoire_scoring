@@ -1,5 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import { useAuth } from "./auth.jsx";
+import { useAuth } from "./useAuth.js";
 import { ACCUEIL, accueilDe } from "./roles.js";
 import Connexion from "./Connexion.jsx";
 import Clients from "./Clients.jsx";

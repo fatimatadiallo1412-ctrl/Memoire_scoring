@@ -27,6 +27,7 @@ export default function Espace() {
   }, []);
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- chargement depuis l'API (système externe)
     charger();
   }, [charger]);
 

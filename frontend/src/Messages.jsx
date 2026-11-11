@@ -29,7 +29,7 @@ export default function Messages() {
   }, [filtre]);
 
   useEffect(() => {
-    setListe(null);
+    // oxlint-disable-next-line react/set-state-in-effect -- chargement depuis l'API (système externe)
     charger();
   }, [charger]);
 
@@ -46,7 +46,7 @@ export default function Messages() {
     <Cadre titre="Messages reçus">
       <div className="mb-5 inline-flex rounded-full bg-white p-1 ring-1 ring-inset ring-bord" role="group" aria-label="Filtrer les messages">
         {[["non_traites", "Non traités"], ["tous", "Tous les messages"]].map(([valeur, libelle]) => (
-          <button key={valeur} type="button" aria-pressed={filtre === valeur} onClick={() => setFiltre(valeur)}
+          <button key={valeur} type="button" aria-pressed={filtre === valeur} onClick={() => { if (valeur !== filtre) { setListe(null); setFiltre(valeur); } }}
             className={"min-h-10 rounded-full px-4 text-sm font-semibold transition duration-200 " +
               (filtre === valeur ? "bg-marque-700 text-white shadow-md" : "bg-transparent text-texte-doux hover:text-encre")}>
             {libelle}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { appeler } from "./api";
+import { aujourdhuiIso } from "./formats.js";
 import { LOGEMENTS, SITUATIONS, TYPES_REVENU } from "./listes.js";
 import Cadre from "./Cadre.jsx";
 import ChampMetier from "./ChampMetier.jsx";
@@ -83,7 +84,7 @@ export default function NouveauClient() {
           </Champ>
           <Champ label="Date de naissance">
             <input className={classeSaisie} type="date" value={f.date_naissance} required
-              max={new Date().toISOString().slice(0, 10)}
+              max={aujourdhuiIso()}
               onChange={(e) => changer("date_naissance", e.target.value)} />
           </Champ>
           <Champ label="Sexe">

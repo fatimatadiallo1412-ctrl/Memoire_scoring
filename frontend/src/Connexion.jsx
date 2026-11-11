@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Bell, CalendarDays, Eye, EyeOff, MessageCircle, TriangleAlert } from "lucide-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { useAuth } from "./auth.jsx";
+import { useAuth } from "./useAuth.js";
 import { SceneSuivi } from "./IllustrationsHero.jsx";
 import LogoMarque from "./LogoMarque.jsx";
 import { MARQUE } from "./marque.js";

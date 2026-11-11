@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { appeler } from "./api";
-import { useAuth } from "./auth.jsx";
+import { useAuth } from "./useAuth.js";
 import { dateFr } from "./formats.js";
 import Cadre from "./Cadre.jsx";
 import { Alerte, Bouton, Chargement, Panneau, classeSaisie } from "./ui.jsx";
@@ -43,6 +43,7 @@ export default function Parametres() {
   }, []);
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- chargement depuis l'API (système externe)
     charger();
   }, [charger]);
 

@@ -2,14 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { appeler } from "./api";
-import { useAuth } from "./auth.jsx";
+import { useAuth } from "./useAuth.js";
 import { dateFr, fcfa } from "./formats.js";
 import { LIBELLE_DECISION, LIBELLE_STATUT } from "./listes.js";
 import Cadre from "./Cadre.jsx";
 import { EncadreDecaissement, PanneauDecaissement } from "./Decaissement.jsx";
-import {
-  Alerte, Badge, Bouton, Champ, Chargement, Info, Infos, LienBouton, Panneau,
-  TD, TH, Tableau, classeSaisie, tonDossier, LienRetour } from "./ui.jsx";
+import { Alerte, Badge, Bouton, Champ, Chargement, Info, Infos, LienBouton, Panneau, TD, TH, Tableau, classeSaisie, LienRetour } from "./ui.jsx";
+import { tonDossier } from "./statuts.js";
 
 const RECOMMANDATION = { accord: "Accord", accord_reduit: "Accord réduit", refus: "Refus" };
 const STATUTS_CREDIT = ["decaisse", "en_remboursement", "solde", "contentieux"];
@@ -259,6 +258,7 @@ export default function FicheDossier() {
   }, [id]);
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- chargement depuis l'API (système externe)
     charger();
   }, [charger]);
 

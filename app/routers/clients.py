@@ -47,7 +47,7 @@ class AffectationIn(BaseModel):
 def creer_client(donnees: ClientIn, session: Session = Depends(get_session),
                  utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
     if session.get(Agence, donnees.agence_id) is None:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Agence inconnue")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Agence inconnue")
 
     # Un agent qui crée un client en devient le gestionnaire ; sinon il reste à affecter.
     gestionnaire = utilisateur.id if utilisateur.role == Role.AGENT_CREDIT else None
@@ -61,7 +61,7 @@ def creer_client(donnees: ClientIn, session: Session = Depends(get_session),
         try:
             metier = resoudre_metier(session, champs["profession"], utilisateur)
         except ValueError:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Profession vide")
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Profession vide")
         champs["profession"] = metier.code
         categorie = metier.categorie_modele
     client = Client(id=prochain_id, code_client=f"CL{prochain_id:06d}",
@@ -113,9 +113,9 @@ def modifier_client(client_id: int, donnees: ClientMaj, session: Session = Depen
     client = exiger_client(session, client_id, utilisateur)
     envoyes = donnees.model_dump(exclude_unset=True)
     if not envoyes:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Aucun champ à modifier")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Aucun champ à modifier")
     if "agence_id" in envoyes and session.get(Agence, envoyes["agence_id"]) is None:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Agence inconnue")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Agence inconnue")
 
     # Les règles de ClientIn (majorité, profession connue...) sont revérifiées sur la fiche
     # fusionnée ; on ne retient que les erreurs portant sur les champs envoyés.
@@ -126,7 +126,7 @@ def modifier_client(client_id: int, donnees: ClientMaj, session: Session = Depen
         problemes = [{"champ": e["loc"][0], "message": e["msg"]}
                      for e in erreur.errors() if e["loc"] and e["loc"][0] in envoyes]
         if problemes:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, problemes)
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, problemes)
 
     # Profession : on reconnaît le métier (ou on le crée « à classer ») et on retient son code
     # et la catégorie que le modèle utilisera.
@@ -137,7 +137,7 @@ def modifier_client(client_id: int, donnees: ClientMaj, session: Session = Depen
             try:
                 metier = resoudre_metier(session, envoyes["profession"], utilisateur)
             except ValueError:
-                raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Profession vide")
+                raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Profession vide")
             envoyes["profession"] = metier.code
             envoyes["categorie_profession"] = metier.categorie_modele
 
@@ -175,7 +175,7 @@ def affecter_client(client_id: int, donnees: AffectationIn,
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Client introuvable")
     gestionnaire = session.get(Utilisateur, donnees.gestionnaire_id)
     if gestionnaire is None or gestionnaire.role != Role.AGENT_CREDIT or not gestionnaire.actif:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "Gestionnaire inconnu, inactif ou qui n'est pas un agent de crédit")
 
     ancien = client.gestionnaire_id

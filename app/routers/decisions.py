@@ -57,7 +57,7 @@ def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get
         montant, duree = demande.montant_demande, demande.duree_mois
     elif choix == TypeDecision.ACCORDER_MODIFIE:
         if donnees.montant_accorde is None or donnees.duree_accordee is None:
-            raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                                 "Montant et durée accordés obligatoires pour un accord avec modification")
         montant, duree = donnees.montant_accorde, donnees.duree_accordee
         verifier_produit(session, demande.produit_id, montant, duree)
@@ -66,7 +66,7 @@ def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get
     concordance = est_concordante(choix, score.recommandation, score.montant_suggere, montant)
     if not concordance and not a_un_motif:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             "Un motif est obligatoire quand la décision diffère de la recommandation du modèle")
 
     # Accord modifié : le risque du montant réellement accordé est recalculé et tracé.
@@ -75,7 +75,7 @@ def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get
         simulation = _simuler(session, demande, montant, duree)
         if not simulation["dans_politique"] and not a_un_motif:
             raise HTTPException(
-                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
                 f"Un motif est obligatoire : le montant accordé sort de la politique de crédit "
                 f"(risque {simulation['p_defaut']:.1%} pour un seuil de {simulation['seuil']:.1%}, "
                 f"endettement {simulation['endettement']:.0%} pour un maximum de {simulation['endettement_max']:.0%})")

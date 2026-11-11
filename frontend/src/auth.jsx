@@ -1,11 +1,7 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { appeler, ecrireJeton, lireJeton } from "./api";
+import { Contexte } from "./useAuth.js";
 
-const Contexte = createContext(null);
-
-export function useAuth() {
-  return useContext(Contexte);
-}
 
 export function AuthProvider({ children }) {
   const [utilisateur, setUtilisateur] = useState(null);

@@ -16,10 +16,6 @@ export default function AssistantPersonnel({ clientId }) {
   const bas = useRef(null);
 
   useEffect(() => {
-    setMessages([]);
-  }, [clientId]);
-
-  useEffect(() => {
     if (messages.length > 0 && bas.current) bas.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }, [messages]);
 

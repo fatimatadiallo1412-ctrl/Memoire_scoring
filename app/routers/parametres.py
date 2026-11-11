@@ -33,7 +33,7 @@ def modifier_parametre(cle: str, donnees: ParametreIn, session: Session = Depend
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Paramètre inconnu")
     defaut, description, mini, maxi = PARAMETRES_DEFAUT[cle]
     if not mini <= donnees.valeur <= maxi:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             f"Valeur hors limites ({mini} à {maxi})")
 
     parametre = session.get(Parametre, cle)

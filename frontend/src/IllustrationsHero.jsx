@@ -470,38 +470,3 @@ export function SceneTransfert() {
     </Cadre>
   );
 }
-
-// 8. Élevage : un mouton broute près de l'enclos
-export function SceneElevage() {
-  return (
-    <Cadre label="elevage">
-      <Soleil x={300} y={92} r={22} />
-      <rect x="0" y="262" width="400" height="100" fill={C.baobabClair} />
-      <rect x="0" y="262" width="400" height="10" fill={C.baobab} />
-      {/* Enclos */}
-      {[60, 110, 290, 340].map((x) => <rect key={x} x={x} y="200" width="9" height="70" rx="2" fill={C.bois} />)}
-      <rect x="40" y="214" width="330" height="7" rx="3" fill={C.boisClair} />
-      <rect x="40" y="240" width="330" height="7" rx="3" fill={C.boisClair} />
-      {/* Botte de foin */}
-      <rect x="282" y="236" width="70" height="38" rx="6" fill={C.soleil} />
-      <path d="M294 236 v38 M318 236 v38 M342 236 v38" stroke={C.soleilFonce} strokeWidth="2" />
-
-      {/* Mouton */}
-      <g className="animate-balancer svg-centre" style={{ animationDuration: "3s" }}>
-        <rect x="160" y="250" width="9" height="34" rx="4" fill={C.peauFonce} />
-        <rect x="182" y="254" width="9" height="32" rx="4" fill={C.peauFonce} />
-        <rect x="218" y="254" width="9" height="32" rx="4" fill={C.peauFonce} />
-        <rect x="238" y="250" width="9" height="34" rx="4" fill={C.peauFonce} />
-        {[[170, 226], [194, 214], [220, 216], [244, 228], [186, 244], [214, 246], [238, 244], [160, 240]].map(([x, y]) => (
-          <circle key={x + "-" + y} cx={x} cy={y} r="22" fill={C.sable} />
-        ))}
-        <ellipse cx="140" cy="236" rx="16" ry="22" fill={C.peauFonce} transform="rotate(28 140 236)" />
-        <path d="M150 220 q14 -10 8 10 q-4 8 -10 2" fill="none" stroke={C.soleilFonce} strokeWidth="5" strokeLinecap="round" />
-        <circle cx="134" cy="232" r="3" fill={C.blanc} />
-      </g>
-      {[[100, 288], [250, 300], [330, 292]].map(([x, y]) => (
-        <path key={x} d={`M${x} ${y} l4 -12 l4 12 l4 -10 l4 10`} fill="none" stroke={C.baobab} strokeWidth="3" strokeLinejoin="round" />
-      ))}
-    </Cadre>
-  );
-}

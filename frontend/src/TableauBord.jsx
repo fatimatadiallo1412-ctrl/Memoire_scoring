@@ -46,6 +46,7 @@ export default function TableauBord() {
   }, []);
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- chargement depuis l'API (système externe)
     charger();
   }, [charger]);
 

@@ -19,10 +19,7 @@ export default function NouvelleDemande() {
   const [envoi, setEnvoi] = useState(false);
 
   useEffect(() => {
-    if (!clientId) {
-      setErreur("Aucun client choisi : ouvrez d'abord la fiche d'un client.");
-      return;
-    }
+    if (!clientId) return;
     appeler("/clients/" + clientId).then(setClient).catch((e) => setErreur(e.message));
     appeler("/produits")
       .then((liste) => {
@@ -32,6 +29,7 @@ export default function NouvelleDemande() {
       .catch((e) => setErreur(e.message));
   }, [clientId]);
 
+  const messageErreur = clientId ? erreur : "Aucun client choisi : ouvrez d'abord la fiche d'un client.";
   const produit = produits.find((p) => String(p.id) === produitId);
 
   async function creer(evenement) {
@@ -58,7 +56,7 @@ export default function NouvelleDemande() {
 
   return (
     <Cadre titre="Nouvelle demande de crédit">
-      {erreur && <Alerte>{erreur}</Alerte>}
+      {messageErreur && <Alerte>{messageErreur}</Alerte>}
       <Panneau>
         {client && (
           <p className="mb-4 text-sm text-slate-600">

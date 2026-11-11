@@ -72,7 +72,7 @@ def classer_metier(code: str, donnees: ClassementIn, session: Session = Depends(
     if metier is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Métier introuvable")
     if donnees.categorie_modele not in CATEGORIES:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "Catégorie inconnue. Choix possibles : " + ", ".join(CATEGORIES))
 
     ancienne = metier.categorie_modele

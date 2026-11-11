@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Mail, MapPin, Menu, Phone, X } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
-import { useAuth } from "./auth.jsx";
+import { useAuth } from "./useAuth.js";
+import { anneeCourante } from "./formats.js";
 import LogoMarque from "./LogoMarque.jsx";
 import { ACCUEIL } from "./roles.js";
 import { MARQUE } from "./marque.js";
@@ -131,7 +132,7 @@ export default function Vitrine({ children }) {
 
         <div className="border-t border-white/10">
           <p className="mx-auto max-w-7xl px-4 py-4 text-xs text-slate-500 sm:px-6">
-            © {new Date().getFullYear()} {MARQUE.nom} · Projet de mémoire de Master 2 MIAGE
+            © {anneeCourante()} {MARQUE.nom} · Projet de mémoire de Master 2 MIAGE
           </p>
         </div>
       </footer>

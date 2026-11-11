@@ -28,14 +28,14 @@ MODIFIABLES = (StatutDossier.BROUILLON, StatutDossier.COMPLET,
 def verifier_produit(session: Session, produit_id: int, montant: int, duree: int) -> None:
     produit = session.get(ProduitCredit, produit_id)
     if produit is None or not produit.actif:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Produit inconnu ou inactif")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Produit inconnu ou inactif")
     if not produit.montant_min <= montant <= produit.montant_max:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             f"Montant hors limites du produit ({produit.montant_min} à {produit.montant_max} FCFA)")
     if not produit.duree_min_mois <= duree <= produit.duree_max_mois:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             f"Durée hors limites du produit ({produit.duree_min_mois} à {produit.duree_max_mois} mois)")
 
 
@@ -50,7 +50,7 @@ def _charger_demande_brut(session: Session, demande_id: int) -> DemandeCredit:
 def creer_demande(donnees: DemandeIn, session: Session = Depends(get_session),
                   utilisateur: Utilisateur = Depends(exiger_roles(*SAISIE))):
     if not client_accessible(session, donnees.client_id, utilisateur):
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, "Client inconnu")
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Client inconnu")
     verifier_produit(session, donnees.produit_id, donnees.montant_demande, donnees.duree_mois)
 
     prochain_id = session.scalar(text("SELECT nextval(pg_get_serial_sequence('ops.demande_credit', 'id'))"))
@@ -134,7 +134,7 @@ def completer_demande(demande_id: int, session: Session = Depends(get_session),
     if client.revenu_mensuel <= 0:
         manquants.append("revenu mensuel du client")
     if manquants:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "Dossier incomplet : " + ", ".join(manquants))
 
     changer_statut(demande, StatutDossier.COMPLET)
@@ -153,7 +153,7 @@ def scorer_demande(demande_id: int, session: Session = Depends(get_session),
     client = session.get(Client, demande.client_id)
     produit = session.get(ProduitCredit, demande.produit_id)
     if client.revenu_mensuel <= 0:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "Le revenu mensuel du client est nécessaire au scoring")
 
     parametres = lire_parametres(session)

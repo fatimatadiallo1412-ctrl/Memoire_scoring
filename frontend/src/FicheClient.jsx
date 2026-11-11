@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { appeler } from "./api";
-import { useAuth } from "./auth.jsx";
-import { dateFr } from "./formats.js";
+import { useAuth } from "./useAuth.js";
+import { aujourdhuiIso, dateFr } from "./formats.js";
 import { LIBELLE_CATEGORIE, LOGEMENTS, SITUATIONS, TYPES_REVENU } from "./listes.js";
 import { invaliderMetiers } from "./metiers.js";
 import ChampMetier from "./ChampMetier.jsx";
@@ -64,9 +64,15 @@ export default function FicheClient() {
   const [message, setMessage] = useState("");
   const [envoi, setEnvoi] = useState(false);
 
-  useEffect(() => {
+  // Autre client affiché : on repart d'une fiche vide (sans effet en cascade).
+  const [idAffiche, setIdAffiche] = useState(id);
+  if (idAffiche !== id) {
+    setIdAffiche(id);
     setClient(null);
     setErreur("");
+  }
+
+  useEffect(() => {
     Promise.all([appeler("/clients/" + id), appeler("/professions")])
       .then(([c, liste]) => {
         setMetiers(liste);
@@ -170,7 +176,7 @@ export default function FicheClient() {
           </Champ>
           <Champ label={"Date de naissance" + marque("date_naissance")}>
             <input className={classeSaisie} type="date" value={f.date_naissance} required
-              max={new Date().toISOString().slice(0, 10)}
+              max={aujourdhuiIso()}
               onChange={(e) => changer("date_naissance", e.target.value)} />
           </Champ>
           <Champ label="Sexe">
@@ -223,8 +229,8 @@ export default function FicheClient() {
           </div>
         </form>
       </Panneau>
-      <AssistantPersonnel clientId={client.id} />
-      {peutDemander && <AccesClient clientId={client.id} />}
+      <AssistantPersonnel key={client.id} clientId={client.id} />
+      {peutDemander && <AccesClient key={client.id} clientId={client.id} />}
     </Cadre>
   );
 }

@@ -113,16 +113,16 @@ def enregistrer_paiement(credit_id: int, donnees: PaiementIn,
 
     jour = donnees.date_paiement or date.today()
     if jour > date.today():
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "La date de paiement ne peut pas être dans le futur")
     if jour < credit.date_decaissement:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "La date de paiement précède le décaissement")
 
     situation = _situation(session, credit)
     if donnees.montant > situation["reste_a_payer"]:
         raise HTTPException(
-            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
             f"Le montant dépasse le reste à payer ({situation['reste_a_payer']})")
 
     paiement = Paiement(credit_id=credit.id, montant=donnees.montant,
@@ -169,18 +169,18 @@ def _controler_decaissement(donnees, decision):
     """Règles : mode obligatoire, date ni future ni antérieure à la décision,
     référence obligatoire hors espèces."""
     if donnees is None or not donnees.mode_decaissement:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "Précisez le mode de décaissement")
     jour = donnees.date_decaissement or date.today()
     if jour > date.today():
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "La date de décaissement ne peut pas être dans le futur")
     if decision.decide_le is not None and jour < decision.decide_le.date():
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "La date de décaissement précède la décision du directeur")
     reference = (donnees.reference or "").strip() or None
     if donnees.mode_decaissement != "especes" and not reference:
-        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY,
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT,
                             "Indiquez la référence de la transaction (mobile money ou virement)")
     return jour, donnees.mode_decaissement, reference
 
