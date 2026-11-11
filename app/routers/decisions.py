@@ -12,16 +12,10 @@ from app.routers.demandes import (LECTURE, charger_demande, exiger_score_valide,
 from app.parametres import lire_parametres
 from app.schemas import DecisionIn, DecisionOut
 from app.scoring import evaluer_montant
-from app.workflow import changer_statut
+from app.workflow import changer_statut, est_concordante
 
 router = APIRouter(prefix="/demandes", tags=["décisions"])
 
-# Ce que la recommandation du modèle signifie, en termes de décision humaine
-EQUIVALENT_MODELE = {
-    "accord": TypeDecision.ACCORDER,
-    "accord_reduit": TypeDecision.ACCORDER_MODIFIE,
-    "refus": TypeDecision.REFUSER,
-}
 STATUT_APRES = {
     TypeDecision.ACCORDER: StatutDossier.ACCORDE,
     TypeDecision.ACCORDER_MODIFIE: StatutDossier.ACCORDE_MODIFIE,
@@ -69,7 +63,7 @@ def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get
         verifier_produit(session, demande.produit_id, montant, duree)
 
     a_un_motif = bool(donnees.commentaire and donnees.commentaire.strip())
-    concordance = choix == EQUIVALENT_MODELE[score.recommandation]
+    concordance = est_concordante(choix, score.recommandation, score.montant_suggere, montant)
     if not concordance and not a_un_motif:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,

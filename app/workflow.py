@@ -1,6 +1,7 @@
 from fastapi import HTTPException, status
 
 from app.models.enums import StatutDossier as S
+from app.models.enums import TypeDecision as D
 
 TRANSITIONS = {
     S.BROUILLON: {S.COMPLET},
@@ -26,3 +27,25 @@ def changer_statut(demande, cible: S) -> None:
             status.HTTP_409_CONFLICT,
             f"Transition interdite : {demande.statut.value} vers {cible.value}")
     demande.statut = cible
+
+
+# Ce que la recommandation du modèle signifie, en termes de décision humaine
+EQUIVALENT_MODELE = {
+    "accord": D.ACCORDER,
+    "accord_reduit": D.ACCORDER_MODIFIE,
+    "refus": D.REFUSER,
+}
+
+
+def est_concordante(choix: D, recommandation: str, montant_suggere: int | None = None,
+                    montant_accorde: int | None = None) -> bool:
+    """La décision du directeur suit-elle la recommandation du modèle ?
+
+    Un accord modifié n'est concordant avec un « accord réduit » que si le montant accordé
+    ne dépasse pas le montant suggéré par le modèle : accorder davantage revient à contredire le modèle.
+    """
+    if choix != EQUIVALENT_MODELE[recommandation]:
+        return False
+    if choix == D.ACCORDER_MODIFIE and montant_suggere is not None and montant_accorde is not None:
+        return montant_accorde <= montant_suggere
+    return True
