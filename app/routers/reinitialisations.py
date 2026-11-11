@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.validation import valider_telephone
 from app.db import get_session
 from app.deps import exiger_roles
 from app.models import Client, DemandeReinitialisation, Journal, Utilisateur
@@ -51,7 +52,7 @@ class DemandeIn(BaseModel):
     @field_validator("contact", mode="before")
     @classmethod
     def nettoyer(cls, valeur):
-        return valeur.strip() if isinstance(valeur, str) else valeur
+        return valider_telephone(valeur) if isinstance(valeur, str) else valeur
 
 
 class ConfirmationOut(BaseModel):

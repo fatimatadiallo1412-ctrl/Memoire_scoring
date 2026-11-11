@@ -6,6 +6,7 @@ from pydantic import Field, field_validator
 from app.models.enums import StatutDossier
 from app.referentiels import PROFESSION
 from app.models.enums import TypeDecision
+from app.validation import valider_telephone
 
 class UtilisateurOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -48,6 +49,8 @@ class ClientIn(BaseModel):
         if age < 18:
             raise ValueError("Le client doit être majeur")
         return valeur
+
+    _telephone = field_validator("telephone", mode="before")(lambda cls, v: valider_telephone(v))
 
 
 class ClientOut(ClientIn):
@@ -232,3 +235,6 @@ class ClientMaj(BaseModel):
     possede_bien_immobilier: bool | None = None
     possede_vehicule: bool | None = None
     revenu_mensuel: int | None = Field(default=None, ge=0)
+
+    _telephone = field_validator("telephone", mode="before")(lambda cls, v: valider_telephone(v))
+

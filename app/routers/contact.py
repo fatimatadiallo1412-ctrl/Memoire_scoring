@@ -1,4 +1,3 @@
-import re
 import time
 from collections import defaultdict, deque
 from datetime import datetime, timezone
@@ -8,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.validation import valider_gmail
 from app.db import get_session
 from app.deps import exiger_roles
 from app.models.contact import MessageContact
@@ -21,7 +21,6 @@ FENETRE_SECONDES = 3600
 MAX_MESSAGES = 5
 _ENVOIS: dict[str, deque] = defaultdict(deque)
 
-MOTIF_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 def _verifier_limite(adresse: str) -> None:
@@ -52,10 +51,7 @@ class ContactIn(BaseModel):
     @field_validator("email")
     @classmethod
     def verifier_email(cls, valeur: str) -> str:
-        valeur = valeur.strip().lower()
-        if not MOTIF_EMAIL.match(valeur):
-            raise ValueError("adresse e-mail invalide")
-        return valeur
+        return valider_gmail(valeur)
 
 
 class ConfirmationOut(BaseModel):

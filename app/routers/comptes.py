@@ -1,4 +1,3 @@
-import re
 import secrets
 from datetime import datetime
 from typing import Literal
@@ -8,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.validation import valider_gmail
 from app.db import get_session
 from app.deps import exiger_roles, utilisateur_courant
 from app.models import Agence, Client, Journal, Utilisateur
@@ -17,7 +17,6 @@ from app.security import hasher_mot_de_passe, verifier_mot_de_passe
 router = APIRouter(prefix="/comptes", tags=["comptes"])
 router_mdp = APIRouter(prefix="/auth", tags=["authentification"])
 
-MOTIF_EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 # Sans caractères ambigus (0/O, 1/l/I) pour qu'on puisse le dicter ou le lire sans erreur.
 ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"
 
@@ -27,10 +26,7 @@ def _mot_de_passe_temporaire() -> str:
 
 
 def _verifier_email(valeur: str) -> str:
-    valeur = valeur.strip().lower()
-    if not MOTIF_EMAIL.match(valeur):
-        raise ValueError("adresse e-mail invalide")
-    return valeur
+    return valider_gmail(valeur)
 
 
 class CompteOut(BaseModel):
