@@ -8,7 +8,7 @@ from src.features import PLAFOND_ENFANTS, PLAFOND_FAMILLE
 from src.modeling import COLONNES, RACINE
 from src.suggestion import construire_ligne, suggerer_montant
 
-VERSION_MODELE = "xgb_home_credit_v3"
+VERSION_MODELE = "xgb_home_credit_v4"
 
 # Facteur appliqué au seuil de défaut pour un client dont l'incident passé est régularisé
 # (1.0 = règle désactivée). La valeur réelle vient de ops.parametre.

@@ -12,17 +12,21 @@ from xgboost import XGBClassifier
 
 RACINE = Path(__file__).resolve().parent.parent
 DONNEES = RACINE / "data" / "processed" / "home_credit_features.parquet"
-SORTIE = RACINE / "models" / "xgb_home_credit_v3.joblib"
+SORTIE = RACINE / "models" / "xgb_home_credit_v4.joblib"
 
 NUM = ["CNT_CHILDREN", "CNT_FAM_MEMBERS", "age_ans", "anciennete_emploi_ans",
        "sans_emploi", "credit_sur_revenu", "annuite_sur_revenu", "duree_implicite"]
 CAT = ["NAME_INCOME_TYPE", "NAME_FAMILY_STATUS", "NAME_HOUSING_TYPE",
        "OCCUPATION_TYPE", "FLAG_OWN_REALTY", "FLAG_OWN_CAR"]
 COLONNES = NUM + CAT
-CROISSANTES = ["credit_sur_revenu", "annuite_sur_revenu"]
+# v4 : duree_implicite est aussi contrainte (à mensualité égale, plus la durée est longue, plus le risque est élevé).
+# Sans cette contrainte (v3), le modèle reprenait un motif en dents de scie propre à Home Credit
+# (12 mois très favorisés, 18 mois pénalisés), non transposable à la microfinance sénégalaise.
+CROISSANTES = ["credit_sur_revenu", "annuite_sur_revenu", "duree_implicite"]
 
+# Réglés sur la validation avec arrêt anticipé (v3 : profondeur 5, 965 arbres).
 PARAMS = dict(
-    n_estimators=965, learning_rate=0.03, max_depth=5, min_child_weight=10,
+    n_estimators=551, learning_rate=0.03, max_depth=3, min_child_weight=10,
     subsample=0.8, colsample_bytree=0.8, tree_method="hist",
     n_jobs=-1, random_state=42)
 
