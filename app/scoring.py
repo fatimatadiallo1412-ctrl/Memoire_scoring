@@ -4,6 +4,7 @@ from functools import lru_cache
 import joblib
 
 from app import referentiels as R
+from app.explication import contributions
 from src.features import PLAFOND_ENFANTS, PLAFOND_FAMILLE
 from src.modeling import COLONNES, RACINE
 from src.suggestion import construire_ligne, suggerer_montant
@@ -81,6 +82,8 @@ def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun"):
 
     ligne = construire_ligne(profil, demande.montant_demande, demande.duree_mois,
                              client.revenu_mensuel, COLONNES, taux)
+    # Explication du score du montant demandé : poids de chaque variable (valeurs de Shapley)
+    recommandation["contributions"] = contributions(modele, ligne, demande)
     variables = json.loads(ligne.to_json(orient="records"))[0]
     variables["antecedent_defaut"] = antecedent
     return recommandation, variables

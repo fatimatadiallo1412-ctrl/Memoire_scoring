@@ -139,6 +139,43 @@ function Facteurs({ facteurs }) {
   );
 }
 
+// Explication du score : variables qui pèsent le plus, dans un sens ou dans l'autre (valeurs de Shapley).
+function Explication({ contributions }) {
+  if (!contributions || contributions.length === 0) return null;
+  const max = Math.max(...contributions.map((c) => Math.abs(c.contribution))) || 1;
+  return (
+    <div className="mt-5">
+      <h3 className="text-sm font-semibold text-slate-700">Ce qui explique ce score</h3>
+      <p className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-texte-doux">
+        <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-risque-eleve" aria-hidden="true" />augmente le risque</span>
+        <span className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-risque-faible" aria-hidden="true" />diminue le risque</span>
+      </p>
+      <ul className="mt-3 space-y-2.5">
+        {contributions.map((c, i) => {
+          const hausse = c.contribution > 0;
+          return (
+            <li key={c.variable} className="grid items-center gap-x-4 gap-y-1 text-sm sm:grid-cols-[minmax(11rem,15rem)_1fr]">
+              <span className="flex items-baseline justify-between gap-2">
+                <span className="font-medium text-texte">{c.libelle}</span>
+                {c.valeur && <span className="text-xs text-texte-doux">{c.valeur}</span>}
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="h-2.5 flex-1 overflow-clip rounded-full bg-fond">
+                  <span className={"block h-full origin-left animate-barre rounded-full " + (hausse ? "bg-risque-eleve" : "bg-risque-faible")}
+                    style={{ width: Math.max(4, (Math.abs(c.contribution) / max) * 100) + "%", animationDelay: i * 0.08 + "s" }} />
+                </span>
+                <span className={"w-20 shrink-0 text-right text-xs font-semibold " + (hausse ? "text-risque-eleve" : "text-risque-faible")}>
+                  {hausse ? "↑ hausse" : "↓ baisse"}
+                </span>
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 export default function FicheDossier() {
   const { id } = useParams();
   const { utilisateur } = useAuth();
@@ -274,10 +311,11 @@ export default function FicheDossier() {
               <Info libelle="Modèle">{score.version_modele}</Info>
             </Infos>
           </div>
+          <Explication contributions={score.facteurs && score.facteurs.contributions} />
           {score.facteurs && (
             <div className="mt-5">
               <h3 className="text-sm font-semibold text-slate-700">Facteurs</h3>
-              <Facteurs facteurs={score.facteurs} />
+              <Facteurs facteurs={Object.fromEntries(Object.entries(score.facteurs).filter(([cle]) => cle !== "contributions"))} />
             </div>
           )}
         </Panneau>
