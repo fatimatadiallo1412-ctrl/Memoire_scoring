@@ -139,6 +139,42 @@ function Facteurs({ facteurs }) {
   );
 }
 
+// Risque du montant envisagé pour un accord modifié (calculé par l'API, rien n'est enregistré).
+function SimulationAccord({ simulation }) {
+  if (!simulation) return null;
+  if (simulation.erreur) {
+    return <p className="text-sm text-risque-eleve sm:col-span-2">{simulation.erreur}</p>;
+  }
+  const conforme = simulation.dans_politique;
+  return (
+    <div className={"animate-apparition rounded-champ border p-4 text-sm sm:col-span-2 " +
+      (conforme ? "border-risque-faible/30 bg-risque-faible-fond" : "border-risque-moyen/30 bg-risque-moyen-fond")}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="font-semibold text-texte">Montant envisagé : {fcfa(simulation.montant)} sur {simulation.duree_mois} mois</p>
+        <Badge ton={conforme ? "vert" : "orange"}>{conforme ? "Conforme à la politique" : "Hors politique : motif obligatoire"}</Badge>
+      </div>
+      <dl className="mt-3 grid gap-3 sm:grid-cols-3">
+        <div>
+          <dt className="text-xs text-texte-doux">Probabilité de défaut</dt>
+          <dd className={"font-semibold " + (simulation.p_defaut > simulation.seuil ? "text-risque-eleve" : "text-texte")}>
+            {pct(simulation.p_defaut)} <span className="font-normal text-texte-doux">(seuil {pct(simulation.seuil)})</span>
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs text-texte-doux">Mensualité</dt>
+          <dd className="font-semibold text-texte">{fcfa(simulation.mensualite)}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-texte-doux">Part du revenu</dt>
+          <dd className={"font-semibold " + (simulation.endettement > simulation.endettement_max ? "text-risque-eleve" : "text-texte")}>
+            {Math.round(simulation.endettement * 100)} % <span className="font-normal text-texte-doux">(max {Math.round(simulation.endettement_max * 100)} %)</span>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  );
+}
+
 // Explication du score : variables qui pèsent le plus, dans un sens ou dans l'autre (valeurs de Shapley).
 function Explication({ contributions }) {
   if (!contributions || contributions.length === 0) return null;
@@ -193,6 +229,21 @@ export default function FicheDossier() {
   const [occupe, setOccupe] = useState(false);
   const [avis, setAvis] = useState("");
   const [dec, setDec] = useState({ decision: "accorder", montant: "", duree: "", commentaire: "" });
+  const [simulation, setSimulation] = useState(null);
+
+  // Accord modifié : risque et endettement du montant envisagé, recalculés pendant la saisie.
+  useEffect(() => {
+    const montant = parseInt(dec.montant, 10);
+    const duree = parseInt(dec.duree, 10);
+    if (dec.decision !== "accorder_modifie" || !(montant > 0) || !(duree > 0)) return undefined;
+    let annule = false;
+    const minuteur = setTimeout(() => {
+      appeler("/demandes/" + id + "/simuler", { params: { montant, duree } })
+        .then((r) => { if (!annule) setSimulation(r); })
+        .catch((e) => { if (!annule) setSimulation({ erreur: e.message }); });
+    }, 400);
+    return () => { annule = true; clearTimeout(minuteur); };
+  }, [dec.decision, dec.montant, dec.duree, id]);
 
   const charger = useCallback(async () => {
     try {
@@ -384,6 +435,7 @@ export default function FicheDossier() {
                   <input className={classeSaisie} type="number" min="1" max="120" value={dec.duree} required
                     onChange={(e) => setDec({ ...dec, duree: e.target.value })} />
                 </Champ>
+                <SimulationAccord simulation={simulation} />
               </>
             )}
             <div className="sm:col-span-2">

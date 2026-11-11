@@ -1,14 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import get_session
 from app.deps import exiger_roles
-from app.models import Decision, Journal, Utilisateur
+from app.historique import niveau_antecedent
+from app.models import Client, Decision, Journal, ProduitCredit, Utilisateur
 from app.models.enums import Role, StatutDossier, TypeDecision
 from app.routers.demandes import (LECTURE, charger_demande, exiger_score_valide,
                                   verifier_produit)
+from app.parametres import lire_parametres
 from app.schemas import DecisionIn, DecisionOut
+from app.scoring import evaluer_montant
 from app.workflow import changer_statut
 
 router = APIRouter(prefix="/demandes", tags=["décisions"])
@@ -25,6 +28,23 @@ STATUT_APRES = {
     TypeDecision.REFUSER: StatutDossier.REFUSE,
     TypeDecision.AJOURNER: StatutDossier.AJOURNE,
 }
+
+
+def _simuler(session: Session, demande, montant: int, duree: int) -> dict:
+    client = session.get(Client, demande.client_id)
+    produit = session.get(ProduitCredit, demande.produit_id)
+    return evaluer_montant(client, demande, produit, lire_parametres(session), montant, duree,
+                           antecedent=niveau_antecedent(session, client.id, demande.date_demande))
+
+
+@router.get("/{demande_id}/simuler")
+def simuler(demande_id: int, montant: int = Query(gt=0), duree: int = Query(gt=0, le=120),
+            session: Session = Depends(get_session),
+            utilisateur: Utilisateur = Depends(exiger_roles(Role.DECIDEUR))):
+    """Risque et endettement d'un montant et d'une durée envisagés pour un accord modifié (lecture seule)."""
+    demande = charger_demande(session, demande_id, utilisateur)
+    verifier_produit(session, demande.produit_id, montant, duree)
+    return _simuler(session, demande, montant, duree)
 
 
 @router.post("/{demande_id}/decider", response_model=DecisionOut,
@@ -48,11 +68,23 @@ def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get
         montant, duree = donnees.montant_accorde, donnees.duree_accordee
         verifier_produit(session, demande.produit_id, montant, duree)
 
+    a_un_motif = bool(donnees.commentaire and donnees.commentaire.strip())
     concordance = choix == EQUIVALENT_MODELE[score.recommandation]
-    if not concordance and not (donnees.commentaire and donnees.commentaire.strip()):
+    if not concordance and not a_un_motif:
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_ENTITY,
             "Un motif est obligatoire quand la décision diffère de la recommandation du modèle")
+
+    # Accord modifié : le risque du montant réellement accordé est recalculé et tracé.
+    simulation = None
+    if choix == TypeDecision.ACCORDER_MODIFIE:
+        simulation = _simuler(session, demande, montant, duree)
+        if not simulation["dans_politique"] and not a_un_motif:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_ENTITY,
+                f"Un motif est obligatoire : le montant accordé sort de la politique de crédit "
+                f"(risque {simulation['p_defaut']:.1%} pour un seuil de {simulation['seuil']:.1%}, "
+                f"endettement {simulation['endettement']:.0%} pour un maximum de {simulation['endettement_max']:.0%})")
 
     decision = Decision(
         demande_id=demande.id, score_id=score.id, decideur_id=utilisateur.id,
@@ -63,7 +95,10 @@ def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get
     changer_statut(demande, STATUT_APRES[choix])
     session.add(Journal(utilisateur_id=utilisateur.id, action="decision",
                         entite="demande_credit", entite_id=demande_id,
-                        details={"decision": choix.value, "concordance": concordance}))
+                        details={"decision": choix.value, "concordance": concordance,
+                                 **({"simulation_montant_accorde": {
+                                     k: (round(v, 4) if isinstance(v, float) else v)
+                                     for k, v in simulation.items()}} if simulation else {})}))
     session.commit()
     session.refresh(decision)
     return decision
