@@ -161,11 +161,18 @@ export default function FicheClient() {
       {erreur && <Alerte>{erreur}</Alerte>}
 
       <Panneau titre="Informations du client">
-        <p className="mb-4 text-xs text-slate-500">
-          ⚠ : modifier ce champ rend non valides les scores déjà calculés pour ce client ; il faudra recalculer
-          le score des dossiers concernés.
-        </p>
-        <form className="grid gap-4 sm:grid-cols-2" onSubmit={enregistrer}>
+        {peutDemander ? (
+          <p className="mb-4 text-xs text-slate-500">
+            ⚠ : modifier ce champ rend non valides les scores déjà calculés pour ce client ; il faudra recalculer
+            le score des dossiers concernés.
+          </p>
+        ) : (
+          <p className="mb-4 text-xs text-slate-500">
+            Consultation seule : la fiche est tenue à jour par le gestionnaire du client.
+          </p>
+        )}
+        <form onSubmit={enregistrer}>
+          <fieldset disabled={!peutDemander} className="grid min-w-0 gap-4 sm:grid-cols-2">
           <Champ label="Nom">
             <input className={classeSaisie} value={f.nom} required maxLength={100}
               onChange={(e) => changer("nom", e.target.value)} />
@@ -223,8 +230,9 @@ export default function FicheClient() {
             <Case libelle={"Possède un véhicule" + marque("possede_vehicule")}
               checked={f.possede_vehicule} onChange={(v) => changer("possede_vehicule", v)} />
           </div>
-          <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
-            <Bouton type="submit" disabled={envoi}>{envoi ? "Enregistrement…" : "Enregistrer"}</Bouton>
+          </fieldset>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {peutDemander && <Bouton type="submit" disabled={envoi}>{envoi ? "Enregistrement…" : "Enregistrer"}</Bouton>}
             <LienRetour to="/clients">Retour à la liste</LienRetour>
           </div>
         </form>

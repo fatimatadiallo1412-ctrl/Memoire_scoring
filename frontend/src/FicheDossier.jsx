@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, CircleCheck, TriangleAlert } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { appeler } from "./api";
 import { useAuth } from "./useAuth.js";
@@ -97,44 +97,58 @@ function ParcoursDossier({ statut }) {
   );
 }
 
-function ValeurFacteur({ valeur }) {
-  if (valeur === null || valeur === undefined) return "—";
-  if (Array.isArray(valeur)) {
-    if (valeur.length === 0) return "—";
-    return (
-      <ul className="list-disc space-y-0.5 pl-5">
-        {valeur.map((x, k) => <li key={k}>{typeof x === "object" ? JSON.stringify(x) : String(x)}</li>)}
-      </ul>
-    );
-  }
-  if (typeof valeur === "object") {
-    return (
-      <span className="flex flex-wrap gap-1.5">
-        {Object.entries(valeur).map(([k, v]) => (
-          <span key={k} className="inline-flex rounded bg-slate-100 px-2 py-0.5 text-xs">
-            <span className="text-texte-doux">{k}</span>
-            <span className="mx-1 text-texte-doux">:</span>
-            <span className="font-medium">{typeof v === "object" ? JSON.stringify(v) : String(v)}</span>
-          </span>
-        ))}
-      </span>
-    );
-  }
-  return String(valeur);
+// Motifs renvoyés par le scoring : codes techniques traduits, phrases déjà rédigées gardées telles quelles.
+const MOTIFS = {
+  risque_modele: "La probabilité de défaut du montant demandé dépasse le seuil de la politique.",
+  endettement: "La mensualité du montant demandé dépasse la part maximale du revenu.",
+  antecedent_en_cours: "Le client a un crédit en retard de plus de 90 jours.",
+};
+
+function nombreFr(valeur, decimales = 1) {
+  return Number(valeur).toLocaleString("fr-FR", { maximumFractionDigits: decimales });
 }
 
-function Facteurs({ facteurs }) {
+// Lecture du score au regard de la politique de crédit en vigueur au moment du calcul.
+function AnalysePolitique({ facteurs }) {
   if (!facteurs) return null;
-  const lignes = Array.isArray(facteurs) ? facteurs.map((x, i) => [String(i + 1), x]) : Object.entries(facteurs);
+  const motifs = Array.isArray(facteurs.motifs) ? facteurs.motifs : [];
+  const p = facteurs.parametres || {};
+  const endettement = facteurs.endettement_demande;
+  const regles = [
+    p.seuil_defaut != null && "seuil de défaut " + nombreFr(p.seuil_defaut * 100) + " %",
+    p.endettement_max != null && "endettement maximal " + nombreFr(p.endettement_max * 100, 0) + " % du revenu",
+    p.ratio_min != null && "réduction jusqu'à " + nombreFr(p.ratio_min * 100, 0) + " % du montant demandé",
+    p.pas_montant != null && "par pas de " + Number(p.pas_montant).toLocaleString("fr-FR") + " FCFA",
+    p.facteur_prudence_antecedent != null && "prudence après incident × " + nombreFr(p.facteur_prudence_antecedent, 2),
+  ].filter(Boolean);
   return (
-    <dl className="mt-2 divide-y divide-slate-100 rounded-champ border border-bord text-sm">
-      {lignes.map(([cle, valeur]) => (
-        <div key={cle} className="grid gap-1 px-3 py-2.5 sm:grid-cols-[minmax(10rem,14rem)_1fr] sm:gap-4">
-          <dt className="font-medium text-slate-700">{cle}</dt>
-          <dd className="text-texte"><ValeurFacteur valeur={valeur} /></dd>
-        </div>
-      ))}
-    </dl>
+    <div className="mt-5 space-y-3">
+      <h3 className="text-sm font-semibold text-slate-700">Au regard de la politique de crédit</h3>
+      {motifs.length === 0 ? (
+        <p className="flex items-start gap-2 rounded-champ bg-risque-faible-fond px-3 py-2.5 text-sm text-risque-faible">
+          <CircleCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          Le montant demandé respecte la politique de crédit.
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {motifs.map((m) => (
+            <li key={m} className="flex items-start gap-2 rounded-champ bg-risque-moyen-fond px-3 py-2.5 text-sm text-risque-moyen">
+              <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+              {MOTIFS[m] || m}
+            </li>
+          ))}
+        </ul>
+      )}
+      {endettement != null && (
+        <p className="text-sm text-texte">
+          Mensualité demandée : <span className="font-semibold">{nombreFr(endettement * 100)} %</span> du revenu mensuel
+          {p.endettement_max != null && <span className="text-texte-doux"> (maximum {nombreFr(p.endettement_max * 100, 0)} %)</span>}.
+        </p>
+      )}
+      {regles.length > 0 && (
+        <p className="text-xs text-texte-doux">Règles appliquées lors du calcul : {regles.join(" · ")}.</p>
+      )}
+    </div>
   );
 }
 
@@ -363,12 +377,7 @@ export default function FicheDossier() {
             </Infos>
           </div>
           <Explication contributions={score.facteurs && score.facteurs.contributions} />
-          {score.facteurs && (
-            <div className="mt-5">
-              <h3 className="text-sm font-semibold text-slate-700">Facteurs</h3>
-              <Facteurs facteurs={Object.fromEntries(Object.entries(score.facteurs).filter(([cle]) => cle !== "contributions"))} />
-            </div>
-          )}
+          <AnalysePolitique facteurs={score.facteurs} />
         </Panneau>
       )}
 
