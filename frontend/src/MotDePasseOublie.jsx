@@ -3,8 +3,7 @@ import { useLocation } from "react-router-dom";
 import { appeler } from "./api";
 import { MARQUE } from "./marque.js";
 import LogoMarque from "./LogoMarque.jsx";
-import { Alerte, Bouton, Champ, LienRetour, classeSaisie } from "./ui.jsx";
-import { AIDE_TELEPHONE, TELEPHONE } from "./validation.js";
+import { Alerte, Bouton, Champ, ChampTelephone, LienRetour, classeSaisie } from "./ui.jsx";
 
 export default function MotDePasseOublie() {
   const lieu = useLocation();
@@ -54,10 +53,8 @@ export default function MotDePasseOublie() {
             <Champ label="E-mail du compte">
               <input className={classeSaisie} type="email" value={email} required onChange={(e) => setEmail(e.target.value)} />
             </Champ>
-            <Champ label="Téléphone pour vous joindre (facultatif)" aide={AIDE_TELEPHONE}>
-              <input className={classeSaisie} type="tel" value={contact} maxLength={100} {...TELEPHONE}
-                onChange={(e) => setContact(e.target.value)} />
-            </Champ>
+            <ChampTelephone label="Téléphone pour vous joindre (facultatif)" valeur={contact} maxLength={100}
+              onChange={setContact} />
             <Bouton type="submit" disabled={envoi}>{envoi ? "Envoi…" : "Envoyer la demande"}</Bouton>
             <LienRetour to="/connexion">Retour à la connexion</LienRetour>
           </form>

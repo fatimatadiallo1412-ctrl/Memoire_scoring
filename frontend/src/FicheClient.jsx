@@ -9,8 +9,7 @@ import ChampMetier from "./ChampMetier.jsx";
 import AssistantPersonnel from "./AssistantPersonnel.jsx";
 import AccesClient from "./AccesClient.jsx";
 import Cadre from "./Cadre.jsx";
-import { Alerte, Bouton, Case, Champ, Chargement, LienBouton, LienRetour, Liste, Panneau, classeSaisie } from "./ui.jsx";
-import { AIDE_TELEPHONE, TELEPHONE } from "./validation.js";
+import { Alerte, Bouton, Case, Champ, ChampTelephone, Chargement, LienBouton, LienRetour, Liste, Panneau, classeSaisie } from "./ui.jsx";
 
 // Champs d'identité : les modifier n'invalide pas les scores existants.
 const IDENTITE = ["nom", "prenom", "telephone", "adresse", "sexe"];
@@ -178,10 +177,7 @@ export default function FicheClient() {
             <Liste valeur={f.sexe} onChange={(v) => changer("sexe", v)} facultatif
               options={[["F", "Féminin"], ["M", "Masculin"]]} />
           </Champ>
-          <Champ label="Téléphone" aide={AIDE_TELEPHONE}>
-            <input className={classeSaisie} type="tel" value={f.telephone} maxLength={20} {...TELEPHONE}
-              onChange={(e) => changer("telephone", e.target.value)} />
-          </Champ>
+          <ChampTelephone valeur={f.telephone} onChange={(v) => changer("telephone", v)} />
           <Champ label="Adresse">
             <input className={classeSaisie} value={f.adresse} maxLength={200}
               onChange={(e) => changer("adresse", e.target.value)} />

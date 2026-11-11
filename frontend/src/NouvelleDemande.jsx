@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { appeler } from "./api";
 import { fcfa } from "./formats.js";
 import Cadre from "./Cadre.jsx";
-import { Alerte, Bouton, Champ, Panneau, classeSaisie } from "./ui.jsx";
+import { Alerte, Bouton, Champ, LienBouton, Panneau, classeSaisie } from "./ui.jsx";
 
 export default function NouvelleDemande() {
   const [params] = useSearchParams();
@@ -96,7 +96,7 @@ export default function NouvelleDemande() {
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
             <Bouton type="submit" disabled={envoi || !client}>{envoi ? "Création…" : "Créer la demande"}</Bouton>
-            {clientId && <Link className="text-sm text-marque-700 underline" to={"/clients/" + clientId}>Annuler</Link>}
+            {clientId && <LienBouton variante="secondaire" to={"/clients/" + clientId}>Annuler</LienBouton>}
           </div>
         </form>
       </Panneau>

@@ -7,7 +7,13 @@ export const TELEPHONE = {
   placeholder: "77 123 45 67",
   inputMode: "numeric",
 };
-export const AIDE_TELEPHONE = "9 chiffres commençant par 70, 71, 75, 76, 77 ou 78.";
+export const AIDE_TELEPHONE = "Numéro invalide : 9 chiffres commençant par 70, 71, 75, 76, 77 ou 78.";
+
+// Vrai si le champ est vide (facultatif) ou au bon format.
+export function telephoneValide(valeur) {
+  const brut = (valeur || "").replace(/\s/g, "");
+  return brut === "" || /^7[015678]\d{7}$/.test(brut);
+}
 
 // Adresse Gmail uniquement (majuscules acceptées, l'API enregistre en minuscules).
 export const GMAIL = {

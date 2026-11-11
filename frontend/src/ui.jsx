@@ -1,3 +1,5 @@
+import { useState } from "react";
+import { AIDE_TELEPHONE, TELEPHONE, telephoneValide } from "./validation.js";
 import { ArrowLeft, ArrowRight, CircleCheck, CircleX, TriangleAlert } from "lucide-react";
 
 const TONS_BADGE = {
@@ -83,13 +85,28 @@ export function Panneau({ titre, droite, children, className = "" }) {
   );
 }
 
-export function Champ({ label, aide, children }) {
+export function Champ({ label, aide, erreur, children }) {
   return (
     <label className="block">
       <span className="mb-1.5 block text-sm font-medium text-encre">{label}</span>
       {children}
-      {aide && <span className="mt-1 block text-xs text-texte-doux">{aide}</span>}
+      {erreur && <span role="alert" className="mt-1 block text-xs font-medium text-risque-eleve">{erreur}</span>}
+      {!erreur && aide && <span className="mt-1 block text-xs text-texte-doux">{aide}</span>}
     </label>
+  );
+}
+
+// Téléphone sénégalais : le rappel du format n'apparaît que si le numéro saisi est invalide
+// (après la sortie du champ, puis il disparaît dès que le numéro devient correct).
+export function ChampTelephone({ label = "Téléphone", valeur, onChange, maxLength = 20 }) {
+  const [quitte, setQuitte] = useState(false);
+  const invalide = quitte && !telephoneValide(valeur);
+  return (
+    <Champ label={label} erreur={invalide ? AIDE_TELEPHONE : null}>
+      <input className={classeSaisie + (invalide ? " ring-2 ring-risque-eleve" : "")} type="tel" value={valeur}
+        maxLength={maxLength} {...TELEPHONE} aria-invalid={invalide}
+        onBlur={() => setQuitte(true)} onChange={(e) => onChange(e.target.value)} />
+    </Champ>
   );
 }
 
@@ -180,7 +197,6 @@ export function tonDossier(statut) {
   return TONS_DOSSIER[statut] || "neutre";
 }
 
-import { useState } from "react";
 
 export function MotDePasseTemp({ email, motDePasse, onFermer }) {
   const [copie, setCopie] = useState(false);

@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { appeler } from "./api";
 import { LOGEMENTS, SITUATIONS, TYPES_REVENU } from "./listes.js";
 import Cadre from "./Cadre.jsx";
 import ChampMetier from "./ChampMetier.jsx";
 import { invaliderMetiers } from "./metiers.js";
-import { Alerte, Bouton, Case, Champ, Liste, Panneau, classeSaisie } from "./ui.jsx";
-import { AIDE_TELEPHONE, TELEPHONE } from "./validation.js";
+import { Alerte, Bouton, Case, Champ, ChampTelephone, LienBouton, Liste, Panneau, classeSaisie } from "./ui.jsx";
 
 const VIDE = {
   nom: "", prenom: "", date_naissance: "", sexe: "", telephone: "", adresse: "",
@@ -91,10 +90,7 @@ export default function NouveauClient() {
             <Liste valeur={f.sexe} onChange={(v) => changer("sexe", v)} facultatif
               options={[["F", "Féminin"], ["M", "Masculin"]]} />
           </Champ>
-          <Champ label="Téléphone" aide={AIDE_TELEPHONE}>
-            <input className={classeSaisie} type="tel" value={f.telephone} maxLength={20} {...TELEPHONE}
-              onChange={(e) => changer("telephone", e.target.value)} />
-          </Champ>
+          <ChampTelephone valeur={f.telephone} onChange={(v) => changer("telephone", v)} />
           <Champ label="Adresse">
             <input className={classeSaisie} value={f.adresse} maxLength={200}
               onChange={(e) => changer("adresse", e.target.value)} />
@@ -140,7 +136,7 @@ export default function NouveauClient() {
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
             <Bouton type="submit" disabled={envoi}>{envoi ? "Création…" : "Créer le client"}</Bouton>
-            <Link className="text-sm text-marque-700 underline" to="/clients">Annuler</Link>
+            <LienBouton variante="secondaire" to="/clients">Annuler</LienBouton>
           </div>
         </form>
       </Panneau>
