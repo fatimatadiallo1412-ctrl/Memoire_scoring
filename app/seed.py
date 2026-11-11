@@ -22,6 +22,11 @@ PRODUITS = [
     ("MICRO", "Microcrédit commerce", 50_000, 1_000_000, 3, 12, 24.0),
     ("PME", "Crédit petite entreprise", 500_000, 5_000_000, 6, 24, 22.0),
     ("SALARIE", "Crédit salarié", 100_000, 2_000_000, 6, 24, 18.0),
+    # Produits présentés sur le site public (frontend/src/vitrine.js)
+    ("COMMERCE", "Crédit commerce", 50_000, 1_000_000, 3, 12, 24.0),
+    ("ARTISAN", "Crédit artisan", 100_000, 25_000_000, 24, 60, 22.0),
+    ("AGRICOLE", "Crédit agricole", 100_000, 25_000_000, 6, 60, 20.0),
+    ("EQUIPEMENT", "Crédit équipement et consommation", 50_000, 25_000_000, 3, 60, 18.0),
 ]
 
 
