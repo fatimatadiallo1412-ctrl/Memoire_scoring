@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { appeler } from "./api";
 import { fcfa } from "./formats.js";
 import Cadre from "./Cadre.jsx";
-import { Alerte, Bouton, Champ, LienBouton, Panneau, classeSaisie } from "./ui.jsx";
+import { GARANTIES } from "./listes.js";
+import { Alerte, Bouton, Champ, LienBouton, Liste, Panneau, classeSaisie } from "./ui.jsx";
 
 export default function NouvelleDemande() {
   const [params] = useSearchParams();
@@ -15,6 +16,7 @@ export default function NouvelleDemande() {
   const [montant, setMontant] = useState("");
   const [duree, setDuree] = useState("");
   const [objet, setObjet] = useState("");
+  const [garantie, setGarantie] = useState("");
   const [erreur, setErreur] = useState("");
   const [envoi, setEnvoi] = useState(false);
 
@@ -45,6 +47,7 @@ export default function NouvelleDemande() {
           montant_demande: parseInt(montant, 10),
           duree_mois: parseInt(duree, 10),
           objet: objet.trim() || null,
+          garantie: garantie || null,
         },
       });
       navigate("/dossiers/" + demande.id);
@@ -86,12 +89,13 @@ export default function NouvelleDemande() {
               min={produit ? produit.duree_min_mois : 1} max={produit ? produit.duree_max_mois : 120}
               onChange={(e) => setDuree(e.target.value)} />
           </Champ>
-          <div className="sm:col-span-2">
-            <Champ label="Objet du crédit (facultatif)">
-              <input className={classeSaisie} value={objet} maxLength={200}
-                onChange={(e) => setObjet(e.target.value)} />
-            </Champ>
-          </div>
+          <Champ label="Objet du crédit (facultatif)">
+            <input className={classeSaisie} value={objet} maxLength={200}
+              onChange={(e) => setObjet(e.target.value)} />
+          </Champ>
+          <Champ label="Garantie proposée (facultatif)" aide="Sans effet sur le score actuel.">
+            <Liste valeur={garantie} options={GARANTIES} facultatif onChange={setGarantie} />
+          </Champ>
           <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
             <Bouton type="submit" disabled={envoi || !client}>{envoi ? "Création…" : "Créer la demande"}</Bouton>
             {clientId && <LienBouton variante="secondaire" to={"/clients/" + clientId}>Annuler</LienBouton>}

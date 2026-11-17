@@ -5,6 +5,8 @@ import { aujourdhuiIso } from "./formats.js";
 import { LOGEMENTS, SITUATIONS, TYPES_REVENU } from "./listes.js";
 import Cadre from "./Cadre.jsx";
 import ChampMetier from "./ChampMetier.jsx";
+import ChampsMicrofinance from "./ChampsMicrofinance.jsx";
+import { CHAMPS_MICROFINANCE, microfinanceVersApi, microfinanceVersFormulaire } from "./microfinance.js";
 import { invaliderMetiers } from "./metiers.js";
 import { Alerte, Bouton, Case, Champ, ChampTelephone, LienBouton, Liste, Panneau, classeSaisie } from "./ui.jsx";
 
@@ -14,6 +16,7 @@ const VIDE = {
   situation_familiale: "celibataire", type_logement: "locataire",
   anciennete_activite_mois: "0", nb_enfants: "0", taille_menage: "1",
   possede_bien_immobilier: false, possede_vehicule: false, revenu_mensuel: "0",
+  ...microfinanceVersFormulaire(),
 };
 
 export default function NouveauClient() {
@@ -58,6 +61,7 @@ export default function NouveauClient() {
       possede_bien_immobilier: f.possede_bien_immobilier,
       possede_vehicule: f.possede_vehicule,
       revenu_mensuel: parseInt(f.revenu_mensuel, 10),
+      ...Object.fromEntries(CHAMPS_MICROFINANCE.map((cle) => [cle, microfinanceVersApi(cle, f[cle])])),
     };
     try {
       const client = await appeler("/clients", { methode: "POST", json: corps });
@@ -135,6 +139,7 @@ export default function NouveauClient() {
             <Case libelle="Possède un véhicule" checked={f.possede_vehicule}
               onChange={(v) => changer("possede_vehicule", v)} />
           </div>
+          <ChampsMicrofinance f={f} changer={changer} />
           <div className="flex flex-wrap items-center gap-3 sm:col-span-2">
             <Bouton type="submit" disabled={envoi}>{envoi ? "Création…" : "Créer le client"}</Bouton>
             <LienBouton variante="secondaire" to="/clients">Annuler</LienBouton>

@@ -82,7 +82,21 @@ def evaluer_montant(client, demande, produit, parametres, montant, duree, antece
             "endettement_max": endettement_max, "dans_politique": not motifs, "motifs": motifs}
 
 
-def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun"):
+# Variables enregistrées avec chaque score sans être données au modèle v4 : elles alimenteront
+# les modèles appris sur les données de l'institution (src/donnees_locales.py).
+VARIABLES_MICROFINANCE = ["epargne_mensuelle", "membre_groupement", "usage_mobile_money",
+                          "activite_saisonniere"]
+
+
+def variables_complementaires(client, demande, historique: dict | None = None) -> dict:
+    complements = {v: getattr(client, v, None) for v in VARIABLES_MICROFINANCE}
+    complements["garantie"] = getattr(demande, "garantie", None)
+    complements["revenu_mensuel"] = client.revenu_mensuel
+    complements.update(historique or {})
+    return complements
+
+
+def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun", historique=None):
     """Renvoie la recommandation (accord / accord_reduit / refus) et les variables d'entrée.
 
     antecedent (voir app/historique.py) :
@@ -123,4 +137,5 @@ def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun"):
     recommandation["contributions"] = contributions(modele, ligne, demande)
     variables = json.loads(ligne.to_json(orient="records"))[0]
     variables["antecedent_defaut"] = antecedent
+    variables["complements"] = variables_complementaires(client, demande, historique)
     return recommandation, variables

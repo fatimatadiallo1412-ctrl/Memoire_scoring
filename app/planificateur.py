@@ -26,12 +26,13 @@ def tache() -> None:
 def suivi_modele() -> None:
     """Rapport du trimestre écoulé : trois mois donnent assez de dossiers pour un PSI fiable."""
     from app.db import SessionLocal
-    from src.surveillance import ecrire_rapport, mois_precedent, produire_rapport
-    debut, fin = mois_precedent(date.today())
-    debut = mois_precedent(mois_precedent(debut)[0])[0]
+    from src.surveillance import (ecrire_rapport, enregistrer_en_base, produire_rapport,
+                                  trimestre_ecoule)
+    debut, fin = trimestre_ecoule(date.today())
     try:
         with SessionLocal() as session:
             rapport = produire_rapport(session, debut, fin)
+            enregistrer_en_base(session, rapport)
         logging.info("Suivi du modèle : niveau %s, rapport %s",
                      rapport["niveau_global"], ecrire_rapport(rapport))
     except Exception:            # le suivi ne doit jamais arrêter les rappels

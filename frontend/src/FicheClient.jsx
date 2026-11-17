@@ -6,13 +6,15 @@ import { aujourdhuiIso, dateFr } from "./formats.js";
 import { LIBELLE_CATEGORIE, LOGEMENTS, SITUATIONS, TYPES_REVENU } from "./listes.js";
 import { invaliderMetiers } from "./metiers.js";
 import ChampMetier from "./ChampMetier.jsx";
+import ChampsMicrofinance from "./ChampsMicrofinance.jsx";
+import { CHAMPS_MICROFINANCE, microfinanceVersApi, microfinanceVersFormulaire } from "./microfinance.js";
 import AssistantPersonnel from "./AssistantPersonnel.jsx";
 import AccesClient from "./AccesClient.jsx";
 import Cadre from "./Cadre.jsx";
 import { Alerte, Bouton, Case, Champ, ChampTelephone, Chargement, LienBouton, LienRetour, Liste, Panneau, classeSaisie } from "./ui.jsx";
 
-// Champs d'identité : les modifier n'invalide pas les scores existants.
-const IDENTITE = ["nom", "prenom", "telephone", "adresse", "sexe"];
+// Champs sans effet sur le score : les modifier n'invalide pas les scores existants.
+const IDENTITE = ["nom", "prenom", "telephone", "adresse", "sexe", ...CHAMPS_MICROFINANCE];
 const ENTIERS = ["anciennete_activite_mois", "nb_enfants", "taille_menage", "revenu_mensuel"];
 const FACULTATIFS = ["sexe", "telephone", "adresse", "profession"];
 
@@ -40,10 +42,12 @@ function versFormulaire(c, metiers) {
     possede_bien_immobilier: c.possede_bien_immobilier,
     possede_vehicule: c.possede_vehicule,
     revenu_mensuel: String(c.revenu_mensuel),
+    ...microfinanceVersFormulaire(c),
   };
 }
 
 function valeurApi(cle, valeur) {
+  if (CHAMPS_MICROFINANCE.includes(cle)) return microfinanceVersApi(cle, valeur);
   if (ENTIERS.includes(cle)) return parseInt(valeur, 10);
   if (FACULTATIFS.includes(cle)) {
     const propre = typeof valeur === "string" ? valeur.trim() : valeur;
@@ -230,6 +234,7 @@ export default function FicheClient() {
             <Case libelle={"Possède un véhicule" + marque("possede_vehicule")}
               checked={f.possede_vehicule} onChange={(v) => changer("possede_vehicule", v)} />
           </div>
+          <ChampsMicrofinance f={f} changer={changer} />
           </fieldset>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             {peutDemander && <Bouton type="submit" disabled={envoi}>{envoi ? "Enregistrement…" : "Enregistrer"}</Bouton>}

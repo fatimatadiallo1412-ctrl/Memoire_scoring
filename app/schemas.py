@@ -22,6 +22,10 @@ class Jeton(BaseModel):
     access_token: str
     token_type: str = "bearer"
 
+UsageMobileMoney = Literal["jamais", "occasionnel", "regulier"]
+Garantie = Literal["aucune", "caution_solidaire", "garant", "epargne_nantie"]
+
+
 class ClientIn(BaseModel):
     nom: str = Field(min_length=1, max_length=100)
     prenom: str = Field(min_length=1, max_length=100)
@@ -40,6 +44,11 @@ class ClientIn(BaseModel):
     possede_bien_immobilier: bool = False
     possede_vehicule: bool = False
     revenu_mensuel: int = Field(default=0, ge=0)
+    # Variables microfinance (facultatives, non utilisées par le modèle v4)
+    epargne_mensuelle: int | None = Field(default=None, ge=0)
+    membre_groupement: bool | None = None
+    usage_mobile_money: UsageMobileMoney | None = None
+    activite_saisonniere: bool | None = None
 
     @field_validator("date_naissance")
     @classmethod
@@ -69,6 +78,7 @@ class DemandeIn(BaseModel):
     montant_demande: int = Field(gt=0)
     duree_mois: int = Field(gt=0, le=120)
     objet: str | None = Field(default=None, max_length=200)
+    garantie: Garantie | None = None
     date_demande: date | None = None
 
 
@@ -83,6 +93,7 @@ class DemandeOut(BaseModel):
     montant_demande: int
     duree_mois: int
     objet: str | None
+    garantie: str | None = None
     statut: StatutDossier
     date_demande: date
     avis_instruction: str | None
@@ -235,6 +246,10 @@ class ClientMaj(BaseModel):
     possede_bien_immobilier: bool | None = None
     possede_vehicule: bool | None = None
     revenu_mensuel: int | None = Field(default=None, ge=0)
+    epargne_mensuelle: int | None = Field(default=None, ge=0)
+    membre_groupement: bool | None = None
+    usage_mobile_money: UsageMobileMoney | None = None
+    activite_saisonniere: bool | None = None
 
     _telephone = field_validator("telephone", mode="before")(lambda cls, v: valider_telephone(v))
 

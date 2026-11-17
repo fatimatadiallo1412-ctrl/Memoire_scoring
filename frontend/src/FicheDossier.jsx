@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { appeler } from "./api";
 import { useAuth } from "./useAuth.js";
 import { dateFr, fcfa } from "./formats.js";
-import { LIBELLE_DECISION, LIBELLE_STATUT } from "./listes.js";
+import { LIBELLE_DECISION, LIBELLE_STATUT, GARANTIES } from "./listes.js";
 import Cadre from "./Cadre.jsx";
 import { EncadreDecaissement, PanneauDecaissement } from "./Decaissement.jsx";
 import { Alerte, Badge, Bouton, Champ, Chargement, Info, Infos, LienBouton, Panneau, TD, TH, Tableau, classeSaisie, LienRetour } from "./ui.jsx";
@@ -337,6 +337,7 @@ export default function FicheDossier() {
           <Info libelle="Montant demandé">{fcfa(d.montant_demande)}</Info>
           <Info libelle="Durée">{d.duree_mois} mois</Info>
           <Info libelle="Objet">{d.objet || "—"}</Info>
+          <Info libelle="Garantie proposée">{(GARANTIES.find(([c]) => c === d.garantie) || [null, "—"])[1]}</Info>
           <Info libelle="Date de la demande">{dateFr(d.date_demande)}</Info>
         </Infos>
         {d.avis_instruction && (

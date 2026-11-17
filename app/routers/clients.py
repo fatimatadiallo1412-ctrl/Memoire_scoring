@@ -23,7 +23,9 @@ STATUTS_OUVERTS = [StatutDossier.BROUILLON, StatutDossier.COMPLET, StatutDossier
                    StatutDossier.INSTRUIT, StatutDossier.SOUMIS]
 
 # Corriger une de ces informations n'a aucun effet sur le score : on n'invalide pas les scores.
-IDENTITE = {"nom", "prenom", "telephone", "adresse", "sexe"}
+# Les variables microfinance ne sont pas utilisées par le modèle en service (v4).
+IDENTITE = {"nom", "prenom", "telephone", "adresse", "sexe", "epargne_mensuelle",
+            "membre_groupement", "usage_mobile_money", "activite_saisonniere"}
 
 ACCENTS = "àâäéèêëîïôöùûüç"
 SANS_ACCENTS = "aaaeeeeiioouuuc"

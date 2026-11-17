@@ -7,6 +7,7 @@ Le modèle v4 a appris sur Home Credit. Dans une institution réelle, il sert de
 | Figer la référence | une fois, après 6 à 12 mois de production | `python -m src.surveillance figer-reference --debut … --fin …` | `models/reference_<version>.json` |
 | Rapport de suivi | le 1er de chaque mois (automatique, `app/planificateur.py`) | `python -m src.surveillance rapport --debut … --fin …` | `suivi_<date>.md` / `.json` |
 | Champion / challenger | alerte rouge, ou une fois par an | `python -m src.champion_challenger` | `champion_challenger_<date>.md` |
+| Page « Santé du modèle » | à tout moment (administrateur) | menu Santé du modèle, bouton « Produire un rapport maintenant » | rapport enregistré dans `ml.rapport_suivi` |
 | Mise en service | après validation par la direction | `MODELE_VERSION=<version>` dans `.env`, puis redémarrage de l'API | chaque score garde sa version (`ml.score.version_modele`) |
 
 ## Indicateurs du rapport mensuel
@@ -34,5 +35,5 @@ Chaque version enregistrée a sa fiche (`models/<version>.json`) : données, per
 
 ## Limites connues
 
-- **Biais de sélection.** Les remboursements ne sont observés que pour les crédits accordés. Le modèle apprend donc de moins en moins sur les profils refusés. Correctifs possibles : inférence des refusés, ou accords encadrés de petits montants juste au-dessus du seuil.
+- **Biais de sélection.** Les remboursements ne sont observés que pour les crédits accordés. L'inférence des refusés (`src/inference_refuses.py`, option `--inference-refuses` du comparateur) en corrige une partie. Son facteur de prudence reste une hypothèse : seuls des accords encadrés de petits montants juste au-dessus du seuil permettraient de le mesurer, et cette décision de politique de crédit revient à l'institution.
 - **Données simulées.** Les remboursements de `simulation/rembourser.py` ne dépendent pas du score. Les rapports produits sur cette base valident le **fonctionnement** des outils, pas le modèle.

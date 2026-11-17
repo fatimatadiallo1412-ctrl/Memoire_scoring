@@ -26,6 +26,9 @@ from src.modeling import COLONNES
 from src.suggestion import construire_ligne
 
 HORIZON_MOIS = 12           # fenêtre de performance maximale
+COMPLEMENTS = ["epargne_mensuelle", "membre_groupement", "usage_mobile_money",
+               "activite_saisonniere", "garantie", "revenu_mensuel", "nb_credits_anterieurs",
+               "nb_credits_soldes", "pire_retard_anterieur_jours", "nb_defauts_anterieurs"]
 PROFIL = [c for c in COLONNES
           if c not in ("credit_sur_revenu", "annuite_sur_revenu", "duree_implicite")]
 
@@ -72,6 +75,10 @@ def construire(session: Session, jour: date, murs_seulement: bool = True) -> pd.
         ligne = construire_ligne(profil, credit.montant_accorde, credit.duree_mois,
                                  client.revenu_mensuel, COLONNES, float(credit.taux_annuel))
         enreg = ligne.iloc[0].to_dict()
+        # Variables microfinance et historique interne enregistrés au moment du score
+        # (absents des scores antérieurs à leur introduction : valeurs manquantes)
+        for cle in COMPLEMENTS:
+            enreg[cle] = (score.variables_entree.get("complements") or {}).get(cle)
         enreg.update({
             "credit_id": credit.id, "demande_id": credit.demande_id, "client_id": client.id,
             "date_decaissement": credit.date_decaissement,

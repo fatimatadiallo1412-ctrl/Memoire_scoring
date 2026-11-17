@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import date, datetime
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, Numeric, String, func
+from sqlalchemy import BigInteger, Date, DateTime, ForeignKey, Numeric, String, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -23,3 +23,17 @@ class Score(Base):
     variables_entree: Mapped[dict] = mapped_column(JSONB)         # ce que le modèle a reçu
     facteurs: Mapped[dict | None] = mapped_column(JSONB)          # explications (SHAP)
     calcule_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+class RapportSuivi(Base):
+    """Rapport de suivi du modèle (src/surveillance.py) : stabilité, décisions, performance."""
+    __tablename__ = "rapport_suivi"
+    __table_args__ = ({"schema": "ml"},)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    version_modele: Mapped[str] = mapped_column(String(80))
+    debut: Mapped[date] = mapped_column(Date)
+    fin: Mapped[date] = mapped_column(Date)
+    niveau_global: Mapped[str] = mapped_column(String(10))       # vert / orange / rouge / n/a
+    contenu: Mapped[dict] = mapped_column(JSONB)
+    produit_par: Mapped[int | None] = mapped_column(ForeignKey("ops.utilisateur.id"))  # vide = planificateur
+    produit_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

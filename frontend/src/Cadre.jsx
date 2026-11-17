@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Briefcase, FileText, FolderOpen, House, KeyRound, LayoutDashboard, LogOut, Mail, Menu, MessageCircle, Settings,
+  Activity, Briefcase, FileText, FolderOpen, House, KeyRound, LayoutDashboard, LogOut, Mail, Menu, MessageCircle, Settings,
   UserCog, Users, X,
 } from "lucide-react";
 import LogoMarque from "./LogoMarque.jsx";
@@ -13,7 +13,7 @@ import { Bouton } from "./ui.jsx";
 
 const LIENS = {
   agent_credit: [["/clients", "Clients"], ["/dossiers", "Dossiers"]],
-  administrateur: [["/comptes", "Comptes"], ["/reinitialisations", "Réinitialisations"], ["/messages", "Messages"]],
+  administrateur: [["/comptes", "Comptes"], ["/reinitialisations", "Réinitialisations"], ["/messages", "Messages"], ["/sante-modele", "Santé du modèle"]],
   decideur: [["/dossiers", "Dossiers"], ["/clients", "Clients"], ["/metiers", "Métiers"], ["/parametres", "Paramètres"], ["/rapports", "Rapports"], ["/tableau-de-bord", "Tableau de bord"]],
   client: [["/espace", "Mon espace"], ["/espace/assistant", "Assistant"]],
 };
@@ -52,6 +52,7 @@ const ICONES = {
   "/comptes": UserCog,
   "/reinitialisations": KeyRound,
   "/messages": Mail,
+  "/sante-modele": Activity,
   "/espace": House,
   "/espace/assistant": MessageCircle,
 };

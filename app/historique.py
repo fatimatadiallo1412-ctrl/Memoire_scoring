@@ -77,3 +77,25 @@ def niveau_antecedent(session: Session, client_id: int, jour: date) -> str:
     if a["regularises"]:
         return "regularise"
     return "aucun"
+
+def resume_historique(session: Session, client_id: int, jour: date) -> dict:
+    """Historique de remboursement interne du client à la date `jour` (crédits décaissés avant).
+
+    Ces variables ne sont pas utilisées par le modèle v4 (Home Credit ne les contient pas) :
+    elles sont enregistrées avec chaque score pour les futurs modèles appris sur les données
+    de l'institution, où elles sont en général parmi les plus prédictives."""
+    credits = session.scalars(
+        select(Credit).where(Credit.client_id == client_id, Credit.date_decaissement < jour)).all()
+    nb_soldes, pire, incidents = 0, 0, 0
+    for credit in credits:
+        echeances = session.scalars(
+            select(Echeance).where(Echeance.credit_id == credit.id)).all()
+        paiements = [(p.date_paiement, p.montant) for p in session.scalars(
+            select(Paiement).where(Paiement.credit_id == credit.id, Paiement.date_paiement < jour))]
+        retard = pire_retard_jours(echeances, paiements, jour)
+        pire = max(pire, retard)
+        incidents += retard > SEUIL_JOURS_DEFAUT
+        if situation_credit(echeances, sum(m for _, m in paiements), jour)["solde"]:
+            nb_soldes += 1
+    return {"nb_credits_anterieurs": len(credits), "nb_credits_soldes": nb_soldes,
+            "pire_retard_anterieur_jours": pire, "nb_defauts_anterieurs": incidents}

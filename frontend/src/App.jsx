@@ -24,6 +24,7 @@ import ChangerMotDePasse from "./ChangerMotDePasse.jsx";
 import Parametres from "./Parametres.jsx";
 import Rapports from "./Rapports.jsx";
 import TableauBord from "./TableauBord.jsx";
+import SanteModele from "./SanteModele.jsx";
 
 const PERSONNEL = ["agent_credit", "decideur"];
 const SAISIE = ["agent_credit"];
@@ -74,6 +75,7 @@ export default function App() {
       <Route path="/reinitialisations" element={<Protegee roles={["administrateur"]}><Reinitialisations /></Protegee>} />
       <Route path="/comptes" element={<Protegee roles={["administrateur"]}><Comptes /></Protegee>} />
       <Route path="/messages" element={<Protegee roles={["administrateur"]}><Messages /></Protegee>} />
+      <Route path="/sante-modele" element={<Protegee roles={["administrateur"]}><SanteModele /></Protegee>} />
       <Route path="/espace" element={<Protegee roles={CLIENT}><Espace /></Protegee>} />
       <Route path="/espace/credits/:id" element={<Protegee roles={CLIENT}><CreditClient /></Protegee>} />
       <Route path="/espace/assistant" element={<Protegee roles={CLIENT}><AssistantClient /></Protegee>} />

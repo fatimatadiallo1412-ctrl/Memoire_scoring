@@ -61,3 +61,19 @@ export const LIBELLE_CATEGORIE = {
   "Security staff": "Sécurité et gardiennage",
   "Waiters/barmen staff": "Serveurs et barmans",
 };
+
+// Variables propres à la microfinance (facultatives, non utilisées par le modèle actuel)
+export const USAGES_MOBILE_MONEY = [
+  ["jamais", "Jamais"],
+  ["occasionnel", "Occasionnel"],
+  ["regulier", "Régulier (chaque semaine)"],
+];
+
+export const OUI_NON = [["oui", "Oui"], ["non", "Non"]];
+
+export const GARANTIES = [
+  ["aucune", "Aucune"],
+  ["caution_solidaire", "Caution solidaire (groupe)"],
+  ["garant", "Garant individuel"],
+  ["epargne_nantie", "Épargne bloquée en garantie"],
+];

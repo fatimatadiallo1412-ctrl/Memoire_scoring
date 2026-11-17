@@ -14,7 +14,7 @@ from app.workflow import changer_statut
 from app.pagination import paginer
 from app.portefeuille import client_accessible, filtrer_demandes
 from app.parametres import lire_parametres
-from app.historique import niveau_antecedent
+from app.historique import niveau_antecedent, resume_historique
 
 
 router = APIRouter(prefix="/demandes", tags=["demandes"])
@@ -64,6 +64,7 @@ def creer_demande(donnees: DemandeIn, session: Session = Depends(get_session),
         montant_demande=donnees.montant_demande,
         duree_mois=donnees.duree_mois,
         objet=donnees.objet,
+        garantie=donnees.garantie,
         date_demande=jour,
     )
     session.add(demande)
@@ -113,6 +114,7 @@ def modifier_demande(demande_id: int, donnees: DemandeIn, session: Session = Dep
     demande.montant_demande = donnees.montant_demande
     demande.duree_mois = donnees.duree_mois
     demande.objet = donnees.objet
+    demande.garantie = donnees.garantie
     demande.donnees_modifiees_le = text("now()")   # le score éventuel devient périmé
     if demande.statut in (StatutDossier.SCORE, StatutDossier.INSTRUIT):
         changer_statut(demande, StatutDossier.COMPLET)
@@ -159,7 +161,8 @@ def scorer_demande(demande_id: int, session: Session = Depends(get_session),
     parametres = lire_parametres(session)
     reco, variables = evaluer_dossier(
         client, demande, produit, parametres,
-        antecedent=niveau_antecedent(session, client.id, demande.date_demande))
+        antecedent=niveau_antecedent(session, client.id, demande.date_demande),
+        historique=resume_historique(session, client.id, demande.date_demande))
 
     if reco["decision"] == "accord":
         montant_suggere, p_suggere = demande.montant_demande, reco["p_defaut"]

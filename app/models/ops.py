@@ -58,6 +58,9 @@ class Client(Base):
         CheckConstraint("revenu_mensuel >= 0", name="revenu_positif"),
         CheckConstraint("nb_enfants >= 0", name="enfants_positif"),
         CheckConstraint("taille_menage >= 1", name="menage_minimum"),
+        CheckConstraint("epargne_mensuelle >= 0", name="epargne_positive"),
+        CheckConstraint("usage_mobile_money IN ('jamais', 'occasionnel', 'regulier')",
+                        name="usage_mobile_money_connu"),
         {"schema": SCHEMA},
     )
 
@@ -92,6 +95,13 @@ class Client(Base):
     possede_vehicule: Mapped[bool] = mapped_column(Boolean, default=False)
     revenu_mensuel: Mapped[int] = mapped_column(BigInteger, default=0)   # en FCFA
 
+    # Variables propres à la microfinance : collectées pour les futurs modèles appris sur les
+    # données de l'institution. Le modèle v4 (Home Credit) ne les utilise pas. Vide = non renseigné.
+    epargne_mensuelle: Mapped[int | None] = mapped_column(BigInteger)          # en FCFA
+    membre_groupement: Mapped[bool | None] = mapped_column(Boolean)            # tontine, GIE, groupement
+    usage_mobile_money: Mapped[str | None] = mapped_column(String(20))         # jamais / occasionnel / regulier
+    activite_saisonniere: Mapped[bool | None] = mapped_column(Boolean)
+
     cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     maj_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
                                              onupdate=func.now())
@@ -122,6 +132,8 @@ class DemandeCredit(Base):
     __table_args__ = (
         CheckConstraint("montant_demande > 0", name="montant_positif"),
         CheckConstraint("duree_mois > 0", name="duree_positive"),
+        CheckConstraint("garantie IN ('aucune', 'caution_solidaire', 'garant', 'epargne_nantie')",
+                        name="garantie_connue"),
         Index("ix_demande_credit_statut", "statut"),
         {"schema": SCHEMA},
     )
@@ -134,6 +146,8 @@ class DemandeCredit(Base):
     montant_demande: Mapped[int] = mapped_column(BigInteger)
     duree_mois: Mapped[int] = mapped_column(Integer)
     objet: Mapped[str | None] = mapped_column(String(200))
+    # Garantie proposée (non utilisée par le modèle v4) : aucune / caution_solidaire / garant / epargne_nantie
+    garantie: Mapped[str | None] = mapped_column(String(30))
     statut: Mapped[E.StatutDossier] = enum_col(
         E.StatutDossier, "statut_dossier", default=E.StatutDossier.BROUILLON)
     date_demande: Mapped[date] = mapped_column(Date)

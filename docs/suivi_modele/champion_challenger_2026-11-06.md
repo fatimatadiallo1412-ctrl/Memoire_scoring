@@ -7,11 +7,14 @@ Coupure hors période : 2025-09-18 · apprentissage 190 crédits (18 défauts) �
 | champion | 2 | 0.070 | 0.024 | 0.388 | 0.412 | 0.0271 | 0.086 |
 | recalibre | 2 | 0.082 | 0.024 | 0.388 | 0.412 | 0.0286 | 0.013 |
 | reentraine | 2 | 0.082 | 0.024 | 0.388 | 0.412 | 0.0286 | 0.013 |
+| reentraine_ir | 2 | 0.082 | 0.024 | 0.388 | 0.412 | 0.0286 | 0.013 |
 
 ## Challengers
 - **recalibre** : decalage (18 défauts) : logit(p') = 1.000 × logit(p) +0.164
 - **reentraine** : 100 arbres ajoutés ; decalage (18 défauts) : logit(p') = 1.000 × logit(p) -0.002
+- **reentraine_ir** : 100 arbres ajoutés avec 44 refusés inférés (facteur 1.5, poids 0.5) ; decalage (18 défauts) : logit(p') = 1.000 × logit(p) -0.057
 - recalibre non promouvable : 2 défauts dans la période d'évaluation : au moins 30 sont nécessaires pour conclure
 - reentraine non promouvable : 2 défauts dans la période d'évaluation : au moins 30 sont nécessaires pour conclure
+- reentraine_ir non promouvable : 2 défauts dans la période d'évaluation : au moins 30 sont nécessaires pour conclure
 
 **Proposition : garder le champion**

@@ -6,6 +6,8 @@ d'entrée de chaque dossier étant conservées (ml.score), l'évaluation rejoue 
 l'identique : c'est un fonctionnement « en parallèle » sans risque pour les clients.
 
 Challengers construits automatiquement :
+  (avec --inference-refuses) reentraine_ir : réentraînement augmenté des dossiers refusés
+                                             (src/inference_refuses.py)
   recalibre    arbres du champion + recalibration sur les données locales
   reentraine   arbres ajoutés sur les données locales, puis recalibration
                (tenté seulement à partir de MIN_DEFAUTS_REENTRAINEMENT défauts, sauf --forcer)
@@ -32,6 +34,7 @@ import pandas as pd
 from sklearn.metrics import average_precision_score, brier_score_loss, log_loss, roc_auc_score
 
 from src.modeling import COLONNES, RACINE
+from src.inference_refuses import FACTEUR_PRUDENCE, POIDS_REFUSES, augmenter
 from src.recalibration import continuer_entrainement, recalibrer
 
 MIN_DEFAUTS_EVALUATION = 30
@@ -93,9 +96,10 @@ def verdict(champion: dict, challenger: dict) -> tuple[bool, list[str]]:
 
 
 def comparer(df: pd.DataFrame, champion, seuil: float, coupure=None, forcer=False,
-             autres: dict | None = None) -> dict:
-    app, ev = decouper(df, coupure)[:2]
-    coupure = decouper(df, coupure)[2]
+             autres: dict | None = None, refus: pd.DataFrame | None = None) -> dict:
+    """refus : dossiers refusés (src/inference_refuses.refuses). S'ils sont fournis, un challenger
+    supplémentaire « reentraine_ir » est réentraîné avec inférence des refusés."""
+    app, ev, coupure = decouper(df, coupure)
     y_app, y_ev = app["defaut"].astype(int), ev["defaut"].astype(int)
 
     modeles = {"champion": champion}
@@ -107,6 +111,15 @@ def comparer(df: pd.DataFrame, champion, seuil: float, coupure=None, forcer=Fals
         continue_ = continuer_entrainement(champion, app, y_app)
         modeles["reentraine"] = recalibrer(continue_, app, y_app)
         notes["reentraine"] = "100 arbres ajoutés ; " + modeles["reentraine"].calibrateur_.description()
+        if refus is not None and len(refus):
+            refus_app = refus[refus["date_decaissement"] < coupure]
+            X, y, w = augmenter(champion, app, refus_app)
+            continue_ir = continuer_entrainement(champion, X, y, poids=w)
+            modeles["reentraine_ir"] = recalibrer(continue_ir, app, y_app)
+            notes["reentraine_ir"] = (
+                f"100 arbres ajoutés avec {len(refus_app)} refusés inférés "
+                f"(facteur {FACTEUR_PRUDENCE}, poids {POIDS_REFUSES}) ; "
+                + modeles["reentraine_ir"].calibrateur_.description())
     else:
         notes["reentraine"] = (f"non tenté : {int(y_app.sum())} défauts en apprentissage, "
                                f"{MIN_DEFAUTS_REENTRAINEMENT} requis")
@@ -156,6 +169,7 @@ def main():
     from app.scoring import VERSION_MODELE, charger_modele
     from src import registre
     from src.donnees_locales import construire
+    from src.inference_refuses import refuses
 
     parseur = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parseur.add_argument("--jour", type=date.fromisoformat, default=date.today())
@@ -164,16 +178,19 @@ def main():
                          help="version enregistrée à comparer (répétable)")
     parseur.add_argument("--forcer", action="store_true",
                          help="tenter le réentraînement même avec peu de défauts (démonstration)")
+    parseur.add_argument("--inference-refuses", action="store_true",
+                         help="ajouter un challenger réentraîné avec inférence des refusés")
     parseur.add_argument("--enregistrer", action="store_true",
                          help="ré-ajuster le gagnant sur toutes les données mûres et l'enregistrer")
     args = parseur.parse_args()
 
     with SessionLocal() as s:
         df = construire(s, args.jour)
+        refus = refuses(s, args.jour) if args.inference_refuses else None
         seuil = float(lire_parametres(s)["seuil_defaut"])
     champion = charger_modele()
     autres = {v: registre.charger(v) for v in args.challenger}
-    c = comparer(df, champion, seuil, args.coupure, args.forcer, autres)
+    c = comparer(df, champion, seuil, args.coupure, args.forcer, autres, refus)
 
     texte = en_markdown(c, VERSION_MODELE)
     print(texte)
@@ -185,11 +202,18 @@ def main():
 
     if args.enregistrer:
         nom = c["proposition"]
-        if nom not in ("recalibre", "reentraine"):
+        if nom not in ("recalibre", "reentraine", "reentraine_ir"):
             print("Aucun challenger construit n'est promouvable : rien n'est enregistré.")
             return
         y = df["defaut"].astype(int)
-        modele = continuer_entrainement(champion, df, y) if nom == "reentraine" else champion
+        if nom == "reentraine_ir":
+            with SessionLocal() as s:
+                X, y_aug, w = augmenter(champion, df, refuses(s, args.jour))
+            modele = continuer_entrainement(champion, X, y_aug, poids=w)
+        elif nom == "reentraine":
+            modele = continuer_entrainement(champion, df, y)
+        else:
+            modele = champion
         modele = recalibrer(modele, df, y)
         version = f"{VERSION_MODELE}_{nom}_{args.jour:%Y%m%d}"
         registre.enregistrer(modele, {

@@ -334,6 +334,25 @@ def ecrire_rapport(r: dict) -> str:
     return str(base.with_suffix(".md"))
 
 
+def enregistrer_en_base(session, r: dict, utilisateur_id: int | None = None):
+    """Conserve le rapport dans ml.rapport_suivi (page « Santé du modèle » de l'administrateur)."""
+    from app.models import RapportSuivi
+    rapport = RapportSuivi(
+        version_modele=r["version_modele"], debut=date.fromisoformat(r["periode"][0]),
+        fin=date.fromisoformat(r["periode"][1]), niveau_global=r["niveau_global"],
+        contenu=json.loads(json.dumps(r, default=str)), produit_par=utilisateur_id)
+    session.add(rapport)
+    session.commit()
+    session.refresh(rapport)
+    return rapport
+
+
+def trimestre_ecoule(jour: date) -> tuple[date, date]:
+    """Les trois derniers mois complets : assez de dossiers pour un PSI fiable."""
+    debut, fin = mois_precedent(jour)
+    return mois_precedent(mois_precedent(debut)[0])[0], fin
+
+
 def mois_precedent(jour: date) -> tuple[date, date]:
     fin = jour.replace(day=1) - timedelta(days=1)
     return fin.replace(day=1), fin
@@ -369,6 +388,7 @@ def main():
             print("Référence enregistrée :", figer_reference(s, debut, fin))
             return
         r = produire_rapport(s, debut, fin, args.jour)
+        enregistrer_en_base(s, r)
     print(en_markdown(r))
     print("Rapport :", ecrire_rapport(r))
 

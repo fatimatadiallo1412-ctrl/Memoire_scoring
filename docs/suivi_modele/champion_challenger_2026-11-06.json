@@ -52,11 +52,28 @@
         "M": 0.11428571428571428
       },
       "ecart_equite": 0.013373860182370814
+    },
+    "reentraine_ir": {
+      "n": 82,
+      "n_defauts": 2,
+      "taux_observe": 0.024390243902439025,
+      "taux_prevu": 0.08171051304347052,
+      "brier": 0.028570630884034942,
+      "logloss": 0.1497165496604123,
+      "auc": 0.3875,
+      "pr_auc": 0.029631255487269532,
+      "ks": 0.4125,
+      "au_dessus_seuil": {
+        "F": 0.1276595744680851,
+        "M": 0.11428571428571428
+      },
+      "ecart_equite": 0.013373860182370814
     }
   },
   "notes": {
     "recalibre": "decalage (18 défauts) : logit(p') = 1.000 × logit(p) +0.164",
-    "reentraine": "100 arbres ajoutés ; decalage (18 défauts) : logit(p') = 1.000 × logit(p) -0.002"
+    "reentraine": "100 arbres ajoutés ; decalage (18 défauts) : logit(p') = 1.000 × logit(p) -0.002",
+    "reentraine_ir": "100 arbres ajoutés avec 44 refusés inférés (facteur 1.5, poids 0.5) ; decalage (18 défauts) : logit(p') = 1.000 × logit(p) -0.057"
   },
   "verdicts": {
     "recalibre": {
@@ -66,6 +83,12 @@
       ]
     },
     "reentraine": {
+      "promouvable": false,
+      "raisons": [
+        "2 défauts dans la période d'évaluation : au moins 30 sont nécessaires pour conclure"
+      ]
+    },
+    "reentraine_ir": {
       "promouvable": false,
       "raisons": [
         "2 défauts dans la période d'évaluation : au moins 30 sont nécessaires pour conclure"
