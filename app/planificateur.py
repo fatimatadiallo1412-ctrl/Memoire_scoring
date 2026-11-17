@@ -1,4 +1,5 @@
-"""Planificateur : génère les rappels de remboursement chaque jour à 07 h 00 (heure de Dakar).
+"""Planificateur : rappels de remboursement chaque jour à 07 h 00 (heure de Dakar) et rapport
+de suivi du modèle le 1er de chaque mois à 06 h 00 (docs/suivi_modele/).
 
 Usage :
     python -m app.planificateur              # processus à laisser tourner
@@ -22,6 +23,21 @@ def tache() -> None:
     logging.info("Rappels générés : %d %s", sum(crees.values()), crees)
 
 
+def suivi_modele() -> None:
+    """Rapport du trimestre écoulé : trois mois donnent assez de dossiers pour un PSI fiable."""
+    from app.db import SessionLocal
+    from src.surveillance import ecrire_rapport, mois_precedent, produire_rapport
+    debut, fin = mois_precedent(date.today())
+    debut = mois_precedent(mois_precedent(debut)[0])[0]
+    try:
+        with SessionLocal() as session:
+            rapport = produire_rapport(session, debut, fin)
+        logging.info("Suivi du modèle : niveau %s, rapport %s",
+                     rapport["niveau_global"], ecrire_rapport(rapport))
+    except Exception:            # le suivi ne doit jamais arrêter les rappels
+        logging.exception("Suivi du modèle en échec")
+
+
 def main() -> None:
     parseur = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parseur.add_argument("--maintenant", action="store_true")
@@ -35,6 +51,8 @@ def main() -> None:
     # misfire_grace_time : une exécution peut avoir jusqu'à 1 h de retard (ordinateur en veille).
     planificateur.add_job(tache, "cron", hour=HEURE, minute=MINUTE,
                           coalesce=True, misfire_grace_time=3600)
+    planificateur.add_job(suivi_modele, "cron", day=1, hour=6, minute=0,
+                          coalesce=True, misfire_grace_time=86400)
     logging.info("Planificateur démarré : rappels chaque jour à %02d h %02d (Dakar)", HEURE, MINUTE)
     planificateur.start()
 

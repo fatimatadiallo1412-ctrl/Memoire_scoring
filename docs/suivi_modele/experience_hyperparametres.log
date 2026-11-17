@@ -1,0 +1,30 @@
+[v4] 1/16 AUC 0.6441 ± 0.0028 (408 arbres, 43 s) {'max_depth': 3, 'min_child_weight': 10, 'subsample': 0.8, 'colsample_bytree': 0.8, 'gamma': 0, 'reg_lambda': 1, 'reg_alpha': 0}
+[v4] 2/16 AUC 0.6442 ± 0.0028 (396 arbres, 41 s) {'max_depth': 3, 'min_child_weight': 20, 'subsample': 0.9, 'colsample_bytree': 0.7, 'gamma': 0.5, 'reg_lambda': 10, 'reg_alpha': 0}
+[v4] 3/16 AUC 0.6433 ± 0.0029 (270 arbres, 21 s) {'max_depth': 5, 'min_child_weight': 5, 'subsample': 0.6, 'colsample_bytree': 0.7, 'gamma': 2, 'reg_lambda': 10, 'reg_alpha': 1}
+[v4] 4/16 AUC 0.6436 ± 0.0028 (402 arbres, 33 s) {'max_depth': 5, 'min_child_weight': 20, 'subsample': 0.8, 'colsample_bytree': 0.5, 'gamma': 2, 'reg_lambda': 5, 'reg_alpha': 0.5}
+[v4] 5/16 AUC 0.6431 ± 0.0032 (231 arbres, 21 s) {'max_depth': 4, 'min_child_weight': 1, 'subsample': 1.0, 'colsample_bytree': 0.8, 'gamma': 1, 'reg_lambda': 5, 'reg_alpha': 1}
+[v4] 6/16 AUC 0.6431 ± 0.0032 (151 arbres, 16 s) {'max_depth': 5, 'min_child_weight': 10, 'subsample': 0.8, 'colsample_bytree': 0.6, 'gamma': 0, 'reg_lambda': 5, 'reg_alpha': 1}
+[v4] 7/16 AUC 0.6437 ± 0.0030 (303 arbres, 29 s) {'max_depth': 3, 'min_child_weight': 50, 'subsample': 1.0, 'colsample_bytree': 0.6, 'gamma': 1, 'reg_lambda': 1, 'reg_alpha': 1}
+[v4] 8/16 AUC 0.6432 ± 0.0025 (150 arbres, 15 s) {'max_depth': 5, 'min_child_weight': 5, 'subsample': 0.6, 'colsample_bytree': 1.0, 'gamma': 0.5, 'reg_lambda': 10, 'reg_alpha': 1}
+[v4] 9/16 AUC 0.6425 ± 0.0030 (130 arbres, 19 s) {'max_depth': 6, 'min_child_weight': 20, 'subsample': 0.6, 'colsample_bytree': 0.6, 'gamma': 0.5, 'reg_lambda': 5, 'reg_alpha': 0}
+[v4] 10/16 AUC 0.6431 ± 0.0030 (181 arbres, 25 s) {'max_depth': 5, 'min_child_weight': 1, 'subsample': 0.9, 'colsample_bytree': 0.8, 'gamma': 2, 'reg_lambda': 10, 'reg_alpha': 0.5}
+[v4] 11/16 AUC 0.6422 ± 0.0025 (104 arbres, 14 s) {'max_depth': 6, 'min_child_weight': 10, 'subsample': 0.7, 'colsample_bytree': 1.0, 'gamma': 0.5, 'reg_lambda': 1, 'reg_alpha': 0.5}
+[v4] 12/16 AUC 0.6429 ± 0.0030 (151 arbres, 24 s) {'max_depth': 6, 'min_child_weight': 1, 'subsample': 0.8, 'colsample_bytree': 0.5, 'gamma': 1, 'reg_lambda': 5, 'reg_alpha': 0}
+[v4] 13/16 AUC 0.6439 ± 0.0031 (400 arbres, 31 s) {'max_depth': 3, 'min_child_weight': 10, 'subsample': 0.9, 'colsample_bytree': 1.0, 'gamma': 0.5, 'reg_lambda': 1, 'reg_alpha': 1}
+[v4] 14/16 AUC 0.6432 ± 0.0028 (187 arbres, 25 s) {'max_depth': 5, 'min_child_weight': 20, 'subsample': 0.6, 'colsample_bytree': 0.6, 'gamma': 2, 'reg_lambda': 10, 'reg_alpha': 0.5}
+[v4] 15/16 AUC 0.6426 ± 0.0025 (119 arbres, 18 s) {'max_depth': 6, 'min_child_weight': 50, 'subsample': 0.7, 'colsample_bytree': 1.0, 'gamma': 0.5, 'reg_lambda': 1, 'reg_alpha': 1}
+[v4] 16/16 AUC 0.6429 ± 0.0030 (153 arbres, 16 s) {'max_depth': 5, 'min_child_weight': 1, 'subsample': 1.0, 'colsample_bytree': 0.5, 'gamma': 2, 'reg_lambda': 1, 'reg_alpha': 1}
+[v4] meilleure CV 0.6442 · test 0.6428
+[sans_duree] 1/5 AUC 0.6359 ± 0.0046 (390 arbres, 32 s) {'max_depth': 3, 'min_child_weight': 20, 'subsample': 0.9, 'colsample_bytree': 0.7, 'gamma': 0.5, 'reg_lambda': 10, 'reg_alpha': 0}
+[sans_duree] 2/5 AUC 0.6356 ± 0.0045 (308 arbres, 25 s) {'max_depth': 3, 'min_child_weight': 10, 'subsample': 0.8, 'colsample_bytree': 0.8, 'gamma': 0, 'reg_lambda': 1, 'reg_alpha': 0}
+[sans_duree] 3/5 AUC 0.6358 ± 0.0046 (362 arbres, 49 s) {'max_depth': 3, 'min_child_weight': 10, 'subsample': 0.9, 'colsample_bytree': 1.0, 'gamma': 0.5, 'reg_lambda': 1, 'reg_alpha': 1}
+[sans_duree] 4/5 AUC 0.6354 ± 0.0045 (302 arbres, 28 s) {'max_depth': 3, 'min_child_weight': 50, 'subsample': 1.0, 'colsample_bytree': 0.6, 'gamma': 1, 'reg_lambda': 1, 'reg_alpha': 1}
+[sans_duree] 5/5 AUC 0.6350 ± 0.0042 (247 arbres, 20 s) {'max_depth': 5, 'min_child_weight': 20, 'subsample': 0.8, 'colsample_bytree': 0.5, 'gamma': 2, 'reg_lambda': 5, 'reg_alpha': 0.5}
+[sans_duree] meilleure CV 0.6359 · test 0.6347
+[libre] 1/5 AUC 0.6915 ± 0.0018 (1237 arbres, 97 s) {'max_depth': 3, 'min_child_weight': 20, 'subsample': 0.9, 'colsample_bytree': 0.7, 'gamma': 0.5, 'reg_lambda': 10, 'reg_alpha': 0}
+[libre] 2/5 AUC 0.6909 ± 0.0014 (935 arbres, 87 s) {'max_depth': 3, 'min_child_weight': 10, 'subsample': 0.8, 'colsample_bytree': 0.8, 'gamma': 0, 'reg_lambda': 1, 'reg_alpha': 0}
+[libre] 3/5 AUC 0.6911 ± 0.0018 (1099 arbres, 102 s) {'max_depth': 3, 'min_child_weight': 10, 'subsample': 0.9, 'colsample_bytree': 1.0, 'gamma': 0.5, 'reg_lambda': 1, 'reg_alpha': 1}
+[libre] 4/5 AUC 0.6859 ± 0.0025 (458 arbres, 48 s) {'max_depth': 3, 'min_child_weight': 50, 'subsample': 1.0, 'colsample_bytree': 0.6, 'gamma': 1, 'reg_lambda': 1, 'reg_alpha': 1}
+[libre] 5/5 AUC 0.6917 ± 0.0015 (1140 arbres, 112 s) {'max_depth': 5, 'min_child_weight': 20, 'subsample': 0.8, 'colsample_bytree': 0.5, 'gamma': 2, 'reg_lambda': 5, 'reg_alpha': 0.5}
+[libre] meilleure CV 0.6917 · test 0.6971
+Journal : /home/diallo/Documents/ODC_project/Scoring_de_credit/Memoire_scoring/docs/suivi_modele/experience_hyperparametres.json

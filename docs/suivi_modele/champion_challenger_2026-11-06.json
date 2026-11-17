@@ -1,0 +1,76 @@
+{
+  "coupure": "2025-09-18",
+  "n_apprentissage": 190,
+  "defauts_apprentissage": 18,
+  "n_evaluation": 82,
+  "seuil": 0.12,
+  "resultats": {
+    "champion": {
+      "n": 82,
+      "n_defauts": 2,
+      "taux_observe": 0.024390243902439025,
+      "taux_prevu": 0.07033409178256989,
+      "brier": 0.027110077440738678,
+      "logloss": 0.1412682831287384,
+      "auc": 0.3875,
+      "pr_auc": 0.029631255487269532,
+      "ks": 0.4125,
+      "au_dessus_seuil": {
+        "F": 0.0,
+        "M": 0.08571428571428572
+      },
+      "ecart_equite": 0.08571428571428572
+    },
+    "recalibre": {
+      "n": 82,
+      "n_defauts": 2,
+      "taux_observe": 0.024390243902439025,
+      "taux_prevu": 0.08171054945178809,
+      "brier": 0.028570635094051458,
+      "logloss": 0.14971657495449517,
+      "auc": 0.3875,
+      "pr_auc": 0.029631255487269532,
+      "ks": 0.4125,
+      "au_dessus_seuil": {
+        "F": 0.1276595744680851,
+        "M": 0.11428571428571428
+      },
+      "ecart_equite": 0.013373860182370814
+    },
+    "reentraine": {
+      "n": 82,
+      "n_defauts": 2,
+      "taux_observe": 0.024390243902439025,
+      "taux_prevu": 0.08171060259223628,
+      "brier": 0.028570642485936507,
+      "logloss": 0.1497166163025834,
+      "auc": 0.3875,
+      "pr_auc": 0.029631255487269532,
+      "ks": 0.4125,
+      "au_dessus_seuil": {
+        "F": 0.1276595744680851,
+        "M": 0.11428571428571428
+      },
+      "ecart_equite": 0.013373860182370814
+    }
+  },
+  "notes": {
+    "recalibre": "decalage (18 défauts) : logit(p') = 1.000 × logit(p) +0.164",
+    "reentraine": "100 arbres ajoutés ; decalage (18 défauts) : logit(p') = 1.000 × logit(p) -0.002"
+  },
+  "verdicts": {
+    "recalibre": {
+      "promouvable": false,
+      "raisons": [
+        "2 défauts dans la période d'évaluation : au moins 30 sont nécessaires pour conclure"
+      ]
+    },
+    "reentraine": {
+      "promouvable": false,
+      "raisons": [
+        "2 défauts dans la période d'évaluation : au moins 30 sont nécessaires pour conclure"
+      ]
+    }
+  },
+  "proposition": null
+}

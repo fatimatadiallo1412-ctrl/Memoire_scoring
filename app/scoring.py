@@ -1,7 +1,9 @@
 import json
+import os
 from functools import lru_cache
 
 import joblib
+from dotenv import load_dotenv
 
 from app import referentiels as R
 from app.explication import contributions
@@ -10,7 +12,11 @@ from src.modeling import COLONNES, RACINE
 from src.suggestion import (construire_ligne, mensualite, probabilite_defaut, suggerer_montant,
                             taux_endettement)
 
-VERSION_MODELE = "xgb_home_credit_v4"
+load_dotenv()
+# Version en production. Une nouvelle version n'est promue qu'après la comparaison
+# champion / challenger (src/champion_challenger.py) et la décision de la direction :
+# on renseigne alors MODELE_VERSION dans .env, sans toucher au code.
+VERSION_MODELE = os.environ.get("MODELE_VERSION", "xgb_home_credit_v4")
 
 # Facteur appliqué au seuil de défaut pour un client dont l'incident passé est régularisé
 # (1.0 = règle désactivée). La valeur réelle vient de ops.parametre.

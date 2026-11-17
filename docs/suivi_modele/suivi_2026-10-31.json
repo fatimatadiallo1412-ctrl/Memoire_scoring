@@ -1,0 +1,128 @@
+{
+  "version_modele": "xgb_home_credit_v4",
+  "periode": [
+    "2026-08-01",
+    "2026-10-31"
+  ],
+  "produit_le": "2026-11-17",
+  "alertes": {
+    "psi_score": "vert",
+    "psi_variables": "vert",
+    "modalites_inconnues": "vert",
+    "derogations": "vert",
+    "calibration": "n/a",
+    "auc": "n/a"
+  },
+  "dossiers_scores": 363,
+  "score_moyen": 0.09209498018026352,
+  "reference": "production du 2025-01-01 au 2025-12-31 (479 dossiers), modèle xgb_home_credit_v4",
+  "psi": {
+    "score": 0.05774148827303074,
+    "variables": {
+      "CNT_CHILDREN": 0.012351664829823344,
+      "CNT_FAM_MEMBERS": 0.033062547927811124,
+      "age_ans": 0.09951490687347651,
+      "anciennete_emploi_ans": 0.012189088087701699,
+      "sans_emploi": 0.0,
+      "credit_sur_revenu": 0.07380569987765881,
+      "annuite_sur_revenu": 0.04126531767994852,
+      "duree_implicite": 0.022769598296719498,
+      "NAME_INCOME_TYPE": 0.0154063892828669,
+      "NAME_FAMILY_STATUS": 0.041301303761179756,
+      "NAME_HOUSING_TYPE": 0.0030097211585736433,
+      "OCCUPATION_TYPE": 0.08460491472474732,
+      "FLAG_OWN_REALTY": 0.0005680856181439121,
+      "FLAG_OWN_CAR": 0.0031784800052320743
+    },
+    "exces": {
+      "score": 0.009316452184301348,
+      "CNT_CHILDREN": 0.0,
+      "CNT_FAM_MEMBERS": 0.0,
+      "age_ans": 0.051089870784747124,
+      "anciennete_emploi_ans": 0.0,
+      "sans_emploi": 0.0,
+      "credit_sur_revenu": 0.02538066378892942,
+      "annuite_sur_revenu": 0.0,
+      "duree_implicite": 0.0,
+      "NAME_INCOME_TYPE": 0.0,
+      "NAME_FAMILY_STATUS": 0.021931289325688,
+      "NAME_HOUSING_TYPE": 0.0,
+      "OCCUPATION_TYPE": 0.0071248569827803004,
+      "FLAG_OWN_REALTY": 0.0,
+      "FLAG_OWN_CAR": 0.0
+    }
+  },
+  "psi_variable_max": {
+    "variable": "age_ans",
+    "exces_psi": 0.051089870784747124
+  },
+  "modalites_inconnues": {
+    "part_dossiers": 0.0,
+    "par_variable": {
+      "NAME_INCOME_TYPE": 0.0,
+      "NAME_FAMILY_STATUS": 0.0,
+      "NAME_HOUSING_TYPE": 0.0,
+      "OCCUPATION_TYPE": 0.0,
+      "FLAG_OWN_REALTY": 0.0,
+      "FLAG_OWN_CAR": 0.0
+    },
+    "exemples": {}
+  },
+  "decisions": {
+    "n": 358,
+    "taux_acceptation": 0.8547486033519553,
+    "taux_derogation": 0.07541899441340782,
+    "derogations_par_sens": {
+      "accord -> accorder_modifie": 7,
+      "accord_reduit -> accorder": 5,
+      "accord -> refuser": 5,
+      "refus -> accorder_modifie": 5,
+      "accord_reduit -> refuser": 5
+    }
+  },
+  "performance": {
+    "n": 268,
+    "n_defauts": 20,
+    "taux_observe": 0.07462686567164178,
+    "taux_prevu": 0.07819867134094238,
+    "brier": 0.06685177981853485,
+    "calibration": [
+      {
+        "classe": 0,
+        "n": 54,
+        "prevu": 0.036605652421712875,
+        "observe": 0.037037037037037035
+      },
+      {
+        "classe": 1,
+        "n": 53,
+        "prevu": 0.05873480066657066,
+        "observe": 0.0
+      },
+      {
+        "classe": 2,
+        "n": 54,
+        "prevu": 0.07310809940099716,
+        "observe": 0.09259259259259259
+      },
+      {
+        "classe": 3,
+        "n": 53,
+        "prevu": 0.09314913302659988,
+        "observe": 0.11320754716981132
+      },
+      {
+        "classe": 4,
+        "n": 54,
+        "prevu": 0.12931209802627563,
+        "observe": 0.12962962962962962
+      }
+    ],
+    "rapport_observe_prevu": 0.9543239596267857,
+    "verdict": "20 défauts observés : moins de 30, performance non jugée (trop peu de recul)",
+    "niveau_calibration": "n/a",
+    "niveau_auc": "n/a"
+  },
+  "niveau_global": "vert",
+  "action": "Aucune action : le modèle reste en service tel quel."
+}
