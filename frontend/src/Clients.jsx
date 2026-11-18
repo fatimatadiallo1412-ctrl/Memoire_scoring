@@ -59,7 +59,7 @@ export default function Clients() {
       <p className="mb-3 text-sm text-slate-500">
         {chargement
           ? "Recherche…"
-          : total + " client(s). Plusieurs clients peuvent porter le même nom : repérez le bon par la date de naissance, le téléphone ou le code client."}
+          : total + " client(s)."}
       </p>
       <Tableau>
         <thead className="bg-slate-50">

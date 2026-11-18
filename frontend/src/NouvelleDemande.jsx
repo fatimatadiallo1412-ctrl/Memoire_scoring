@@ -93,7 +93,7 @@ export default function NouvelleDemande() {
             <input className={classeSaisie} value={objet} maxLength={200}
               onChange={(e) => setObjet(e.target.value)} />
           </Champ>
-          <Champ label="Garantie proposée (facultatif)" aide="Sans effet sur le score actuel.">
+          <Champ label="Garantie proposée (facultatif)">
             <Liste valeur={garantie} options={GARANTIES} facultatif onChange={setGarantie} />
           </Champ>
           <div className="flex flex-wrap items-center gap-3 sm:col-span-2">

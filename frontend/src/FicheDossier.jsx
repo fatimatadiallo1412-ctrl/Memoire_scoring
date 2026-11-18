@@ -6,6 +6,8 @@ import { useAuth } from "./useAuth.js";
 import { dateFr, fcfa } from "./formats.js";
 import { LIBELLE_DECISION, LIBELLE_STATUT, GARANTIES } from "./listes.js";
 import Cadre from "./Cadre.jsx";
+import RetourClient from "./RetourClient.jsx";
+import { apercuDepuisScore } from "./retour.js";
 import { EncadreDecaissement, PanneauDecaissement } from "./Decaissement.jsx";
 import { Alerte, Badge, Bouton, Champ, Chargement, Info, Infos, LienBouton, Panneau, TD, TH, Tableau, classeSaisie, LienRetour } from "./ui.jsx";
 import { tonDossier } from "./statuts.js";
@@ -114,13 +116,6 @@ function AnalysePolitique({ facteurs }) {
   const motifs = Array.isArray(facteurs.motifs) ? facteurs.motifs : [];
   const p = facteurs.parametres || {};
   const endettement = facteurs.endettement_demande;
-  const regles = [
-    p.seuil_defaut != null && "seuil de défaut " + nombreFr(p.seuil_defaut * 100) + " %",
-    p.endettement_max != null && "endettement maximal " + nombreFr(p.endettement_max * 100, 0) + " % du revenu",
-    p.ratio_min != null && "réduction jusqu'à " + nombreFr(p.ratio_min * 100, 0) + " % du montant demandé",
-    p.pas_montant != null && "par pas de " + Number(p.pas_montant).toLocaleString("fr-FR") + " FCFA",
-    p.facteur_prudence_antecedent != null && "prudence après incident × " + nombreFr(p.facteur_prudence_antecedent, 2),
-  ].filter(Boolean);
   return (
     <div className="mt-5 space-y-3">
       <h3 className="text-sm font-semibold text-slate-700">Au regard de la politique de crédit</h3>
@@ -144,9 +139,6 @@ function AnalysePolitique({ facteurs }) {
           Mensualité demandée : <span className="font-semibold">{nombreFr(endettement * 100)} %</span> du revenu mensuel
           {p.endettement_max != null && <span className="text-texte-doux"> (maximum {nombreFr(p.endettement_max * 100, 0)} %)</span>}.
         </p>
-      )}
-      {regles.length > 0 && (
-        <p className="text-xs text-texte-doux">Règles appliquées lors du calcul : {regles.join(" · ")}.</p>
       )}
     </div>
   );
@@ -236,12 +228,13 @@ export default function FicheDossier() {
   const [score, setScore] = useState(null);
   const [decisions, setDecisions] = useState([]);
   const [credit, setCredit] = useState(null);
+  const [retour, setRetour] = useState(null);
   const [ouvrirDec, setOuvrirDec] = useState(false);
   const [erreur, setErreur] = useState("");
   const [message, setMessage] = useState("");
   const [occupe, setOccupe] = useState(false);
   const [avis, setAvis] = useState("");
-  const [dec, setDec] = useState({ decision: "accorder", montant: "", duree: "", commentaire: "" });
+  const [dec, setDec] = useState({ decision: "accorder", montant: "", duree: "", commentaire: "", motifClient: "" });
   const [simulation, setSimulation] = useState(null);
 
   // Accord modifié : risque et endettement du montant envisagé, recalculés pendant la saisie.
@@ -266,6 +259,7 @@ export default function FicheDossier() {
       appeler("/demandes/" + id + "/score").then(setScore).catch(() => setScore(null));
       appeler("/demandes/" + id + "/decisions").then(setDecisions).catch(() => setDecisions([]));
       appeler("/demandes/" + id + "/credit").then(setCredit).catch(() => setCredit(null));
+      appeler("/demandes/" + id + "/retour").then(setRetour).catch(() => setRetour(null));
     } catch (e) {
       setErreur(e.message);
     }
@@ -302,13 +296,16 @@ export default function FicheDossier() {
 
   function envoyerDecision(evenement) {
     evenement.preventDefault();
-    const corps = { decision: dec.decision, commentaire: dec.commentaire.trim() || null };
+    const corps = { decision: dec.decision, commentaire: dec.commentaire.trim() || null,
+      motif_client: dec.motifClient.trim() || null };
     if (dec.decision === "accorder_modifie") {
       corps.montant_accorde = parseInt(dec.montant, 10);
       corps.duree_accordee = parseInt(dec.duree, 10);
     }
     agir("/decider", corps, "Décision enregistrée.");
   }
+
+  const motifClientObligatoire = dec.decision === "refuser" && score && score.recommandation !== "refus";
 
   if (!d) {
     return (
@@ -374,11 +371,22 @@ export default function FicheDossier() {
           <div className="mt-6 border-t border-slate-100 pt-4">
             <Infos>
               <Info libelle="Montant suggéré">{score.montant_suggere ? fcfa(score.montant_suggere) : "—"}</Info>
-              <Info libelle="Modèle">{score.version_modele}</Info>
             </Infos>
           </div>
           <Explication contributions={score.facteurs && score.facteurs.contributions} />
           <AnalysePolitique facteurs={score.facteurs} />
+        </Panneau>
+      )}
+
+      {!retour && score && apercuDepuisScore(score) && !["accorde", "accorde_modifie", "refuse", "ajourne"].includes(d.statut) && (
+        <Panneau titre="Pistes pour le client">
+          <RetourClient retour={apercuDepuisScore(score)} personnel />
+        </Panneau>
+      )}
+
+      {retour && (
+        <Panneau titre="Retour au client">
+          <RetourClient retour={retour} personnel />
         </Panneau>
       )}
 
@@ -422,9 +430,6 @@ export default function FicheDossier() {
 
       {directeur && d.statut === "soumis_decision" && (
         <Panneau titre="Décision">
-          <p className="mb-3 text-sm text-slate-500">
-            Si votre décision diffère de la recommandation du modèle, un commentaire est obligatoire.
-          </p>
           <form className="grid gap-4 sm:grid-cols-2" onSubmit={envoyerDecision}>
             <div className="sm:col-span-2">
               <Champ label="Décision">
@@ -449,11 +454,20 @@ export default function FicheDossier() {
               </>
             )}
             <div className="sm:col-span-2">
-              <Champ label="Commentaire">
+              <Champ label="Commentaire interne">
                 <textarea className={classeSaisie} rows={3} value={dec.commentaire} maxLength={2000}
                   onChange={(e) => setDec({ ...dec, commentaire: e.target.value })} />
               </Champ>
             </div>
+            {dec.decision !== "accorder" && (
+              <div className="sm:col-span-2">
+                <Champ label={"Motif communiqué au client" + (motifClientObligatoire ? " (obligatoire)" : " (facultatif)")}>
+                  <textarea className={classeSaisie} rows={2} value={dec.motifClient} maxLength={1000}
+                    required={motifClientObligatoire}
+                    onChange={(e) => setDec({ ...dec, motifClient: e.target.value })} />
+                </Champ>
+              </div>
+            )}
             <div className="sm:col-span-2">
               <Bouton type="submit" disabled={occupe}>Enregistrer la décision</Bouton>
             </div>
@@ -468,7 +482,7 @@ export default function FicheDossier() {
               <tr>
                 <th className={TH}>Date</th><th className={TH}>Décision</th><th className={TH}>Montant</th>
                 <th className={TH}>Durée</th><th className={TH}>Modèle</th><th className={TH}>Concordance</th>
-                <th className={TH}>Commentaire</th>
+                <th className={TH}>Commentaire</th><th className={TH}>Motif communiqué au client</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -481,6 +495,7 @@ export default function FicheDossier() {
                   <td className={TD}>{RECOMMANDATION[x.recommandation_modele] || x.recommandation_modele || "—"}</td>
                   <td className={TD}>{x.concordance === null ? "—" : x.concordance ? "Oui" : "Non"}</td>
                   <td className={TD}>{x.commentaire || ""}</td>
+                  <td className={TD}>{x.motif_client || ""}</td>
                 </tr>
               ))}
             </tbody>

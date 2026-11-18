@@ -124,6 +124,7 @@ class DecisionIn(BaseModel):
     montant_accorde: int | None = Field(default=None, gt=0)
     duree_accordee: int | None = Field(default=None, gt=0, le=120)
     commentaire: str | None = Field(default=None, max_length=2000)
+    motif_client: str | None = Field(default=None, max_length=1000)
 
 
 class DecisionOut(BaseModel):
@@ -137,6 +138,7 @@ class DecisionOut(BaseModel):
     montant_accorde: int | None
     duree_accordee: int | None
     commentaire: str | None
+    motif_client: str | None = None
     recommandation_modele: str | None
     concordance: bool | None
     decide_le: datetime  

@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from app import referentiels as R
 from app.explication import contributions
 from src.features import PLAFOND_ENFANTS, PLAFOND_FAMILLE
+from src import recours as RC
 from src.modeling import COLONNES, RACINE
 from src.suggestion import (construire_ligne, mensualite, probabilite_defaut, suggerer_montant,
                             taux_endettement)
@@ -96,7 +97,8 @@ def variables_complementaires(client, demande, historique: dict | None = None) -
     return complements
 
 
-def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun", historique=None):
+def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun", historique=None,
+                    avec_recours=True):
     """Renvoie la recommandation (accord / accord_reduit / refus) et les variables d'entrée.
 
     antecedent (voir app/historique.py) :
@@ -104,6 +106,8 @@ def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun", hi
       "regularise" : défaut passé régularisé, seuil d'acceptation resserré
       "en_cours"   : crédit en retard de plus de 90 jours, recommandation de refus
     La probabilité du modèle n'est jamais modifiée.
+    avec_recours : calcule aussi les conseils au client (src/recours.py) ; désactivé pour les
+    simulations de masse, qui n'en ont pas besoin.
     """
     modele = charger_modele()
     profil = profil_client(client, demande.date_demande)
@@ -130,6 +134,10 @@ def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun", hi
             f"Incident de paiement passé, régularisé : seuil de risque resserré "
             f"({seuil:.3f} au lieu de {seuil_base:.3f})")
     recommandation["seuil_applique"] = seuil
+    if avec_recours:
+        recommandation["recours"] = recours_dossier(
+            modele, profil, client, demande, produit, parametres, recommandation, seuil, antecedent,
+            historique)
 
     ligne = construire_ligne(profil, demande.montant_demande, demande.duree_mois,
                              client.revenu_mensuel, COLONNES, taux)
@@ -139,3 +147,54 @@ def evaluer_dossier(client, demande, produit, parametres, antecedent="aucun", hi
     variables["antecedent_defaut"] = antecedent
     variables["complements"] = variables_complementaires(client, demande, historique)
     return recommandation, variables
+
+def recours_dossier(modele, profil, client, demande, produit, parametres, recommandation, seuil,
+                    antecedent="aucun", historique=None) -> dict:
+    """Pourquoi la demande n'est pas accordée telle quelle, et ce que le client peut changer
+    pour sa prochaine demande (src/recours.py). Calculé à chaque score et enregistré avec lui.
+
+    Les conseils de l'institution sont calculés même pour un accord : ils servent si le directeur
+    refuse contre l'avis du modèle (le motif est alors celui qu'il écrit pour le client)."""
+    taux = float(produit.taux_annuel) / 100
+    revenu = client.revenu_mensuel
+    m_demandee = mensualite(demande.montant_demande, demande.duree_mois, taux)
+    endettement_max = float(parametres["endettement_max"])
+    reglages = {
+        "mois_epargne": int(parametres.get("recours_mois_epargne", RC.MOIS_EPARGNE)),
+        "part_nantie": float(parametres.get("recours_part_nantie", RC.PART_NANTIE)),
+        "hausse_revenu_max": float(parametres.get("recours_hausse_revenu_max", RC.HAUSSE_REVENU_MAX)),
+        "attente_max": int(parametres.get("recours_attente_max", RC.ATTENTE_MAX_MOIS)),
+    }
+    motifs = RC.motifs_client(
+        recommandation["motifs"], mensualite_demandee=m_demandee, antecedent=antecedent,
+        endettement=taux_endettement(demande.montant_demande, demande.duree_mois, revenu, taux),
+        endettement_max=endettement_max)
+    if antecedent == "en_cours":
+        # Un seul conseil possible : régulariser avant toute nouvelle demande.
+        return {"motifs": motifs, "plans": [], "institution": RC.regulariser(), "bloque": True,
+                "reglages": reglages}
+
+    plans = []
+    if recommandation["decision"] != "accord":
+        plans = RC.chercher_plans(
+            modele, profil, demande.montant_demande, demande.duree_mois, revenu, COLONNES,
+            taux_annuel=taux, seuil=seuil, endettement_max=endettement_max,
+            montant_min=produit.montant_min, duree_min=produit.duree_min_mois,
+            duree_max=produit.duree_max_mois, pas=int(parametres["pas_montant"]),
+            # Accord réduit : comment obtenir la totalité du montant la prochaine fois
+            montant_fixe=recommandation["decision"] == "accord_reduit",
+            hausse_revenu_max=reglages["hausse_revenu_max"], attente_max=reglages["attente_max"])
+    plan_reduit = next((p for p in plans if p["leviers"] and set(p["leviers"]) <= {"montant", "duree"}), None)
+    # Épargne conseillée = mensualité d'un crédit réellement envisageable : celle du plan le plus proche
+    # de la demande, sinon la mensualité maximale permise par la politique (jamais plus que la demande).
+    if plans:
+        m_visee, montant_vise = plans[-1]["mensualite"], plans[-1]["montant"]
+    else:
+        m_visee, montant_vise = min(m_demandee, endettement_max * revenu), demande.montant_demande
+    institution = RC.recommandations_institution(
+        client, demande, mensualite_visee=round(m_visee), historique=historique,
+        plan_reduit=plan_reduit, montant_vise=montant_vise, mois_epargne=reglages["mois_epargne"],
+        part_nantie=reglages["part_nantie"])
+    return {"motifs": motifs if recommandation["decision"] != "accord" else [], "plans": plans,
+            "institution": institution, "bloque": False, "mensualite_visee": round(m_visee),
+            "reglages": reglages}

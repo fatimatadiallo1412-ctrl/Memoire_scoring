@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Activity, Clock, Filter, Maximize2, RefreshCw, Scale, ShieldAlert, ShieldCheck, Users,
+  Activity, Clock, Filter, Maximize2, RefreshCw, Scale, ShieldAlert, Users,
 } from "lucide-react";
 import { appeler } from "./api";
 import Cadre from "./Cadre.jsx";
@@ -153,11 +153,6 @@ export default function TableauBord() {
         </section>
       )}
 
-      <p className="mt-4 flex items-start gap-2 text-xs text-texte-doux">
-        <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-baobab" aria-hidden="true" />
-        L'accès est personnel et temporaire : il expire après 10 minutes (cliquez sur « Actualiser » pour le renouveler)
-        et chaque ouverture est inscrite au journal d'audit.
-      </p>
     </Cadre>
   );
 }

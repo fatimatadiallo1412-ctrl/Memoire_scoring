@@ -70,6 +70,11 @@ MOTIFS = {
     ("accord_reduit", TypeDecision.REFUSER): "Capacité de remboursement jugée insuffisante.",
     ("refus", TypeDecision.ACCORDER_MODIFIE): "Client connu de l'agence, montant réduit accepté avec garantie.",
 }
+# Motif écrit pour le client quand le directeur refuse contre l'avis du modèle (obligatoire).
+MOTIFS_CLIENT = {
+    "accord": "Votre niveau d'endettement actuel auprès d'autres institutions ne permet pas un nouveau crédit.",
+    "accord_reduit": "Votre capacité de remboursement ne permet pas ce crédit pour le moment.",
+}
 STATUT_DECISION = {TypeDecision.ACCORDER: "accorde", TypeDecision.ACCORDER_MODIFIE: "accorde_modifie",
                    TypeDecision.REFUSER: "refuse", TypeDecision.AJOURNER: "ajourne"}
 
@@ -247,6 +252,7 @@ def main() -> None:
                     p_montant_suggere=reco["p_defaut"], variables_entree=variables,
                     facteurs={"motifs": reco["motifs"],
                               "endettement_demande": round(reco["endettement_demande"], 3),
+                              "recours": reco["recours"],
                               "parametres": parametres},
                     calcule_le=t_score)
                 session.add(score)
@@ -280,6 +286,8 @@ def main() -> None:
                     demande_id=demande.id, score_id=score.id, decideur_id=directeur.id,
                     decision=choix, montant_accorde=montant_acc, duree_accordee=duree_acc,
                     commentaire=commentaire, recommandation_modele=reco["decision"],
+                    motif_client=(MOTIFS_CLIENT.get(reco["decision"])
+                                  if choix == TypeDecision.REFUSER else None),
                     concordance=concordance, decide_le=t_decision))
                 statut, derniere = STATUT_DECISION[choix], t_decision
                 bilan["concordance"].append(concordance)

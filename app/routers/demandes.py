@@ -181,6 +181,7 @@ def scorer_demande(demande_id: int, session: Session = Depends(get_session),
         facteurs={"motifs": reco["motifs"],
                   "contributions": reco["contributions"],
                   "endettement_demande": round(reco["endettement_demande"], 3),
+                  "recours": reco["recours"],
                   "parametres": parametres},
     )
     session.add(score)

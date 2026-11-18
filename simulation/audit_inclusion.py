@@ -28,7 +28,8 @@ def scorer_profils() -> pd.DataFrame:
         montant = int(min(max(montant, PRODUIT.montant_min), PRODUIT.montant_max))
         demande = SimpleNamespace(date_demande=DATE_REFERENCE,
                                   montant_demande=montant, duree_mois=DUREE_MOIS)
-        reco, _ = evaluer_dossier(SimpleNamespace(**p), demande, PRODUIT, PARAMETRES)
+        reco, _ = evaluer_dossier(SimpleNamespace(**p), demande, PRODUIT, PARAMETRES,
+                                  avec_recours=False)
         lignes.append({**p, "montant_demande": montant, "decision": reco["decision"],
                        "p_demande": reco["p_demande"],
                        "endettement": reco["endettement_demande"]})

@@ -13,6 +13,10 @@ const META = {
   ratio_min: { libelle: "Réduction minimale proposable", unite: "% du montant demandé", echelle: 100, min: 10, max: 100, pas: "1" },
   pas_montant: { libelle: "Pas de réduction du montant", unite: "FCFA", echelle: 1, min: 1000, max: 1000000, pas: "1000" },
   facteur_prudence_antecedent: { libelle: "Facteur de prudence (incident passé régularisé)", unite: "coefficient (1 = désactivé)", echelle: 1, min: 0.1, max: 1, pas: "0.05" },
+  recours_mois_epargne: { libelle: "Conseil : durée d'épargne préalable", unite: "mois", echelle: 1, min: 1, max: 12, pas: "1" },
+  recours_part_nantie: { libelle: "Conseil : épargne nantie", unite: "% du montant demandé", echelle: 100, min: 1, max: 50, pas: "1" },
+  recours_hausse_revenu_max: { libelle: "Conseil : hausse de revenu jugée réaliste", unite: "%", echelle: 100, min: 0, max: 100, pas: "5" },
+  recours_attente_max: { libelle: "Conseil : attente maximale avant nouvelle demande", unite: "mois", echelle: 1, min: 0, max: 24, pas: "1" },
 };
 
 function metaDe(cle) {

@@ -12,6 +12,7 @@ from app.models import Agence, Client, DemandeCredit, Journal, Utilisateur
 from app.models.enums import Role, StatutDossier
 from app.pagination import paginer
 from app.portefeuille import exiger_client, filtrer_clients
+from app.retour_client import demandes_avec_retour
 from app.schemas import ClientIn, ClientMaj, ClientOut
 
 router = APIRouter(prefix="/clients", tags=["clients"])
@@ -106,6 +107,14 @@ def rechercher_clients(
 def lire_client(client_id: int, session: Session = Depends(get_session),
                 utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
     return exiger_client(session, client_id, utilisateur)
+
+
+@router.get("/{client_id}/retours")
+def retours_du_client(client_id: int, session: Session = Depends(get_session),
+                      utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
+    """Demandes refusées ou réduites du client, avec le motif et les conseils qui lui sont donnés."""
+    exiger_client(session, client_id, utilisateur)
+    return [d for d in demandes_avec_retour(session, client_id) if d["retour"]]
 
 
 @router.patch("/{client_id}", response_model=ClientOut)

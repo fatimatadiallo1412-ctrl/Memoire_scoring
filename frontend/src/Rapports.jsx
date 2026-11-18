@@ -49,7 +49,7 @@ export default function Rapports() {
               {PERIODES.map(([cle, libelle]) => <option key={cle} value={cle}>{libelle}</option>)}
             </select>
           </Champ>
-          <Champ label="Un jour de la période" aide="Le rapport couvre la période qui contient cette date.">
+          <Champ label="Un jour de la période">
             <input className={classeSaisie} type="date" value={jour} required
               onChange={(e) => setJour(e.target.value)} />
           </Champ>
@@ -63,7 +63,6 @@ export default function Rapports() {
             <Bouton type="submit" disabled={envoi}>{envoi ? "Génération…" : "Télécharger le rapport"}</Bouton>
           </div>
         </form>
-        <p className="mt-4 text-xs text-slate-500">Chaque génération de rapport est inscrite au journal d'audit.</p>
       </Panneau>
     </Cadre>
   );

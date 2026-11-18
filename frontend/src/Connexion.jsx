@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Bell, CalendarDays, Eye, EyeOff, Info, MessageCircle, TriangleAlert } from "lucide-react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "./useAuth.js";
 import { SceneSuivi } from "./IllustrationsHero.jsx";
 import LogoMarque from "./LogoMarque.jsx";
@@ -17,7 +17,7 @@ const AVANTAGES = [
 ];
 
 export default function Connexion() {
-  const { utilisateur, connecter } = useAuth();
+  const { connecter } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [motDePasse, setMotDePasse] = useState("");
@@ -27,8 +27,6 @@ export default function Connexion() {
   const [envoi, setEnvoi] = useState(false);
   const [echecs, setEchecs] = useState(0);
   const [bloque, setBloque] = useState(false);
-
-  if (utilisateur) return <Navigate to={accueilDe(utilisateur)} replace />;
 
   async function soumettre(evenement) {
     evenement.preventDefault();

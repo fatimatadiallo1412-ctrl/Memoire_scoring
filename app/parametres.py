@@ -10,6 +10,11 @@ PARAMETRES_DEFAUT = {
     "ratio_min": (0.50, "Part minimale du montant demandé proposable en réduction", 0.10, 1.00),
     "pas_montant": (10_000, "Pas de réduction du montant (FCFA)", 1_000, 1_000_000),
     "facteur_prudence_antecedent": (0.80, "Facteur appliqué au seuil de défaut si le client a un incident passé regularisé(1 = règle désactivée)", 0.10, 1.00),
+    # Conseils donnés aux clients refusés ou partiellement accordés (src/recours.py)
+    "recours_mois_epargne": (3, "Conseil au client : nombre de mois d'épargne préalable", 1, 12),
+    "recours_part_nantie": (0.10, "Conseil au client : épargne nantie, en part du montant demandé", 0.01, 0.50),
+    "recours_hausse_revenu_max": (0.30, "Conseil au client : hausse de revenu justifié jugée réaliste", 0.00, 1.00),
+    "recours_attente_max": (12, "Conseil au client : attente maximale avant une nouvelle demande (mois)", 0, 24),
 }
 
 

@@ -11,6 +11,8 @@ import { CHAMPS_MICROFINANCE, microfinanceVersApi, microfinanceVersFormulaire } 
 import AssistantPersonnel from "./AssistantPersonnel.jsx";
 import AccesClient from "./AccesClient.jsx";
 import Cadre from "./Cadre.jsx";
+import RetourClient from "./RetourClient.jsx";
+import { fcfa } from "./formats.js";
 import { Alerte, Bouton, Case, Champ, ChampTelephone, Chargement, LienBouton, LienRetour, Liste, Panneau, classeSaisie } from "./ui.jsx";
 
 // Champs sans effet sur le score : les modifier n'invalide pas les scores existants.
@@ -54,6 +56,30 @@ function valeurApi(cle, valeur) {
     return propre === "" ? null : propre;
   }
   return valeur;
+}
+
+// Demandes refusées ou réduites : le motif et les conseils donnés au client (les mêmes que dans son espace).
+function RetoursDuClient({ clientId }) {
+  const [retours, setRetours] = useState([]);
+  useEffect(() => {
+    appeler("/clients/" + clientId + "/retours").then(setRetours).catch(() => setRetours([]));
+  }, [clientId]);
+  if (retours.length === 0) return null;
+  return (
+    <Panneau titre="Demandes non accordées en entier">
+      <ul className="space-y-6">
+        {retours.map((d, i) => (
+          <li key={d.id} className={i > 0 ? "border-t border-slate-100 pt-5" : ""}>
+            <p className="mb-3 text-sm">
+              <Link className="font-semibold text-marque-700 underline" to={"/dossiers/" + d.id}>Dossier {d.numero}</Link>
+              <span className="text-texte-doux"> · {fcfa(d.montant_demande)} sur {d.duree_mois} mois · demandé le {dateFr(d.date_demande)}</span>
+            </p>
+            <RetourClient retour={d.retour} personnel />
+          </li>
+        ))}
+      </ul>
+    </Panneau>
+  );
 }
 
 export default function FicheClient() {
@@ -164,17 +190,15 @@ export default function FicheClient() {
       {message && <Alerte ton="succes">{message}</Alerte>}
       {erreur && <Alerte>{erreur}</Alerte>}
 
+      <RetoursDuClient key={"retours-" + client.id} clientId={client.id} />
+
       <Panneau titre="Informations du client">
         {peutDemander ? (
           <p className="mb-4 text-xs text-slate-500">
             ⚠ : modifier ce champ rend non valides les scores déjà calculés pour ce client ; il faudra recalculer
             le score des dossiers concernés.
           </p>
-        ) : (
-          <p className="mb-4 text-xs text-slate-500">
-            Consultation seule : la fiche est tenue à jour par le gestionnaire du client.
-          </p>
-        )}
+        ) : null}
         <form onSubmit={enregistrer}>
           <fieldset disabled={!peutDemander} className="grid min-w-0 gap-4 sm:grid-cols-2">
           <Champ label="Nom">

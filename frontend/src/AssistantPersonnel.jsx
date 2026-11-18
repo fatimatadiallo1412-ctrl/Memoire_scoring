@@ -40,10 +40,6 @@ export default function AssistantPersonnel({ clientId }) {
 
   return (
     <Panneau titre="Assistant sur ce client">
-      <p className="mb-3 text-sm text-slate-500">
-        Posez une question en français sur ce client. L'assistant ne répond que pour ce client et ne remplace pas
-        l'étude du dossier.
-      </p>
       <div className="mb-3 flex flex-wrap gap-2">
         {SUGGESTIONS.map((s) => (
           <button key={s} type="button" disabled={attente} onClick={() => envoyer(s)}

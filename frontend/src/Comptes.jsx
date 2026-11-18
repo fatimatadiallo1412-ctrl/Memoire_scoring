@@ -154,9 +154,6 @@ export default function Comptes() {
             )}
             <div className="sm:col-span-2">
               <Bouton type="submit" disabled={envoi}>{envoi ? "Création…" : "Créer le compte"}</Bouton>
-              <p className="mt-2 text-xs text-slate-500">
-                Un mot de passe temporaire sera généré. Il n'existe qu'un seul administrateur : ce rôle n'est pas proposé.
-              </p>
             </div>
           </form>
         </Panneau>

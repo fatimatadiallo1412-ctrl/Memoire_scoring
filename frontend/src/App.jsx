@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { lireJeton } from "./api";
 import { useAuth } from "./useAuth.js";
 import { ACCUEIL, accueilDe } from "./roles.js";
 import Connexion from "./Connexion.jsx";
@@ -47,6 +49,18 @@ function Connectee({ children }) {
   return children;
 }
 
+// Pages publiques (site, connexion) : y arriver ferme la session. Pour revenir dans son espace,
+// l'utilisateur doit ressaisir son identifiant et son mot de passe. La session est aussi perdue
+// à la fermeture de l'onglet (jeton conservé dans sessionStorage).
+function Publique({ children }) {
+  const { deconnecter } = useAuth();
+  // Une seule fois, à l'arrivée sur la page : une connexion faite ensuite sur cette page est conservée.
+  useEffect(() => {
+    if (lireJeton()) deconnecter();
+  }, [deconnecter]);
+  return children;
+}
+
 function Racine() {
   const { utilisateur, chargement } = useAuth();
   if (chargement) return <p className="centre">Chargement…</p>;
@@ -56,10 +70,10 @@ function Racine() {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Accueil />} />
-      <Route path="/produits" element={<Produits />} />
-      <Route path="/contact" element={<Contact />} />
-      <Route path="/connexion" element={<Connexion />} />
+      <Route path="/" element={<Publique><Accueil /></Publique>} />
+      <Route path="/produits" element={<Publique><Produits /></Publique>} />
+      <Route path="/contact" element={<Publique><Contact /></Publique>} />
+      <Route path="/connexion" element={<Publique><Connexion /></Publique>} />
       <Route path="/clients" element={<Protegee roles={PERSONNEL}><Clients /></Protegee>} />
       <Route path="/clients/nouveau" element={<Protegee roles={SAISIE}><NouveauClient /></Protegee>} />
       <Route path="/clients/:id" element={<Protegee roles={PERSONNEL}><FicheClient /></Protegee>} />
@@ -71,7 +85,7 @@ export default function App() {
       <Route path="/tableau-de-bord" element={<Protegee roles={RESPONSABLES}><TableauBord /></Protegee>} />
       <Route path="/rapports" element={<Protegee roles={RESPONSABLES}><Rapports /></Protegee>} />
       <Route path="/changer-mot-de-passe" element={<Connectee><ChangerMotDePasse /></Connectee>} />
-      <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+      <Route path="/mot-de-passe-oublie" element={<Publique><MotDePasseOublie /></Publique>} />
       <Route path="/reinitialisations" element={<Protegee roles={["administrateur"]}><Reinitialisations /></Protegee>} />
       <Route path="/comptes" element={<Protegee roles={["administrateur"]}><Comptes /></Protegee>} />
       <Route path="/messages" element={<Protegee roles={["administrateur"]}><Messages /></Protegee>} />

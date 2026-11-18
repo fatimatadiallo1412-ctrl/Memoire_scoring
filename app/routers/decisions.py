@@ -10,6 +10,7 @@ from app.models.enums import Role, StatutDossier, TypeDecision
 from app.routers.demandes import (LECTURE, charger_demande, exiger_score_valide,
                                   verifier_produit)
 from app.parametres import lire_parametres
+from app.retour_client import retour_demande
 from app.schemas import DecisionIn, DecisionOut
 from app.scoring import evaluer_montant
 from app.workflow import changer_statut, est_concordante
@@ -69,6 +70,14 @@ def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get
             status.HTTP_422_UNPROCESSABLE_CONTENT,
             "Un motif est obligatoire quand la décision diffère de la recommandation du modèle")
 
+    # Refus contre l'avis du modèle : le modèle n'a aucun motif à donner au client.
+    motif_client = (donnees.motif_client or "").strip() or None
+    if choix == TypeDecision.REFUSER and score.recommandation != "refus" and not motif_client:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT,
+            "Un motif communiqué au client est obligatoire pour un refus alors que le modèle "
+            "recommandait un accord")
+
     # Accord modifié : le risque du montant réellement accordé est recalculé et tracé.
     simulation = None
     if choix == TypeDecision.ACCORDER_MODIFIE:
@@ -83,7 +92,8 @@ def decider(demande_id: int, donnees: DecisionIn, session: Session = Depends(get
     decision = Decision(
         demande_id=demande.id, score_id=score.id, decideur_id=utilisateur.id,
         decision=choix, montant_accorde=montant, duree_accordee=duree,
-        commentaire=donnees.commentaire, recommandation_modele=score.recommandation,
+        commentaire=donnees.commentaire, motif_client=motif_client,
+        recommandation_modele=score.recommandation,
         concordance=concordance)
     session.add(decision)
     changer_statut(demande, STATUT_APRES[choix])
@@ -104,3 +114,10 @@ def historique_decisions(demande_id: int, session: Session = Depends(get_session
     charger_demande(session, demande_id, utilisateur)
     return session.scalars(select(Decision).where(Decision.demande_id == demande_id)
                            .order_by(Decision.decide_le)).all()
+
+@router.get("/{demande_id}/retour")
+def retour_au_client(demande_id: int, session: Session = Depends(get_session),
+                     utilisateur: Utilisateur = Depends(exiger_roles(*LECTURE))):
+    """Ce que le client voit de la décision : motifs et conseils pour sa prochaine demande."""
+    charger_demande(session, demande_id, utilisateur)
+    return retour_demande(session, demande_id)

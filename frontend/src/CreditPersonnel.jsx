@@ -142,9 +142,6 @@ export default function CreditPersonnel() {
               )}
             </div>
           </form>
-          <p className="mt-3 text-xs text-slate-500">
-            Un paiement est définitif : il ne peut ni être modifié ni supprimé (registre en ajout seul).
-          </p>
         </Panneau>
       )}
 

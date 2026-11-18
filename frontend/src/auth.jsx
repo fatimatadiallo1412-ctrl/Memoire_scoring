@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (!lireJeton()) return;
     appeler("/auth/me")
-      .then(setUtilisateur)
+      .then((moi) => { if (lireJeton()) setUtilisateur(moi); })
       .catch(() => ecrireJeton(null))
       .finally(() => setChargement(false));
   }, []);

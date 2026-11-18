@@ -173,6 +173,10 @@ class Decision(Base):
             "concordance IS DISTINCT FROM FALSE OR "
             "(commentaire IS NOT NULL AND length(trim(commentaire)) > 0)",
             name="motif_si_divergence"),
+        CheckConstraint(
+            "decision <> 'refuser' OR recommandation_modele IS NULL OR recommandation_modele = 'refus' "
+            "OR (motif_client IS NOT NULL AND length(trim(motif_client)) > 0)",
+            name="motif_client_si_refus_contre_modele"),
         {"schema": SCHEMA},
     )
 
@@ -183,7 +187,9 @@ class Decision(Base):
     decision: Mapped[E.TypeDecision] = enum_col(E.TypeDecision, "type_decision")
     montant_accorde: Mapped[int | None] = mapped_column(BigInteger)
     duree_accordee: Mapped[int | None] = mapped_column(Integer)
-    commentaire: Mapped[str | None] = mapped_column(Text)
+    commentaire: Mapped[str | None] = mapped_column(Text)            # interne, jamais montré au client
+    # Motif rédigé pour le client (obligatoire pour un refus contre l'avis du modèle)
+    motif_client: Mapped[str | None] = mapped_column(Text)
     # Recommandation du modèle au moment de la décision, conservée À PART de la décision
     recommandation_modele: Mapped[str | None] = mapped_column(String(30))
     concordance: Mapped[bool | None] = mapped_column(Boolean)

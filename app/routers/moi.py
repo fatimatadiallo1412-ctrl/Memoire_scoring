@@ -9,6 +9,7 @@ from app.db import get_session
 from app.deps import exiger_roles
 from app.models import Credit, Echeance, Rappel, Utilisateur
 from app.models.enums import Role
+from app.retour_client import demandes_avec_retour
 from app.routers.credits import _situation
 from app.schemas import (CreditOut, EcheanceOut, ProchaineEcheanceOut,
                          SituationOut)
@@ -31,6 +32,14 @@ def _credit_du_client(session: Session, credit_id: int, utilisateur: Utilisateur
     if credit is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Crédit introuvable")
     return credit
+
+
+@router.get("/demandes")
+def mes_demandes(session: Session = Depends(get_session),
+                 utilisateur: Utilisateur = Depends(client_connecte)):
+    """Les demandes du client connecté. Après un refus ou un accord réduit : le motif et ce qu'il
+    peut changer pour sa prochaine demande (sans aucun chiffre de risque)."""
+    return demandes_avec_retour(session, utilisateur.client_id, pour_client=True)
 
 
 @router.get("/credits", response_model=list[CreditOut])
