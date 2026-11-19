@@ -1,0 +1,48 @@
+PROXY  AUC validation = 0.8625  IC95 [0.8594 ; 0.8657]  (n = 55647, femmes 0.657)
+Perte d'AUC quand on brouille la variable :
+   OCCUPATION_TYPE          0.2058 ± 0.0014
+   FLAG_OWN_CAR             0.0596 ± 0.0008
+   age_ans                  0.0192 ± 0.0004
+   NAME_FAMILY_STATUS       0.0160 ± 0.0005
+   anciennete_emploi_ans    0.0047 ± 0.0001
+   annuite_sur_revenu       0.0039 ± 0.0001
+   credit_sur_revenu        0.0028 ± 0.0002
+   CNT_FAM_MEMBERS          0.0027 ± 0.0002
+   CNT_CHILDREN             0.0020 ± 0.0001
+   duree_implicite          0.0016 ± 0.0001
+   sans_emploi              0.0009 ± 0.0000
+   FLAG_OWN_REALTY          0.0006 ± 0.0001
+   NAME_INCOME_TYPE         0.0006 ± 0.0000
+   NAME_HOUSING_TYPE        0.0004 ± 0.0000
+   AUC proxy sans ['OCCUPATION_TYPE'] : 0.7740
+   AUC proxy sans ['OCCUPATION_TYPE', 'FLAG_OWN_CAR'] : 0.7169
+
+Bons payeurs en validation : 51003
+
+=== Seuil 12% : part des bons payeurs acceptés ===
+  F            n= 33916   86.69 %  IC95 [86.32 ; 87.05]
+  M            n= 17087   76.84 %  IC95 [76.20 ; 77.47]
+    M vs F : écart -9.85 pts IC95 [-10.60 ; -9.12] | rapport 0.886 IC95 [0.878 ; 0.895]
+  < 30 ans     n=  6901   54.40 %  IC95 [53.22 ; 55.57]
+  30-39 ans    n= 13412   72.52 %  IC95 [71.76 ; 73.27]
+  40-49 ans    n= 12627   89.46 %  IC95 [88.91 ; 89.98]
+  50-59 ans    n= 11601   97.44 %  IC95 [97.14 ; 97.71]
+  60 ans et +  n=  6462   99.83 %  IC95 [99.70 ; 99.90]
+    < 30 ans vs 60 ans et + : écart -45.43 pts IC95 [-46.59 ; -44.32] | rapport 0.545 IC95 [0.533 ; 0.556]
+    30-39 ans vs 60 ans et + : écart -27.31 pts IC95 [-28.09 ; -26.57] | rapport 0.726 IC95 [0.719 ; 0.734]
+    40-49 ans vs 60 ans et + : écart -10.37 pts IC95 [-10.95 ; -9.87] | rapport 0.896 IC95 [0.890 ; 0.901]
+    50-59 ans vs 60 ans et + : écart -2.39 pts IC95 [-2.71 ; -2.09] | rapport 0.976 IC95 [0.973 ; 0.979]
+
+=== Seuil 15% : part des bons payeurs acceptés ===
+  F            n= 33916   94.96 %  IC95 [94.73 ; 95.19]
+  M            n= 17087   88.98 %  IC95 [88.50 ; 89.44]
+    M vs F : écart -5.98 pts IC95 [-6.52 ; -5.44] | rapport 0.937 IC95 [0.931 ; 0.943]
+  < 30 ans     n=  6901   77.31 %  IC95 [76.30 ; 78.28]
+  30-39 ans    n= 13412   88.29 %  IC95 [87.73 ; 88.82]
+  40-49 ans    n= 12627   96.99 %  IC95 [96.68 ; 97.27]
+  50-59 ans    n= 11601   99.39 %  IC95 [99.23 ; 99.51]
+  60 ans et +  n=  6462   99.95 %  IC95 [99.86 ; 99.98]
+    < 30 ans vs 60 ans et + : écart -22.65 pts IC95 [-23.66 ; -21.63] | rapport 0.773 IC95 [0.763 ; 0.784]
+    30-39 ans vs 60 ans et + : écart -11.67 pts IC95 [-12.24 ; -11.13] | rapport 0.883 IC95 [0.878 ; 0.889]
+    40-49 ans vs 60 ans et + : écart -2.96 pts IC95 [-3.26 ; -2.67] | rapport 0.970 IC95 [0.967 ; 0.973]
+    50-59 ans vs 60 ans et + : écart -0.57 pts IC95 [-0.73 ; -0.42] | rapport 0.994 IC95 [0.993 ; 0.996]

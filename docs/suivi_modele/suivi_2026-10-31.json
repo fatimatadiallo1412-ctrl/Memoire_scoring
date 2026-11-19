@@ -4,7 +4,7 @@
     "2026-08-01",
     "2026-10-31"
   ],
-  "produit_le": "2026-11-17",
+  "produit_le": "2026-11-19",
   "alertes": {
     "psi_score": "vert",
     "psi_variables": "vert",
@@ -13,48 +13,48 @@
     "calibration": "n/a",
     "auc": "n/a"
   },
-  "dossiers_scores": 363,
-  "score_moyen": 0.09209498018026352,
-  "reference": "production du 2025-01-01 au 2025-12-31 (479 dossiers), modèle xgb_home_credit_v4",
+  "dossiers_scores": 349,
+  "score_moyen": 0.09929654002189636,
+  "reference": "production du 2025-01-01 au 2025-12-31 (500 dossiers), modèle xgb_home_credit_v4",
   "psi": {
-    "score": 0.05774148827303074,
+    "score": 0.04250036108582275,
     "variables": {
-      "CNT_CHILDREN": 0.012351664829823344,
-      "CNT_FAM_MEMBERS": 0.033062547927811124,
-      "age_ans": 0.09951490687347651,
-      "anciennete_emploi_ans": 0.012189088087701699,
+      "CNT_CHILDREN": 0.018594706831018458,
+      "CNT_FAM_MEMBERS": 0.0282811077425999,
+      "age_ans": 0.03876916495098761,
+      "anciennete_emploi_ans": 0.03379404877712462,
       "sans_emploi": 0.0,
-      "credit_sur_revenu": 0.07380569987765881,
-      "annuite_sur_revenu": 0.04126531767994852,
-      "duree_implicite": 0.022769598296719498,
-      "NAME_INCOME_TYPE": 0.0154063892828669,
-      "NAME_FAMILY_STATUS": 0.041301303761179756,
-      "NAME_HOUSING_TYPE": 0.0030097211585736433,
-      "OCCUPATION_TYPE": 0.08460491472474732,
-      "FLAG_OWN_REALTY": 0.0005680856181439121,
-      "FLAG_OWN_CAR": 0.0031784800052320743
+      "credit_sur_revenu": 0.03014586637605853,
+      "annuite_sur_revenu": 0.018441443154995248,
+      "duree_implicite": 0.011319834882613804,
+      "NAME_INCOME_TYPE": 0.017210708316705545,
+      "NAME_FAMILY_STATUS": 0.000800865870285197,
+      "NAME_HOUSING_TYPE": 0.007726982618071384,
+      "OCCUPATION_TYPE": 0.06118778440867229,
+      "FLAG_OWN_REALTY": 0.0018555984614816593,
+      "FLAG_OWN_CAR": 0.01016868044356056
     },
     "exces": {
-      "score": 0.009316452184301348,
+      "score": 0.0,
       "CNT_CHILDREN": 0.0,
       "CNT_FAM_MEMBERS": 0.0,
-      "age_ans": 0.051089870784747124,
+      "age_ans": 0.0,
       "anciennete_emploi_ans": 0.0,
       "sans_emploi": 0.0,
-      "credit_sur_revenu": 0.02538066378892942,
+      "credit_sur_revenu": 0.0,
       "annuite_sur_revenu": 0.0,
       "duree_implicite": 0.0,
       "NAME_INCOME_TYPE": 0.0,
-      "NAME_FAMILY_STATUS": 0.021931289325688,
+      "NAME_FAMILY_STATUS": 0.0,
       "NAME_HOUSING_TYPE": 0.0,
-      "OCCUPATION_TYPE": 0.0071248569827803004,
+      "OCCUPATION_TYPE": 0.0,
       "FLAG_OWN_REALTY": 0.0,
-      "FLAG_OWN_CAR": 0.0
+      "FLAG_OWN_CAR": 0.00043802141777259454
     }
   },
   "psi_variable_max": {
-    "variable": "age_ans",
-    "exces_psi": 0.051089870784747124
+    "variable": "FLAG_OWN_CAR",
+    "exces_psi": 0.00043802141777259454
   },
   "modalites_inconnues": {
     "part_dossiers": 0.0,
@@ -69,57 +69,57 @@
     "exemples": {}
   },
   "decisions": {
-    "n": 358,
-    "taux_acceptation": 0.8547486033519553,
-    "taux_derogation": 0.07541899441340782,
+    "n": 334,
+    "taux_acceptation": 0.8203592814371258,
+    "taux_derogation": 0.09580838323353294,
     "derogations_par_sens": {
-      "accord -> accorder_modifie": 7,
-      "accord_reduit -> accorder": 5,
+      "accord -> accorder_modifie": 12,
+      "refus -> accorder_modifie": 7,
+      "accord_reduit -> accorder": 6,
       "accord -> refuser": 5,
-      "refus -> accorder_modifie": 5,
-      "accord_reduit -> refuser": 5
+      "accord_reduit -> refuser": 2
     }
   },
   "performance": {
-    "n": 268,
-    "n_defauts": 20,
-    "taux_observe": 0.07462686567164178,
-    "taux_prevu": 0.07819867134094238,
-    "brier": 0.06685177981853485,
+    "n": 266,
+    "n_defauts": 16,
+    "taux_observe": 0.06015037593984962,
+    "taux_prevu": 0.07491205632686615,
+    "brier": 0.05812029168009758,
     "calibration": [
       {
         "classe": 0,
         "n": 54,
-        "prevu": 0.036605652421712875,
-        "observe": 0.037037037037037035
+        "prevu": 0.03783271834254265,
+        "observe": 0.05555555555555555
       },
       {
         "classe": 1,
         "n": 53,
-        "prevu": 0.05873480066657066,
-        "observe": 0.0
+        "prevu": 0.055215951055288315,
+        "observe": 0.03773584905660377
       },
       {
         "classe": 2,
-        "n": 54,
-        "prevu": 0.07310809940099716,
-        "observe": 0.09259259259259259
+        "n": 53,
+        "prevu": 0.07011941820383072,
+        "observe": 0.11320754716981132
       },
       {
         "classe": 3,
         "n": 53,
-        "prevu": 0.09314913302659988,
-        "observe": 0.11320754716981132
+        "prevu": 0.09020432829856873,
+        "observe": 0.03773584905660377
       },
       {
         "classe": 4,
-        "n": 54,
-        "prevu": 0.12931209802627563,
-        "observe": 0.12962962962962962
+        "n": 53,
+        "prevu": 0.12188749760389328,
+        "observe": 0.05660377358490566
       }
     ],
-    "rapport_observe_prevu": 0.9543239596267857,
-    "verdict": "20 défauts observés : moins de 30, performance non jugée (trop peu de recul)",
+    "rapport_observe_prevu": 0.8029465334310618,
+    "verdict": "16 défauts observés : moins de 30, performance non jugée (trop peu de recul)",
     "niveau_calibration": "n/a",
     "niveau_auc": "n/a"
   },

@@ -108,7 +108,7 @@ def reinitialiser(session) -> None:
     """Vide les tables transactionnelles. Les tables en ajout seul ne se vident que par TRUNCATE
     (les triggers ne bloquent que UPDATE et DELETE)."""
     session.execute(text(
-        "TRUNCATE ops.paiement, ops.echeance, ops.credit, ops.decision, audit.journal "
+        "TRUNCATE ops.rappel, ops.paiement, ops.echeance, ops.credit, ops.decision, audit.journal "
         "RESTART IDENTITY"))
     session.execute(text("DELETE FROM ml.score"))
     session.execute(text("DELETE FROM ops.demande_credit"))
@@ -251,6 +251,7 @@ def main() -> None:
                     recommandation=reco["decision"], montant_suggere=montant_sug,
                     p_montant_suggere=reco["p_defaut"], variables_entree=variables,
                     facteurs={"motifs": reco["motifs"],
+                              "contributions": reco["contributions"],
                               "endettement_demande": round(reco["endettement_demande"], 3),
                               "recours": reco["recours"],
                               "parametres": parametres},
