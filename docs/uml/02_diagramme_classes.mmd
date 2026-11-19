@@ -1,0 +1,125 @@
+---
+title: "Diagramme de classes : modèle du domaine (schémas ops, ml, audit)"
+---
+classDiagram
+  direction TB
+  class Agence {
+    code
+    nom
+    zone
+  }
+  class Utilisateur {
+    email
+    nom_complet
+    role : agent_credit | decideur | administrateur | client
+    actif
+    doit_changer_mdp
+    echecs_connexion
+    verrouille_jusqua
+  }
+  class Client {
+    code_client
+    identité, sexe, téléphone, adresse
+    type_revenu, profession, categorie_profession
+    situation_familiale, type_logement
+    anciennete_activite_mois
+    nb_enfants, taille_menage
+    possede_bien_immobilier, possede_vehicule
+    revenu_mensuel
+    epargne_mensuelle, membre_groupement
+    usage_mobile_money, activite_saisonniere
+  }
+  class ProduitCredit {
+    code, libelle
+    montant_min, montant_max
+    duree_min_mois, duree_max_mois
+    taux_annuel
+  }
+  class DemandeCredit {
+    numero
+    montant_demande, duree_mois
+    objet, garantie
+    statut
+    avis_instruction
+    donnees_modifiees_le
+  }
+  class Score {
+    version_modele
+    p_defaut, seuil_applique
+    recommandation
+    montant_suggere
+    variables_entree
+    facteurs (motifs, contributions, recours)
+  }
+  class Decision {
+    decision
+    montant_accorde, duree_accordee
+    commentaire, motif_client
+    recommandation_modele
+    concordance
+  }
+  class Credit {
+    montant_accorde, duree_mois
+    taux_annuel, mensualite
+    date_decaissement
+    mode_decaissement
+  }
+  class Echeance {
+    numero, date_echeance
+    montant_du, capital, interet
+  }
+  class Paiement {
+    montant, date_paiement, mode
+  }
+  class Rappel {
+    type_rappel, canal, jour
+    message, lu_le
+  }
+  class Parametre {
+    cle, valeur
+  }
+  class Metier {
+    libelle
+    categorie_modele
+    valide
+  }
+  class RapportSuivi {
+    version_modele
+    debut, fin
+    niveau_global
+    contenu
+  }
+  class Journal {
+    action, entite, entite_id
+    details
+    horodatage
+  }
+  class DemandeReinitialisation {
+    email, contact, statut
+  }
+  class MessageContact {
+    nom, email, objet, message
+    traite
+  }
+
+  Agence "1" -- "0..*" Client : rattache
+  Agence "0..1" -- "0..*" Utilisateur : emploie
+  Utilisateur "0..1" -- "0..*" Client : gestionnaire de
+  Client "1" -- "0..1" Utilisateur : compte client
+  Client "1" -- "0..*" DemandeCredit : dépose
+  ProduitCredit "1" -- "0..*" DemandeCredit : concerne
+  Utilisateur "1" -- "0..*" DemandeCredit : instruit
+  DemandeCredit "1" *-- "0..*" Score : est scorée par
+  DemandeCredit "1" -- "0..*" Decision : reçoit
+  Score "1" -- "0..*" Decision : fonde
+  Utilisateur "1" -- "0..*" Decision : décide
+  DemandeCredit "1" -- "0..1" Credit : donne lieu à
+  Credit "1" *-- "1..*" Echeance : calendrier
+  Credit "1" -- "0..*" Paiement : reçoit
+  Echeance "1" -- "0..*" Rappel : déclenche
+  Utilisateur "0..1" -- "0..*" Journal : trace
+  Utilisateur "0..1" -- "0..*" RapportSuivi : produit
+  Utilisateur "0..1" -- "0..*" Parametre : modifie
+  Utilisateur "1" -- "0..*" DemandeReinitialisation : demande
+  Utilisateur "0..1" -- "0..*" Metier : propose
+  Utilisateur "0..1" -- "0..*" MessageContact : traite

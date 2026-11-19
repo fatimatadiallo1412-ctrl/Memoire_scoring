@@ -1,0 +1,51 @@
+---
+title: "Cas d'utilisation : vue d'ensemble de la plateforme de scoring"
+---
+flowchart LR
+  classDef acteur fill:#ffffff,stroke:#14213d,stroke-width:2px,color:#14213d,font-weight:bold
+  classDef cas fill:#eef3fb,stroke:#2f5d8f,stroke-width:1.5px,color:#14213d
+  classDef auto fill:#f3f3f1,stroke:#7a7a75,stroke-dasharray:4 3,color:#3a3a37
+
+  V["🧑 Visiteur"]:::acteur
+  C["🧑 Client"]:::acteur
+  A["🧑 Agent de crédit<br/>(gestionnaire)"]:::acteur
+  D["🧑 Directeur<br/>(seul décideur)"]:::acteur
+  AD["🧑 Administrateur"]:::acteur
+  P["⏱ Planificateur"]:::acteur
+
+  subgraph S["Plateforme Yokkuté"]
+    direction TB
+    U1(["Consulter le site et les produits"]):::cas
+    U2(["Envoyer un message de contact"]):::cas
+    U3(["Demander la réinitialisation du mot de passe"]):::cas
+    U14(["Consulter son espace client"]):::cas
+    U4(["Gérer les clients de son portefeuille"]):::cas
+    U5(["Instruire une demande"]):::cas
+    U6(["Décaisser et suivre les remboursements"]):::cas
+    U7(["Ouvrir l'espace client d'un client"]):::cas
+    U8(["Interroger l'assistant du personnel"]):::cas
+    U9(["Décider d'une demande"]):::cas
+    U10(["Piloter : politique, tableau de bord, rapports"]):::cas
+    U11(["Affecter les portefeuilles, classer les métiers"]):::cas
+    U12(["Administrer comptes, réinitialisations, messages"]):::cas
+    U13(["Surveiller la santé du modèle"]):::cas
+    U15(["Générer rappels et rapport de suivi"]):::auto
+  end
+
+  V --> U1
+  V --> U2
+  V --> U3
+  C --> U3
+  C --> U14
+  A --> U4
+  A --> U5
+  A --> U6
+  A --> U7
+  A --> U8
+  D --> U8
+  D --> U9
+  D --> U10
+  D --> U11
+  AD --> U12
+  AD --> U13
+  P --> U15

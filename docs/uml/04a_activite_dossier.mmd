@@ -1,0 +1,49 @@
+---
+title: "Diagramme d'activité : cycle de vie d'un dossier de crédit"
+---
+flowchart TB
+  classDef action fill:#eef3fb,stroke:#2f5d8f,stroke-width:1.5px,color:#14213d
+  classDef systeme fill:#fdf3e1,stroke:#b5751b,stroke-width:1.5px,color:#14213d
+  classDef choix fill:#fff8c5,stroke:#b08800,color:#14213d
+  classDef fin fill:#14213d,stroke:#14213d,color:#ffffff
+
+  debut((" ")):::fin
+  subgraph AG["Agent de crédit"]
+    a1["Créer ou retrouver le client<br/>(son portefeuille)"]:::action
+    a2["Saisir la demande<br/>(statut brouillon)"]:::action
+    a3["Compléter le dossier<br/>(statut complet)"]:::action
+    a4["Rédiger l'avis d'instruction<br/>(statut instruit)"]:::action
+    a5["Soumettre à la décision<br/>(statut soumis_decision)"]:::action
+    a6["Décaisser le crédit<br/>(statut decaisse)"]:::action
+    a7["Enregistrer un paiement<br/>(ajout seul)"]:::action
+  end
+  subgraph SY["Système"]
+    s1["Calculer le score v4,<br/>règle d'historique, montant suggéré,<br/>explication (statut score)"]:::systeme
+    q0{"Données modifiées<br/>après le score ?"}:::choix
+    s2["Enregistrer la décision<br/>(ajout seul, journalisée)"]:::systeme
+    s3["Calendrier d'échéances<br/>(statut en_remboursement)"]:::systeme
+    s4["Rappels quotidiens<br/>aux paliers d'échéance"]:::systeme
+    q2{"Reste à payer ?"}:::choix
+    s5["Dossier soldé<br/>(statut solde)"]:::systeme
+    s6["Retour au client :<br/>motif et conseils"]:::systeme
+  end
+  subgraph DI["Directeur"]
+    d1["Consulter dossier, score<br/>et explication"]:::action
+    d2["Simuler un autre montant<br/>(facultatif)"]:::action
+    q1{"Décision"}:::choix
+  end
+  f1((" ")):::fin
+  f2((" ")):::fin
+
+  debut --> a1 --> a2 --> a3 --> s1 --> q0
+  q0 -- "oui : recalculer" --> a3
+  q0 -- non --> a4 --> a5 --> d1 --> d2 --> q1
+  q1 -- "accorder ou<br/>accorder modifié" --> s2
+  q1 -- refuser --> s6 --> f1
+  q1 -- "ajourner" --> a5
+  s2 --> a6 --> s3 --> s4 --> a7 --> q2
+  q2 -- oui --> s4
+  q2 -- non --> s5 --> f2
+  classDef note fill:#fff8c5,stroke:#b08800,stroke-dasharray:3 3,color:#14213d
+  n1["Le cycle de vie prévoit aussi le statut contentieux<br/>(retard de plus de 90 jours, retour possible en remboursement).<br/>Aucune action de l'application ne le pose encore :<br/>il n'apparaît que dans les données simulées."]:::note
+  q2 -.- n1

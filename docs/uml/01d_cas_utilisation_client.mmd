@@ -1,0 +1,27 @@
+---
+title: "Cas d'utilisation : espace client"
+---
+flowchart LR
+  classDef acteur fill:#ffffff,stroke:#14213d,stroke-width:2px,color:#14213d,font-weight:bold
+  classDef cas fill:#eef3fb,stroke:#2f5d8f,stroke-width:1.5px,color:#14213d
+  classDef inclus fill:#fdf3e1,stroke:#b5751b,stroke-width:1.5px,color:#14213d
+
+  C["🧑 Client"]:::acteur
+  A["🧑 Agent de crédit"]:::acteur
+
+  subgraph E["Espace client"]
+    direction TB
+    C0(["Ouvrir l'accès à l'espace client<br/>(mot de passe temporaire)"]):::cas
+    C1(["Changer son mot de passe"]):::cas
+    C2(["Consulter ses crédits,<br/>échéances et prochaine échéance"]):::cas
+    C3(["Consulter ses rappels<br/>et les marquer comme lus"]):::cas
+    C4(["Suivre ses demandes<br/>et la décision"]):::cas
+    C5(["Lire le motif d'un refus et<br/>les conseils pour une prochaine demande"]):::cas
+    C6(["Interroger l'assistant<br/>(son propre compte)"]):::cas
+    X1(["Refuser toute question<br/>sur un tiers"]):::inclus
+  end
+
+  A --> C0
+  C --> C1 & C2 & C3 & C4 & C6
+  C5 -. "«extend»<br/>(refus ou accord réduit)" .-> C4
+  C6 -. "«include»" .-> X1

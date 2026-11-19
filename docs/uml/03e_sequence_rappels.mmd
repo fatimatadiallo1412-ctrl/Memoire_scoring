@@ -1,0 +1,27 @@
+---
+title: "Séquence : génération et consultation des rappels de remboursement"
+---
+sequenceDiagram
+  autonumber
+  actor C as Client
+  participant P as Planificateur (APScheduler, chaque jour à 7 h, heure de Dakar)
+  participant G as Générateur de rappels
+  participant API as API (FastAPI)
+  participant PostgreSQL@{ "type" : "database" }
+
+  P->>G: executer(jour)
+  G->>PostgreSQL: crédits en remboursement ou en contentieux
+  loop pour chaque crédit
+    G->>PostgreSQL: échéances et paiements
+    G->>G: imputer les paiements, écart de chaque échéance impayée avec le jour
+    opt un palier est atteint (3 jours avant, jour J, 1, 7, 14 ou 30 jours de retard)
+      G->>PostgreSQL: INSERT rappel … ON CONFLICT DO NOTHING (aucun doublon)
+    end
+  end
+  G->>PostgreSQL: journal (nombre de rappels créés par type)
+  C->>API: GET /moi/rappels
+  API->>PostgreSQL: rappels du client connecté
+  API-->>C: rappels, les plus récents d'abord
+  C->>API: POST /moi/rappels/{id}/lu
+  API->>PostgreSQL: date de lecture (404 si le rappel est d'un autre client)
+  API-->>C: rappel marqué comme lu

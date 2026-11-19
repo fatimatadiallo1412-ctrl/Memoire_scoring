@@ -1,0 +1,43 @@
+---
+title: "Séquence : saisie et scoring d'un dossier de crédit (modèle v4)"
+---
+sequenceDiagram
+  autonumber
+  actor A as Agent de crédit
+  participant API as API (FastAPI)
+  participant M as Moteur de scoring (XGBoost v4 + règles)
+  participant PostgreSQL@{ "type" : "database" }
+
+  A->>API: POST /demandes (client, produit, montant, durée, garantie)
+  API->>PostgreSQL: le client est-il dans le portefeuille de l'agent ?
+  API->>API: vérifier les limites du produit
+  alt client hors portefeuille ou limites non respectées
+    API-->>A: 404 ou 422
+  else dossier valide
+    API->>PostgreSQL: créer la demande (brouillon) + journal
+    API-->>A: 201, dossier créé
+  end
+  A->>API: POST /demandes/{id}/completer
+  API->>PostgreSQL: statut complet (422 si une information manque)
+  A->>API: POST /demandes/{id}/scorer
+  API->>PostgreSQL: client, produit, paramètres de la politique
+  API->>PostgreSQL: échéances et paiements passés du client
+  API->>API: antécédent (aucun, régularisé, en cours) et résumé de l'historique
+  API->>M: profil du client et demande
+  M->>M: seuil applicable (12 %, × 0,8 si incident régularisé)
+  M->>M: probabilité de défaut du montant demandé
+  alt crédit en retard de plus de 90 jours
+    M-->>API: recommandation = refus (antécédent en cours)
+  else risque ≤ seuil et mensualité ≤ 40 % du revenu
+    M-->>API: recommandation = accord
+  else dépassement
+    M->>M: chercher un montant plus bas (pas, plancher : minimum du produit et 50 % de la demande)
+    M-->>API: accord réduit (montant suggéré) ou refus
+  end
+  M->>M: contributions de Shapley (6 variables principales)
+  opt accord réduit ou refus
+    M->>M: recommandations au client (plans possibles, conseils)
+  end
+  API->>PostgreSQL: enregistrer le score (variables d'entrée, variables microfinance, facteurs) + statut scoré + journal
+  API-->>A: recommandation, probabilité, montant suggéré, explication
+  Note over A,PostgreSQL: Si les données du client ou de la demande changent ensuite, le score devient périmé : il faut le recalculer.

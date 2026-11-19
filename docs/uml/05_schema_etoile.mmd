@@ -1,0 +1,118 @@
+---
+title: "Entrepôt de données (schéma dwh) : schéma en constellation"
+---
+erDiagram
+  dim_temps {
+    int date_key PK
+    date date
+    int annee
+    int trimestre
+    int mois
+    text annee_mois
+    int semaine
+    bool est_weekend
+  }
+  dim_agence {
+    int agence_key PK
+    text code
+    text nom
+    text zone
+  }
+  dim_agent {
+    int agent_key PK
+    text nom_complet
+    text role
+    int agence_key FK
+  }
+  dim_client {
+    int client_key PK
+    text code_client
+    text sexe
+    text tranche_age
+    text type_revenu
+    text profession
+    text situation_familiale
+    text type_logement
+    text tranche_revenu
+    text tranche_anciennete
+    int nb_enfants
+    int agence_key FK
+  }
+  dim_produit {
+    int produit_key PK
+    text code
+    text libelle
+    numeric taux_annuel
+    int montant_min
+    int montant_max
+  }
+  fait_demande {
+    int demande_key PK
+    int date_demande_key FK
+    int date_decision_key FK
+    int client_key FK
+    int agence_key FK
+    int produit_key FK
+    int agent_key FK
+    text statut
+    int montant_demande
+    numeric p_defaut
+    numeric seuil_applique
+    text recommandation
+    text decision
+    int montant_accorde
+    bool concordance
+    int delai_decision_jours
+  }
+  fait_credit {
+    int credit_key PK
+    int demande_key FK
+    int date_decaissement_key FK
+    int client_key FK
+    int agence_key FK
+    int produit_key FK
+    int agent_key FK
+    int montant_decaisse
+    int mensualite
+    int reste_a_payer
+    int capital_restant
+    int jours_retard_max
+    bool est_retard_30
+    bool est_contentieux
+  }
+  fait_echeance {
+    int echeance_key PK
+    int credit_key FK
+    int date_echeance_key FK
+    int montant_du
+    int montant_paye
+    int reste_du
+    int jours_retard
+  }
+  fait_paiement {
+    int paiement_key PK
+    int credit_key FK
+    int date_paiement_key FK
+    int montant
+    text mode
+  }
+  fait_portefeuille_mensuel {
+    int credit_key FK
+    int date_key FK
+    int capital_restant
+    int jours_retard_max
+    bool est_retard_30
+    bool est_retard_90
+  }
+
+  dim_temps ||--o{ fait_demande : "date de demande et de décision"
+  dim_client ||--o{ fait_demande : ""
+  dim_agence ||--o{ fait_demande : ""
+  dim_produit ||--o{ fait_demande : ""
+  dim_agent ||--o{ fait_demande : ""
+  fait_demande ||--o| fait_credit : "donne lieu à"
+  dim_temps ||--o{ fait_credit : "décaissement"
+  dim_client ||--o{ fait_credit : ""
+  fait_credit ||--o{ fait_echeance : ""
+  fait_credit ||--o{ fait_paiement : ""
+  fait_credit ||--o{ fait_portefeuille_mensuel : "photo mensuelle"

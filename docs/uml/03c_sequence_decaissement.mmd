@@ -1,0 +1,32 @@
+---
+title: "Séquence : décaissement d'un crédit et enregistrement d'un paiement"
+---
+sequenceDiagram
+  autonumber
+  actor A as Agent de crédit
+  participant API as API (FastAPI)
+  participant PostgreSQL@{ "type" : "database" }
+
+  A->>API: GET /demandes/{id}/apercu-decaissement
+  API-->>A: montant et durée accordés, mensualité, calendrier prévu
+  A->>API: POST /demandes/{id}/decaisser (date, mode, référence)
+  API->>PostgreSQL: dossier, dernière décision, produit
+  alt dossier non accordé ou aucune décision d'accord
+    API-->>A: 409
+  else
+    API->>API: mensualité constante et calendrier d'échéances (taux du produit)
+    API->>PostgreSQL: crédit + échéances, statuts décaissé puis en remboursement + journal
+    API-->>A: 201, crédit créé
+  end
+  A->>API: POST /credits/{id}/paiements (montant, mode, date)
+  API->>PostgreSQL: crédit, échéances et paiements
+  API->>API: situation (imputation sur l'échéance la plus ancienne)
+  alt crédit non suivi, date invalide, montant supérieur au reste à payer
+    API-->>A: 409 ou 422
+  else paiement valide
+    API->>PostgreSQL: paiement (ajout seul) + journal
+    opt le paiement solde le crédit
+      API->>PostgreSQL: statut soldé
+    end
+    API-->>A: 201, paiement enregistré
+  end

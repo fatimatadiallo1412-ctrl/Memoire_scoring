@@ -1,0 +1,53 @@
+---
+title: "Architecture générale du système d'information décisionnel"
+---
+flowchart LR
+  classDef boite fill:#eef3fb,stroke:#2f5d8f,stroke-width:1.5px,color:#14213d
+  classDef base fill:#fdf3e1,stroke:#b5751b,stroke-width:1.5px,color:#14213d
+  classDef horsligne fill:#f3f3f1,stroke:#7a7a75,stroke-dasharray:4 3,color:#3a3a37
+
+  subgraph UI["Interfaces"]
+    direction TB
+    R["Interface React (Vite, Tailwind)<br/>site public · agent · directeur ·<br/>administrateur · client"]:::boite
+    MB["Metabase<br/>tableau de bord du directeur<br/>(intégré par lien signé, 10 min)"]:::boite
+  end
+
+  subgraph APP["Application (FastAPI)"]
+    direction TB
+    API["API REST<br/>JWT (8 h), rôles, portefeuilles,<br/>verrouillage après 5 échecs"]:::boite
+    SC["Scoring v4 + règles<br/>historique interne, montant suggéré,<br/>Shapley, recommandations au client"]:::boite
+    AS["Assistants client et personnel<br/>(classifieur d'intentions)"]:::boite
+    RP["Rapports Excel / PDF"]:::boite
+    SM["Santé du modèle<br/>(PSI, dérogations, calibration)"]:::boite
+    PL["Planificateur APScheduler<br/>rappels 7 h · suivi le 1er du mois"]:::boite
+  end
+
+  subgraph PG["PostgreSQL 16"]
+    direction TB
+    OPS[("ops<br/>données opérationnelles")]:::base
+    ML[("ml<br/>scores, rapports de suivi")]:::base
+    AU[("audit<br/>journal en ajout seul")]:::base
+    DWH[("dwh<br/>entrepôt en constellation")]:::base
+    STG[("staging")]:::base
+  end
+
+  ETL["ETL<br/>python -m etl.charger_dwh<br/>(reconstruction complète)"]:::boite
+
+  subgraph HL["Données et modélisation (hors ligne)"]
+    direction TB
+    DS["Home Credit · Credit Risk Dataset ·<br/>données simulées (Sénégal)"]:::horsligne
+    NB["Notebooks et scripts<br/>(nettoyage, variables, entraînement,<br/>équité, champion / challenger)"]:::horsligne
+    MOD["Modèle XGBoost v4<br/>models/*.joblib + fiche + référence PSI"]:::horsligne
+  end
+
+  R -- "HTTP (JSON)" --> API
+  API --> SC & AS & RP & SM
+  API --> OPS & ML & AU
+  PL --> OPS
+  PL --> SM
+  SM --> ML
+  RP -- lecture --> DWH
+  ETL -- lecture --> OPS & ML
+  ETL --> DWH
+  MB -- "lecture seule" --> DWH
+  DS --> NB --> MOD --> SC

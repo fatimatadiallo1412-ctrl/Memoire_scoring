@@ -1,0 +1,31 @@
+---
+title: "Séquence : question d'un client à l'assistant (avec garde-fou)"
+---
+sequenceDiagram
+  autonumber
+  actor C as Client
+  participant UI as Interface client (React)
+  participant API as API (FastAPI)
+  participant K as Classifieur d'intentions
+  participant PostgreSQL@{ "type" : "database" }
+
+  C->>UI: saisit un message
+  UI->>API: POST /moi/assistant (jeton, message)
+  API->>API: vérifier le jeton et le rôle client
+  API->>PostgreSQL: client connecté et noms des autres clients
+  API->>API: garde-fou : un tiers est-il mentionné ?
+  alt un tiers est mentionné
+    API-->>UI: refus explicite (son propre compte uniquement)
+  else message sur son propre compte
+    API->>API: séparer la politesse, découper en questions
+    loop pour chaque question
+      API->>K: texte de la question
+      K-->>API: intention et confiance
+    end
+    Note right of K: seuil 0,50 pour les intentions qui montrent des données personnelles, 0,30 pour les autres
+    API->>PostgreSQL: échéances et paiements du client connecté uniquement
+    API-->>UI: réponse(s) en français, ou « je n'ai pas compris »
+  end
+  API->>PostgreSQL: journal (intentions et confiance, jamais le texte saisi)
+  UI-->>C: affiche la réponse
+  Note over C,PostgreSQL: L'assistant du personnel (POST /assistant/personnel) suit le même principe : il vérifie que le client cité est dans le portefeuille de l'agent.

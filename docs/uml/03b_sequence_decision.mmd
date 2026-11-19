@@ -1,0 +1,43 @@
+---
+title: "Séquence : instruction, soumission et décision du directeur"
+---
+sequenceDiagram
+  autonumber
+  actor A as Agent de crédit
+  actor D as Directeur
+  participant API as API (FastAPI)
+  participant PostgreSQL@{ "type" : "database" }
+
+  A->>API: POST /demandes/{id}/instruire (avis)
+  API->>PostgreSQL: dernier score et date de modification des données
+  alt aucun score ou score périmé
+    API-->>A: 409, recalculer le score
+  else score valide
+    API->>PostgreSQL: statut instruit + avis + journal
+  end
+  A->>API: POST /demandes/{id}/soumettre
+  API->>PostgreSQL: statut soumis à décision + journal
+  D->>API: GET /demandes/{id}/score
+  API-->>D: recommandation, probabilité, explication, montant suggéré
+  opt accord avec un autre montant ou une autre durée
+    D->>API: GET /demandes/{id}/simuler (montant, durée)
+    API-->>D: risque et endettement du montant envisagé (rien n'est enregistré)
+  end
+  D->>API: POST /demandes/{id}/decider (décision, montant, durée, commentaire, motif communiqué au client)
+  API->>PostgreSQL: le dossier est-il soumis ? le score est-il valide ?
+  alt dossier non soumis ou score périmé
+    API-->>D: 409
+  else
+    API->>API: concordance avec la recommandation du modèle
+    alt décision contraire à la recommandation sans commentaire
+      API-->>D: 422, motif obligatoire
+    else refus alors que le modèle recommandait un accord, sans motif pour le client
+      API-->>D: 422, motif communiqué au client obligatoire
+    else accord modifié hors politique sans commentaire
+      API-->>D: 422, motif obligatoire (risque recalculé)
+    else décision recevable
+      API->>PostgreSQL: décision (ajout seul) + recommandation conservée + nouveau statut + journal
+      API-->>D: décision enregistrée
+    end
+  end
+  Note over D,PostgreSQL: Le modèle recommande, le directeur décide. La décision n'est jamais modifiée après coup.

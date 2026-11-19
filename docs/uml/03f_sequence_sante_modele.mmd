@@ -1,0 +1,35 @@
+---
+title: "Séquence : suivi du modèle en production (santé du modèle)"
+---
+sequenceDiagram
+  autonumber
+  actor AD as Administrateur
+  participant P as Planificateur (le 1er du mois à 6 h)
+  participant API as API (FastAPI)
+  participant S as Surveillance (src/surveillance.py)
+  participant PostgreSQL@{ "type" : "database" }
+
+  alt lancement automatique
+    P->>S: produire_rapport(trimestre écoulé)
+  else lancement manuel
+    AD->>API: POST /modele/sante
+    API->>S: produire_rapport(trois derniers mois complets)
+  end
+  S->>PostgreSQL: dernier score de chaque dossier de la période (variables d'entrée)
+  S->>S: rescorer avec le modèle en service
+  S->>S: PSI des scores et des variables, comparé à la référence figée
+  S->>S: retirer le bruit d'échantillonnage : seul l'excès déclenche l'alerte
+  S->>S: part des modalités inconnues du modèle
+  S->>PostgreSQL: décisions de la période
+  S->>S: taux d'acceptation et de dérogation
+  S->>PostgreSQL: crédits mûrs des 12 derniers mois et leurs remboursements
+  alt au moins 30 défauts observés
+    S->>S: AUC et calibration (prévu contre observé)
+  else moins de 30 défauts
+    S->>S: performance non jugée
+  end
+  S->>S: niveau global (vert, orange, rouge) et action conseillée
+  S->>PostgreSQL: rapport (ml.rapport_suivi)
+  AD->>API: GET /modele/sante
+  API-->>AD: dernier rapport, 12 derniers rapports, fiche du modèle, seuils
+  Note over AD,PostgreSQL: En cas d'alerte rouge, la comparaison champion / challenger et la recalibration se lancent hors ligne. La mise en service d'un nouveau modèle reste une décision de la direction.

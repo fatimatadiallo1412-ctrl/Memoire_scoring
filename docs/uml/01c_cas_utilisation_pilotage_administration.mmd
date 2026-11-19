@@ -1,0 +1,50 @@
+---
+title: "Cas d'utilisation : pilotage, administration et suivi du modèle"
+---
+flowchart LR
+  classDef acteur fill:#ffffff,stroke:#14213d,stroke-width:2px,color:#14213d,font-weight:bold
+  classDef cas fill:#eef3fb,stroke:#2f5d8f,stroke-width:1.5px,color:#14213d
+  classDef inclus fill:#fdf3e1,stroke:#b5751b,stroke-width:1.5px,color:#14213d
+  classDef auto fill:#f3f3f1,stroke:#7a7a75,stroke-dasharray:4 3,color:#3a3a37
+
+  D["🧑 Directeur"]:::acteur
+  A["🧑 Agent de crédit"]:::acteur
+  AD["🧑 Administrateur"]:::acteur
+  P["⏱ Planificateur"]:::acteur
+
+  subgraph PI["Pilotage (directeur)"]
+    direction TB
+    P1(["Paramétrer la politique de crédit<br/>(seuil, endettement, réduction, prudence)"]):::cas
+    P2(["Consulter le tableau de bord<br/>(Metabase, lien signé de 10 min)"]):::cas
+    P3(["Exporter un rapport d'activité<br/>(Excel, PDF)"]):::cas
+    P4(["Affecter un client<br/>à un gestionnaire"]):::cas
+    P5(["Classer un métier saisi librement<br/>dans une catégorie du modèle"]):::cas
+  end
+
+  subgraph AS["Assistant du personnel"]
+    direction TB
+    S1(["Interroger l'assistant<br/>sur un client"]):::cas
+    S2(["Vérifier que le client est<br/>dans son portefeuille"]):::inclus
+  end
+
+  subgraph ADM["Administration"]
+    direction TB
+    M1(["Créer, désactiver un compte<br/>du personnel"]):::cas
+    M2(["Traiter une demande<br/>de réinitialisation"]):::cas
+    M3(["Lire et traiter les<br/>messages de contact"]):::cas
+    M4(["Consulter la santé du modèle<br/>et produire un rapport"]):::cas
+  end
+
+  subgraph AU["Tâches programmées"]
+    direction TB
+    T1(["Générer les rappels<br/>(chaque jour à 7 h)"]):::auto
+    T2(["Produire le rapport de suivi<br/>(le 1er du mois à 6 h)"]):::auto
+    T3(["Recharger l'entrepôt (ETL)<br/>(lancement manuel)"]):::auto
+  end
+
+  D --> P1 & P2 & P3 & P4 & P5 & S1
+  A --> S1
+  S1 -. "«include»" .-> S2
+  AD --> M1 & M2 & M3 & M4
+  P --> T1 & T2
+  AD -.-> T3

@@ -1,0 +1,37 @@
+---
+title: "Cas d'utilisation : instruction et décision d'une demande"
+---
+flowchart LR
+  classDef acteur fill:#ffffff,stroke:#14213d,stroke-width:2px,color:#14213d,font-weight:bold
+  classDef cas fill:#eef3fb,stroke:#2f5d8f,stroke-width:1.5px,color:#14213d
+  classDef inclus fill:#fdf3e1,stroke:#b5751b,stroke-width:1.5px,color:#14213d
+
+  A["🧑 Agent de crédit"]:::acteur
+  D["🧑 Directeur"]:::acteur
+
+  subgraph I["Instruction"]
+    direction TB
+    I1(["Créer la demande<br/>(produit, montant, durée, garantie)"]):::cas
+    I2(["Compléter le dossier"]):::cas
+    I3(["Calculer le score"]):::cas
+    I4(["Rédiger l'avis d'instruction<br/>et soumettre"]):::cas
+    X1(["Vérifier l'historique interne<br/>(incident régularisé ou en cours)"]):::inclus
+    X2(["Expliquer le score<br/>(valeurs de Shapley)"]):::inclus
+    X3(["Proposer un montant réduit<br/>ou des recommandations au client"]):::inclus
+  end
+
+  subgraph DE["Décision"]
+    direction TB
+    D1(["Consulter le dossier,<br/>le score et son explication"]):::cas
+    D2(["Simuler un accord modifié<br/>(risque du montant envisagé)"]):::cas
+    D3(["Accorder, accorder modifié,<br/>refuser ou ajourner"]):::cas
+    X4(["Motiver un écart à la recommandation<br/>(et le motif communiqué au client)"]):::inclus
+  end
+
+  A --> I1 & I2 & I3 & I4
+  I3 -. "«include»" .-> X1
+  I3 -. "«include»" .-> X2
+  I3 -. "«include»" .-> X3
+  D --> D1 & D2 & D3
+  D3 -. "«include»" .-> X4
+  D2 -. "«extend»" .-> D3
